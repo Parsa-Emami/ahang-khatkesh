@@ -1,0 +1,25 @@
+# مهارت‌ها و منابع
+
+## استفاده در این ساخت
+
+- **Sites**: اصول طراحی تجربه، responsive و خوانایی و مسیر بررسی رابط؛ خروجی پروژه Laravel برای GitHub است و روی Sites منتشر نشده است.
+- **Laravel Boost / laravel-best-practices**: Actionهای محدود، FormRequest، policy، Resource، migration، قیدها، eager loading و job idempotent.
+- **Laravel Boost / testing-best-practices**: تست رفتار و مرز دسترسی، خطاهای ایمپورت، ظرفیت و رقابت revision.
+- **راهنمای PHP و Pint در Boost**: PHP 8.5، typeهای بازگشتی و قالب‌بندی ثابت.
+
+راهنماهای تولیدشدهٔ Boost برای ادامهٔ توسعه در `.claude/skills` موجودند. `AGENTS.md` قراردادهای این مخزن را مشخص می‌کند. انتخاب مهارت به مسئله وابسته است؛ اضافه‌کردن ابزار و لایهٔ معماری، معیار کیفیت مستقل محسوب نمی‌شود.
+
+## منابع بررسی‌شده
+
+| منبع | کاربرد در تصمیم |
+| --- | --- |
+| [Laravel 13 Release Notes](https://laravel.com/docs/13.x/releases) | سازگاری نسخه با PHP 8.5 |
+| [Laravel Authentication](https://laravel.com/docs/13.x/authentication) | session برای رابط هم‌مبدأ |
+| [Laravel Sanctum](https://laravel.com/docs/13.x/sanctum) | مقایسهٔ SPA auth؛ در این نسخه session وب مستقیم کافی است |
+| [Laravel HTTP Responses](https://laravel.com/docs/13.x/responses) | ارائهٔ فایل با پاسخ استاندارد |
+| [21st.dev](https://21st.dev/) | الگوهای کارت، ناوبری و تم و زیست‌بوم React |
+| [Music Player Card — Ravi Katiyar](https://21st.dev/@ravikatiyar162/components/music-player-card) | ایدهٔ کارت پخش و تم سازگار |
+| [Sidebar — Manu Arora](https://21st.dev/@manuarora700/components/sidebar) | ایدهٔ ناوبری responsive و حالت‌های تعاملی |
+| [Media Session API](https://developer.mozilla.org/en-US/docs/Web/API/Media_Session_API) | کنترل رسانه با بررسی پشتیبانی مرورگر |
+
+از صفحات 21st.dev برای جهت بصری و تعامل الهام گرفته شده است. کد componentهای دارای source پشت حساب یا مجوز بررسی‌نشده کپی نشده است. UI، کاورهای هندسی و نشان این مخزن پیاده‌سازی اختصاصی‌اند. React، Radix، TanStack Query و Lucide از بسته‌های پروژه استفاده می‌شوند و فونت‌ها در build به‌صورت محلی ارائه می‌شوند.
