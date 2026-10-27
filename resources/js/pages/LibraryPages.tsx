@@ -222,7 +222,7 @@ export function LibraryPage({ saved = false }: { saved?: boolean }) {
                             ? "با دکمهٔ نشانک در صفحهٔ هر پلی‌لیست، آن را ذخیره کن."
                             : "پلی‌لیست‌های واردشده از پنل مدیریت، اینجا قرار می‌گیرند."
                     }
-                    admin={user?.is_admin && !saved}
+                    admin={user?.permissions.includes("admin.access") && !saved}
                 />
             )}
             <Pager
@@ -312,7 +312,7 @@ export function PlaylistPage() {
                     تصادفی
                 </button>
                 <SaveButton playlist={playlist} />
-                {user?.is_admin && (
+                {user?.permissions.includes("admin.access") && (
                     <Link
                         className="text-link admin-edit"
                         to="/admin?tab=library"

@@ -2,10 +2,12 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import laravel from "laravel-vite-plugin";
 
-export default defineConfig({
+export default defineConfig(({ command }) => ({
     plugins: [
         react(),
-        laravel({ input: ["resources/js/main.tsx"], refresh: true }),
+        command === "build"
+            ? laravel({ input: ["resources/js/main.tsx"], refresh: true })
+            : undefined,
     ],
     server: {
         host: "0.0.0.0",
@@ -17,4 +19,4 @@ export default defineConfig({
             "/up": "http://127.0.0.1:8000",
         },
     },
-});
+}));

@@ -18,6 +18,13 @@ class EnsureAccountActive
             abort(403, 'این حساب غیرفعال است.');
         }
 
+        if ((int) $request->session()->get('auth.access_version', -1) !== $request->user()->access_version) {
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+            abort(401, 'دسترسی حساب تغییر کرده است؛ دوباره وارد شوید.');
+        }
+
         return $next($request);
     }
 }

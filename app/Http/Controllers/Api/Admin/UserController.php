@@ -3,21 +3,28 @@
 namespace App\Http\Controllers\Api\Admin;
 
 use App\Actions\CreateUser;
+use App\Actions\ResetMemberPassword;
+use App\Actions\UpdateUserAccess;
+use App\Enums\Permission;
+use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreUserRequest;
+use App\Http\Requests\UpdateUserAccessRequest;
 use App\Http\Resources\UserResource;
-use App\Models\AuditEvent;
 use App\Models\LibrarySetting;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rules\Password;
 
 class UserController extends Controller
 {
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
-        return response()->json(['data' => UserResource::collection(User::orderBy('id')->get()), 'meta' => ['capacity' => LibrarySetting::MAX_USERS]]);
+        $roles = collect(UserRole::cases())->filter(fn (UserRole $role) => ! $role->isPrivileged() || $request->user()->hasPermission(Permission::RolesManage))->map(fn (UserRole $role) => ['value' => $role->value, 'label' => $role->label()])->values();
+
+        return response()->json(['data' => UserResource::collection(User::orderBy('id')->get()), 'meta' => ['capacity' => LibrarySetting::MAX_USERS, 'assignable_roles' => $roles]]);
     }
 
     public function store(StoreUserRequest $request, CreateUser $create): UserResource
@@ -25,19 +32,24 @@ class UserController extends Controller
         return new UserResource($create->handle($request->validated(), $request->user()));
     }
 
-    public function update(Request $request, User $user): UserResource
+    public function password(Request $request, User $user, ResetMemberPassword $reset): JsonResponse
     {
-        $data = $request->validate(['is_active' => ['required', 'boolean']]);
-        abort_if($user->id === $request->user()->id && ! $data['is_active'], 422, 'نمی‌توانید حساب خودتان را غیرفعال کنید.');
-        DB::transaction(function () use ($request, $user, $data): void {
-            LibrarySetting::whereKey(1)->increment('lock_version');
-            $user->update($data);
-            if (! $data['is_active'] && config('session.driver') === 'database') {
-                DB::table('sessions')->where('user_id', $user->id)->delete();
-            }
-            AuditEvent::create(['user_id' => $request->user()->id, 'action' => $data['is_active'] ? 'user.activated' : 'user.deactivated', 'subject_id' => (string) $user->id]);
-        }, 5);
+        $data = $request->validate(['password' => ['required', 'string', 'confirmed', 'max:128', Password::min(12)->letters()->numbers()]]);
+        $reset->handle($user, $request->user(), $data['password']);
 
-        return new UserResource($user);
+        return response()->json(['data' => ['reset' => true]]);
+    }
+
+    public function update(UpdateUserAccessRequest $request, User $user, UpdateUserAccess $update): UserResource
+    {
+        $oldRole = $user->role;
+        $updated = $update->handle($user, $request->user(), $request->validated());
+        if ($updated->id === $request->user()->id && $updated->role !== $oldRole) {
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+        }
+
+        return new UserResource($updated);
     }
 }

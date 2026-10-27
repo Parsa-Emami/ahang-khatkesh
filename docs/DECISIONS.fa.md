@@ -14,3 +14,23 @@
 | 010 | قالب JSON/CSV با asset_id داخلی | لینک خارجی و مسیر فایل از manifest پذیرفته نمی‌شود؛ رسانه باید قبلاً بارگذاری شده باشد |
 
 وضعیت این تصمیم‌ها accepted برای نسخهٔ 0.1 است. تغییر نقش‌ها، دسترسی خصوصی هر پلی‌لیست، نوع queue و storage باید همراه ADR و migration/test مناسب باشد.
+
+## ADR-008: MySQL هدف و phpMyAdmin ابزار اپراتور
+
+MySQL 8.4/InnoDB/utf8mb4 مرجع داده است. migrationها مرجع schema هستند؛ phpMyAdmin جدا از برنامه و محدود به اپراتور است. SQLite برای تست سریع و توسعهٔ موقت باقی می‌ماند.
+
+## ADR-009: پنل مشترک React و capability
+
+یک رابط، یک سیستم طراحی و API نسخه‌دار حفظ می‌شود. owner/administrator/curator/listener از enum به capability نگاشت می‌شوند. boolean قدیمی is_admin مرجع مجوز نیست. پنل lazy است و player با تغییر route از نو ساخته نمی‌شود.
+
+## ADR-010: MFA با Fortify و step-up
+
+رمزنگاری یا الگوریتم TOTP سفارشی نوشته نمی‌شود. Fortify، enrollment تأییدشده، recovery و OTP را فراهم می‌کند. challenge با lock و access_version به وضعیت حساب پیوند می‌خورد؛ نوشتن مدیریتی تأیید حداکثر ۱۵ دقیقه می‌خواهد. credential در browser storage/cache پایدار نمی‌رود.
+
+## ADR-011: هویت کاتالوگ و سازگاری
+
+Artist، Release، credit، release_track و track_media مستقل‌اند. نام مشابه خودکار ادغام نمی‌شود. IDs قدیمی Track، لایک و عضویت‌ها حفظ می‌شوند؛ artist/album projection هستند. چند انتشار برای یک ضبط ممکن است. اجرای transcoding و انتخاب rendition توسعهٔ بعدی است.
+
+## ADR-012: ویرایش نسخه‌دار و بایگانی
+
+Artist/Release/Track/Playlist revision دارند؛ تعارض 409 مانع overwrite می‌شود. پلی‌لیست بایگانی می‌شود و حساب غیرفعال می‌شود؛ حذف فیزیکی از پنل، قرارداد فعلی نیست. تکرار Track در playlist v1 مجاز نیست و تغییر آن به مدل occurrence نیاز دارد.

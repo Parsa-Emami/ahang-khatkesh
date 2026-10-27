@@ -2,7 +2,7 @@
 
 ## محیط هدف
 
-نسخهٔ PHP وب و CLI هر دو 8.5.x باشند. افزونه‌های ctype، curl، dom، fileinfo، mbstring، openssl، PDO، session، tokenizer، XML و درایور دیتابیس لازم‌اند. FFprobe باید در PATH یا FFPROBE_BINARY باشد. برای توسعه Node 24 و Composer 2 استفاده شده است. MySQL 8.4 با utf8mb4 انتخاب پیشنهادی سرور است؛ SQLite برای نصب کوچک هم در schema پشتیبانی می‌شود. تست‌های محلی فعلی روی SQLite اجرا شده‌اند و اجرای ماتریس MySQL در CI باید قبل از انتشار کنترل شود.
+نسخهٔ PHP وب و CLI هر دو 8.5.x باشند. افزونه‌های ctype، curl، dom، fileinfo، mbstring، openssl، PDO، session، tokenizer، XML و درایور دیتابیس لازم‌اند. FFprobe باید در PATH یا FFPROBE_BINARY باشد. برای توسعه Node 24 و Composer 2 استفاده شده است. MySQL 8.4 با utf8mb4 هدف سرور است؛ SQLite برای تست و توسعهٔ موقت پشتیبانی می‌شود. تست‌ها روی MySQL 8.4.13 واقعی نیز اجرا شده‌اند؛ نتیجهٔ آخرین commit در سند بررسی و GitHub Actions کنترل شود.
 
 برای شروع می‌توان 2 هسته و 2 تا 4 GiB RAM در نظر گرفت؛ این تخمین اولیه است و ظرفیت تأییدشده محسوب نمی‌شود. فضای رسانه را بر اساس تعداد فایل‌ها محاسبه کنید. هزار آهنگ سه‌دقیقه‌ای با 320 kbps تقریباً 7.2 GB صوت می‌خواهند. ده پخش 320 kbps تقریباً 3.2 Mbps ترافیک صوت، بدون سربار پروتکل، ایجاد می‌کنند. این محاسبه جای آزمون بار را نمی‌گیرد.
 
@@ -31,8 +31,8 @@ upload_max_filesize حداقل 100M، post_max_size حدود 110M، client_max_b
 1. نصب از lockfileها با `composer install --no-dev --prefer-dist --no-interaction` و `npm ci`.
 2. ساخت assets با `npm run build`.
 3. backup دیتابیس و رسانه و بررسی فضای آزاد.
-4. اجرای `php artisan migrate --force` در زمان استقرار کنترل‌شده.
-5. `php artisan optimize`، سپس `php artisan queue:restart`.
+4. فعال‌کردن maintenance و توقف worker؛ اجرای `php artisan migrate --force` با credential migrator، پس از پشتیبان‌گیری. backfill این نسخه ارتقای zero downtime نیست.
+5. بازگرداندن credential دیتابیس runtime به محیط سرویس؛ سپس `php artisan optimize` و `php artisan queue:restart`. credential migrator نباید در config cache وب باقی بماند.
 6. سوئیچ release و بررسی `/up`، ورود، یک Range واقعی، یک import و یک ذخیرهٔ پخش.
 
 مسیر `/up` liveness لاراول است؛ بررسی کامل DB/worker/readiness نیست. فرمان‌های تغییر production در این ساخت اجرا نشده‌اند. workflow موجود CI است و انتشار خودکار به سرور ندارد.
@@ -42,10 +42,10 @@ upload_max_filesize حداقل 100M، post_max_size حدود 110M، client_max_b
 - صف: `php artisan queue:failed`، بررسی worker و لاگ؛ پس از رفع علت، retry از پنل import یا صف با دقت به وضعیت import.
 - وضعیت import پردازش‌نشده: job موجود، worker فعال، connection یکسان و نبود timeout/کمبود فضا بررسی شود.
 - تغییر کد worker: queue:restart برای بارگذاری release جدید.
-- audit_events: ایجاد/فعال‌سازی حساب، بارگذاری صوت، پیش‌نمایش، ثبت صف، تکمیل import و تغییر playlist در DB ثبت می‌شوند. رابط مشاهدهٔ audit هنوز در فاز عملیات برنامه‌ریزی شده است.
+- audit_events: ایجاد/فعال‌سازی حساب، بارگذاری صوت، پیش‌نمایش، ثبت صف، تکمیل import و تغییر playlist در DB ثبت می‌شوند. رابط audit با مجوز مستقل و cursor موجود است؛ اطلاعات محرمانه در Resource خروجی نیست.
 - پشتیبان: دیتابیس، storage/app/private/media و APP_KEY جداگانه و امن نگهداری شوند؛ بازیابی عملی آزمایش شود.
 - فایل‌های آپلودشده و استفاده‌نشده: پاک‌سازی خودکار وجود ندارد. پیش از افزودن آن، مرجع Track، import آماده/پردازشی و کاور جاری باید در نظر گرفته شوند.
-- رمز فراموش‌شده: نسخهٔ اولیه گردش ایمیلی ندارد؛ بازنشانی کنترل‌شده توسط اپراتور سرور لازم است. فرمان اختصاصی ثبت audit و گردش reset در فاز بعد قرار دارد.
+- رمز فراموش‌شده: گردش ایمیلی وجود ندارد؛ مدیر مجاز از پنل رمز عضو را بازنشانی می‌کند، نشست‌ها باطل و MFA حفظ می‌شود. برای مالک قفل‌شده از app:recover-owner روی میزبان مورد اعتماد استفاده می‌شود.
 
 ## معیار انتشار
 

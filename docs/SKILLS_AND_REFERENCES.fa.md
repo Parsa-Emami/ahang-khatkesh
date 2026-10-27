@@ -23,3 +23,14 @@
 | [Media Session API](https://developer.mozilla.org/en-US/docs/Web/API/Media_Session_API) | کنترل رسانه با بررسی پشتیبانی مرورگر |
 
 از صفحات 21st.dev برای جهت بصری و تعامل الهام گرفته شده است. کد componentهای دارای source پشت حساب یا مجوز بررسی‌نشده کپی نشده است. UI، کاورهای هندسی و نشان این مخزن پیاده‌سازی اختصاصی‌اند. React، Radix، TanStack Query و Lucide از بسته‌های پروژه استفاده می‌شوند و فونت‌ها در build به‌صورت محلی ارائه می‌شوند.
+
+## منابع تکمیلی و دامنهٔ ادعا در نسخهٔ 0.2
+
+- [Laravel Fortify](https://laravel.com/framework/docs/fortify): TOTP، enrollment و recovery؛ منبع اصلی رفتار framework.
+- [Laravel frontend](https://laravel.com/framework/docs/frontend): انتخاب‌های React/Vue/Livewire؛ انتخاب React SPA در این محصول تصمیم معماری است، نه ادعای برتری مطلق.
+- [MySQL 8.4](https://dev.mysql.com/doc/refman/8.4/en/): InnoDB، constraint، transaction و indexes.
+- [phpMyAdmin](https://www.phpmyadmin.net/downloads/): ابزار مستقل مدیریت DB؛ نسخهٔ stable مشاهده‌شده 5.2.3.
+- [OWASP ASVS](https://owasp.org/www-project-application-security-verification-standard/): هدف ردیابی کنترل امنیت؛ گواهی انطباق صادر نشده است.
+- [WCAG 2.2](https://www.w3.org/TR/WCAG22/): مبنای معیارهای تعامل؛ ممیزی کامل انجام نشده است.
+- Product Design audit برای مشاهدهٔ مرورگر و گزارش محدودیت‌ها استفاده شد؛ طراحی با CSS/React محلی پیاده شده است.
+- [Vitest advisory](https://github.com/vitest-dev/vitest/security/advisories/GHSA-qxg6-89mg-rqv8): dependency توسعه به نسخهٔ اصلاح‌شده 4.1.12 ارتقا یافت.

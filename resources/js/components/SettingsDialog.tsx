@@ -4,6 +4,7 @@ import { LogOut } from "lucide-react";
 import { api, getCsrfToken, json } from "../lib/api";
 import { useSession, useTheme, useToast } from "../context/AppContext";
 import { Dialog } from "./UI";
+import { MfaPanel } from "../features/security/MfaPanel";
 import type { Theme, User } from "../types";
 
 export function SettingsDialog({
@@ -167,6 +168,7 @@ export function SettingsDialog({
                     ذخیرهٔ رمز عبور
                 </button>
             </form>
+            {open && <MfaPanel />}
             <button
                 className="button danger logout-button"
                 disabled={logout.isPending}

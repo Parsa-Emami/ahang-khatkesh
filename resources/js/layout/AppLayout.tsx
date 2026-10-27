@@ -127,7 +127,7 @@ export function AppLayout() {
                     )}
                 </nav>
                 <div className="sidebar-bottom">
-                    {session.user?.is_admin && (
+                    {session.user?.permissions.includes("admin.access") && (
                         <NavLink to="/admin" className="admin-link">
                             <Upload size={18} />
                             مدیریت کتابخانه
@@ -144,7 +144,9 @@ export function AppLayout() {
                         <span>
                             {session.user?.name}
                             <small>
-                                {session.user?.is_admin
+                                {session.user?.permissions.includes(
+                                    "admin.access",
+                                )
                                     ? "مدیر کتابخانه"
                                     : "عضو کتابخانه"}
                             </small>
@@ -211,7 +213,9 @@ export function AppLayout() {
                         </IconButton>
                     </div>
                 </header>
-                <div className="workspace-columns">
+                <div
+                    className={`workspace-columns ${location.pathname === "/admin" ? "workspace-admin" : ""}`}
+                >
                     <main
                         id="main-content"
                         className="main-content"
@@ -219,7 +223,7 @@ export function AppLayout() {
                     >
                         <Outlet />
                     </main>
-                    <NowPlaying />
+                    {location.pathname !== "/admin" && <NowPlaying />}
                 </div>
             </div>
             <PlayerBar />

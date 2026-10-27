@@ -1,0 +1,60 @@
+.security-panel {
+    padding-block: 20px;
+}
+.panel-heading {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+.panel-heading > svg {
+    color: var(--active);
+    flex-shrink: 0;
+}
+.panel-heading h2 {
+    font-size: 19px;
+    margin-bottom: 6px;
+}
+.security-panel p {
+    font-size: 12px;
+    line-height: 2;
+}
+.security-panel .button {
+    align-self: start;
+}
+.mfa-qr {
+    width: 200px;
+    height: 200px;
+    padding: 10px;
+    background: white;
+    border-radius: 8px;
+}
+.secret-key {
+    padding: 13px;
+    background: var(--surface-2);
+    font-size: 12px;
+    letter-spacing: 1px;
+    user-select: all;
+    overflow-wrap: anywhere;
+}
+.recovery-box {
+    padding: 20px;
+    border: 1px solid var(--active);
+    border-radius: 12px;
+    display: grid;
+    gap: 16px;
+}
+.recovery-codes {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    user-select: all;
+}
+.recovery-codes code {
+    font-size: 12px;
+    overflow-wrap: anywhere;
+}
+
+.panel-heading > div {
+    flex: 1;
+    text-align: start;
+}

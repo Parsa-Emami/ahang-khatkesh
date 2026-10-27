@@ -1,4 +1,10 @@
 let csrfToken = "";
+let confirmSession: (() => Promise<boolean>) | null = null;
+export function setSessionConfirmation(
+    handler: (() => Promise<boolean>) | null,
+) {
+    confirmSession = handler;
+}
 export class ApiError extends Error {
     constructor(
         public status: number,
@@ -16,6 +22,7 @@ export async function api<T>(
     path: string,
     options: RequestInit = {},
     retryCsrf = true,
+    retryConfirmation = true,
 ): Promise<T> {
     const headers = new Headers(options.headers);
     headers.set("Accept", "application/json");
@@ -46,7 +53,17 @@ export async function api<T>(
             false,
         );
         setCsrfToken(session.data.csrf_token);
-        return api<T>(path, options, false);
+        return api<T>(path, options, false, retryConfirmation);
+    }
+    if (
+        response.status === 423 &&
+        payload.code === "password_confirmation_required" &&
+        retryConfirmation &&
+        confirmSession
+    ) {
+        if (await confirmSession())
+            return api<T>(path, options, retryCsrf, false);
+        throw new ApiError(423, "تأیید هویت لغو شد؛ تغییری ثبت نشد.");
     }
     if (!response.ok) {
         if (response.status === 401)

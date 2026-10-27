@@ -1,6 +1,7 @@
 import {
     useEffect,
     useState,
+    useRef,
     type ButtonHTMLAttributes,
     type CSSProperties,
     type PropsWithChildren,
@@ -54,18 +55,49 @@ export function Dialog({
     onOpenChange,
     title,
     description,
+    priority = false,
     children,
 }: PropsWithChildren<{
     open: boolean;
     onOpenChange: (value: boolean) => void;
     title: string;
     description: string;
+    priority?: boolean;
 }>) {
+    const content = useRef<HTMLDivElement>(null);
     return (
         <DialogPrimitive.Root open={open} onOpenChange={onOpenChange}>
             <DialogPrimitive.Portal>
-                <DialogPrimitive.Overlay className="dialog-overlay" />
-                <DialogPrimitive.Content className="dialog-content" dir="rtl">
+                <DialogPrimitive.Overlay
+                    className={`dialog-overlay ${priority ? "dialog-priority" : ""}`}
+                />
+                <DialogPrimitive.Content
+                    ref={content}
+                    className={`dialog-content ${priority ? "dialog-priority" : ""}`}
+                    dir="rtl"
+                    onCloseAutoFocus={(event) => {
+                        if (priority) {
+                            const underlying =
+                                document.querySelector<HTMLInputElement>(
+                                    ".dialog-content:not(.dialog-priority) input:not([disabled]), .dialog-content:not(.dialog-priority) button:not([disabled])",
+                                );
+                            if (underlying) {
+                                event.preventDefault();
+                                underlying.focus();
+                            }
+                        }
+                    }}
+                    onOpenAutoFocus={(event) => {
+                        const field =
+                            content.current?.querySelector<HTMLInputElement>(
+                                "input:not([disabled]), textarea:not([disabled]), select:not([disabled])",
+                            );
+                        if (field) {
+                            event.preventDefault();
+                            field.focus();
+                        }
+                    }}
+                >
                     <DialogPrimitive.Title>{title}</DialogPrimitive.Title>
                     <DialogPrimitive.Description>
                         {description}

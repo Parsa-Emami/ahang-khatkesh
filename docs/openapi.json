@@ -2,8 +2,8 @@
   "openapi": "3.1.0",
   "info": {
     "title": "ahang-khatkesh internal API",
-    "version": "0.1.0",
-    "description": "Same-origin Laravel session authentication. Bootstrap /session and send X-CSRF-TOKEN for writes. Audio files are private."
+    "version": "0.2.0",
+    "description": "Private same-origin Laravel API. Session cookies and CSRF are required for writes. Admin reads require confirmed MFA; sensitive writes also require recent password and MFA confirmation. MySQL is authoritative; phpMyAdmin is an operator tool, not an API dependency."
   },
   "servers": [
     {
@@ -17,10 +17,16 @@
   ],
   "tags": [
     {
-      "name": "Library"
+      "name": "Library",
+      "description": "Private catalog, playback and personal library."
     },
     {
-      "name": "Administration"
+      "name": "Administration",
+      "description": "Capability checked administration with confirmed MFA."
+    },
+    {
+      "name": "Authentication",
+      "description": "Session login, TOTP enrollment and recovery."
     }
   ],
   "paths": {
@@ -98,27 +104,14 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "required": [
-                    "data"
-                  ],
-                  "properties": {
-                    "data": {
-                      "type": "object",
-                      "properties": {
-                        "csrf_token": {
-                          "type": "string"
-                        },
-                        "user": {
-                          "$ref": "#/components/schemas/User"
-                        }
-                      },
-                      "required": [
-                        "csrf_token",
-                        "user"
-                      ]
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/LoginSuccess"
+                    },
+                    {
+                      "$ref": "#/components/schemas/LoginChallenge"
                     }
-                  }
+                  ]
                 }
               }
             }
@@ -134,10 +127,17 @@
           },
           "429": {
             "$ref": "#/components/responses/RateLimited"
+          },
+          "419": {
+            "$ref": "#/components/responses/CsrfExpired"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
           }
         },
         "security": [
           {
+            "sessionCookie": [],
             "csrfToken": []
           }
         ],
@@ -212,6 +212,9 @@
           },
           "429": {
             "$ref": "#/components/responses/RateLimited"
+          },
+          "419": {
+            "$ref": "#/components/responses/CsrfExpired"
           }
         },
         "security": [
@@ -259,6 +262,9 @@
           },
           "429": {
             "$ref": "#/components/responses/RateLimited"
+          },
+          "419": {
+            "$ref": "#/components/responses/CsrfExpired"
           }
         },
         "security": [
@@ -340,6 +346,9 @@
           },
           "429": {
             "$ref": "#/components/responses/RateLimited"
+          },
+          "419": {
+            "$ref": "#/components/responses/CsrfExpired"
           }
         },
         "security": [
@@ -981,6 +990,9 @@
           },
           "429": {
             "$ref": "#/components/responses/RateLimited"
+          },
+          "419": {
+            "$ref": "#/components/responses/CsrfExpired"
           }
         },
         "security": [
@@ -1045,6 +1057,9 @@
           },
           "429": {
             "$ref": "#/components/responses/RateLimited"
+          },
+          "419": {
+            "$ref": "#/components/responses/CsrfExpired"
           }
         },
         "security": [
@@ -1111,6 +1126,9 @@
           },
           "429": {
             "$ref": "#/components/responses/RateLimited"
+          },
+          "419": {
+            "$ref": "#/components/responses/CsrfExpired"
           }
         },
         "security": [
@@ -1175,6 +1193,9 @@
           },
           "429": {
             "$ref": "#/components/responses/RateLimited"
+          },
+          "419": {
+            "$ref": "#/components/responses/CsrfExpired"
           }
         },
         "security": [
@@ -1330,6 +1351,9 @@
           },
           "409": {
             "$ref": "#/components/responses/Conflict"
+          },
+          "419": {
+            "$ref": "#/components/responses/CsrfExpired"
           }
         },
         "security": [
@@ -1403,6 +1427,12 @@
           },
           "429": {
             "$ref": "#/components/responses/RateLimited"
+          },
+          "423": {
+            "$ref": "#/components/responses/ConfirmationRequired"
+          },
+          "428": {
+            "$ref": "#/components/responses/MfaEnrollmentRequired"
           }
         }
       },
@@ -1442,6 +1472,15 @@
           },
           "429": {
             "$ref": "#/components/responses/RateLimited"
+          },
+          "419": {
+            "$ref": "#/components/responses/CsrfExpired"
+          },
+          "423": {
+            "$ref": "#/components/responses/ConfirmationRequired"
+          },
+          "428": {
+            "$ref": "#/components/responses/MfaEnrollmentRequired"
           }
         },
         "security": [
@@ -1471,7 +1510,16 @@
                     "maxLength": 128
                   },
                   "is_admin": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "deprecated": true
+                  },
+                  "role": {
+                    "enum": [
+                      "owner",
+                      "administrator",
+                      "curator",
+                      "listener"
+                    ]
                   }
                 },
                 "required": [
@@ -1522,6 +1570,15 @@
           },
           "429": {
             "$ref": "#/components/responses/RateLimited"
+          },
+          "419": {
+            "$ref": "#/components/responses/CsrfExpired"
+          },
+          "423": {
+            "$ref": "#/components/responses/ConfirmationRequired"
+          },
+          "428": {
+            "$ref": "#/components/responses/MfaEnrollmentRequired"
           }
         },
         "security": [
@@ -1550,11 +1607,18 @@
                 "properties": {
                   "is_active": {
                     "type": "boolean"
+                  },
+                  "role": {
+                    "enum": [
+                      "owner",
+                      "administrator",
+                      "curator",
+                      "listener"
+                    ]
                   }
                 },
-                "required": [
-                  "is_active"
-                ]
+                "required": [],
+                "description": "At least one of role or is_active is required. Last active owner and actor privilege invariants apply."
               }
             }
           }
@@ -1609,6 +1673,12 @@
           },
           "429": {
             "$ref": "#/components/responses/RateLimited"
+          },
+          "423": {
+            "$ref": "#/components/responses/ConfirmationRequired"
+          },
+          "428": {
+            "$ref": "#/components/responses/MfaEnrollmentRequired"
           }
         },
         "parameters": [
@@ -1684,6 +1754,15 @@
                 }
               }
             }
+          },
+          "419": {
+            "$ref": "#/components/responses/CsrfExpired"
+          },
+          "423": {
+            "$ref": "#/components/responses/ConfirmationRequired"
+          },
+          "428": {
+            "$ref": "#/components/responses/MfaEnrollmentRequired"
           }
         },
         "security": [
@@ -1772,6 +1851,12 @@
           },
           "429": {
             "$ref": "#/components/responses/RateLimited"
+          },
+          "423": {
+            "$ref": "#/components/responses/ConfirmationRequired"
+          },
+          "428": {
+            "$ref": "#/components/responses/MfaEnrollmentRequired"
           }
         },
         "parameters": [
@@ -1842,6 +1927,15 @@
           },
           "409": {
             "$ref": "#/components/responses/Conflict"
+          },
+          "419": {
+            "$ref": "#/components/responses/CsrfExpired"
+          },
+          "423": {
+            "$ref": "#/components/responses/ConfirmationRequired"
+          },
+          "428": {
+            "$ref": "#/components/responses/MfaEnrollmentRequired"
           }
         },
         "security": [
@@ -1938,6 +2032,12 @@
           },
           "429": {
             "$ref": "#/components/responses/RateLimited"
+          },
+          "423": {
+            "$ref": "#/components/responses/ConfirmationRequired"
+          },
+          "428": {
+            "$ref": "#/components/responses/MfaEnrollmentRequired"
           }
         },
         "parameters": [
@@ -1990,6 +2090,15 @@
           },
           "429": {
             "$ref": "#/components/responses/RateLimited"
+          },
+          "419": {
+            "$ref": "#/components/responses/CsrfExpired"
+          },
+          "423": {
+            "$ref": "#/components/responses/ConfirmationRequired"
+          },
+          "428": {
+            "$ref": "#/components/responses/MfaEnrollmentRequired"
           }
         },
         "security": [
@@ -2066,6 +2175,18 @@
           },
           "429": {
             "$ref": "#/components/responses/RateLimited"
+          },
+          "419": {
+            "$ref": "#/components/responses/CsrfExpired"
+          },
+          "423": {
+            "$ref": "#/components/responses/ConfirmationRequired"
+          },
+          "428": {
+            "$ref": "#/components/responses/MfaEnrollmentRequired"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
           }
         },
         "security": [
@@ -2114,11 +2235,18 @@
                   "status": {
                     "enum": [
                       "draft",
-                      "published"
+                      "published",
+                      "archived"
                     ]
+                  },
+                  "revision": {
+                    "type": "integer",
+                    "minimum": 0
                   }
                 },
-                "required": []
+                "required": [
+                  "revision"
+                ]
               }
             }
           }
@@ -2162,6 +2290,15 @@
           },
           "429": {
             "$ref": "#/components/responses/RateLimited"
+          },
+          "419": {
+            "$ref": "#/components/responses/CsrfExpired"
+          },
+          "423": {
+            "$ref": "#/components/responses/ConfirmationRequired"
+          },
+          "428": {
+            "$ref": "#/components/responses/MfaEnrollmentRequired"
           }
         },
         "security": [
@@ -2191,10 +2328,2248 @@
                   "cover": {
                     "type": "string",
                     "format": "binary"
+                  },
+                  "revision": {
+                    "type": "integer",
+                    "minimum": 0
                   }
                 },
                 "required": [
-                  "cover"
+                  "cover",
+                  "revision"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/login/challenge": {
+      "post": {
+        "operationId": "post_login_challenge",
+        "summary": "Complete the pending 10 minute MFA challenge",
+        "tags": [
+          "Authentication"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginSuccess"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "422": {
+            "$ref": "#/components/responses/Validation"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "419": {
+            "$ref": "#/components/responses/CsrfExpired"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          }
+        },
+        "security": [
+          {
+            "sessionCookie": [],
+            "csrfToken": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "pattern": "^[0-9]{6}$"
+                  },
+                  "recovery_code": {
+                    "type": "string",
+                    "maxLength": 64
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/me/password/confirm": {
+      "post": {
+        "operationId": "post_me_password_confirm",
+        "summary": "Confirm current password and a fresh TOTP when enrolled",
+        "tags": [
+          "Authentication"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "confirmed_until": {
+                          "type": "string",
+                          "format": "date-time"
+                        }
+                      }
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "422": {
+            "$ref": "#/components/responses/Validation"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "419": {
+            "$ref": "#/components/responses/CsrfExpired"
+          },
+          "423": {
+            "$ref": "#/components/responses/ConfirmationRequired"
+          },
+          "428": {
+            "$ref": "#/components/responses/MfaEnrollmentRequired"
+          }
+        },
+        "security": [
+          {
+            "sessionCookie": [],
+            "csrfToken": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "password": {
+                    "type": "string",
+                    "maxLength": 128
+                  },
+                  "code": {
+                    "type": "string",
+                    "pattern": "^[0-9]{6}$"
+                  }
+                },
+                "required": [
+                  "password"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/me/mfa": {
+      "get": {
+        "operationId": "get_me_mfa",
+        "summary": "Read enrollment status",
+        "tags": [
+          "Authentication"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "enabled": {
+                          "type": "boolean"
+                        },
+                        "pending": {
+                          "type": "boolean"
+                        }
+                      }
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "422": {
+            "$ref": "#/components/responses/Validation"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "423": {
+            "$ref": "#/components/responses/ConfirmationRequired"
+          },
+          "428": {
+            "$ref": "#/components/responses/MfaEnrollmentRequired"
+          }
+        }
+      },
+      "post": {
+        "operationId": "post_me_mfa",
+        "summary": "Start or resume pending enrollment; response must not be cached",
+        "tags": [
+          "Authentication"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "setup_key": {
+                          "type": "string"
+                        },
+                        "qr_svg": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "setup_key",
+                        "qr_svg"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "422": {
+            "$ref": "#/components/responses/Validation"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "419": {
+            "$ref": "#/components/responses/CsrfExpired"
+          },
+          "423": {
+            "$ref": "#/components/responses/ConfirmationRequired"
+          },
+          "428": {
+            "$ref": "#/components/responses/MfaEnrollmentRequired"
+          }
+        },
+        "security": [
+          {
+            "sessionCookie": [],
+            "csrfToken": []
+          }
+        ]
+      },
+      "delete": {
+        "operationId": "delete_me_mfa",
+        "summary": "Disable MFA for a listener; administrative roles are refused",
+        "tags": [
+          "Authentication"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "user": {
+                          "$ref": "#/components/schemas/User"
+                        }
+                      }
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "422": {
+            "$ref": "#/components/responses/Validation"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "419": {
+            "$ref": "#/components/responses/CsrfExpired"
+          },
+          "423": {
+            "$ref": "#/components/responses/ConfirmationRequired"
+          },
+          "428": {
+            "$ref": "#/components/responses/MfaEnrollmentRequired"
+          }
+        },
+        "security": [
+          {
+            "sessionCookie": [],
+            "csrfToken": []
+          }
+        ]
+      }
+    },
+    "/me/mfa/confirm": {
+      "post": {
+        "operationId": "post_me_mfa_confirm",
+        "summary": "Confirm enrollment; temporarily display recovery codes",
+        "tags": [
+          "Authentication"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "recovery_codes": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "user": {
+                          "$ref": "#/components/schemas/User"
+                        }
+                      }
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "422": {
+            "$ref": "#/components/responses/Validation"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "419": {
+            "$ref": "#/components/responses/CsrfExpired"
+          },
+          "423": {
+            "$ref": "#/components/responses/ConfirmationRequired"
+          },
+          "428": {
+            "$ref": "#/components/responses/MfaEnrollmentRequired"
+          }
+        },
+        "security": [
+          {
+            "sessionCookie": [],
+            "csrfToken": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "pattern": "^[0-9]{6}$"
+                  }
+                },
+                "required": [
+                  "code"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/me/mfa/recovery-codes": {
+      "get": {
+        "operationId": "get_me_mfa_recovery_codes",
+        "summary": "Read recovery codes",
+        "tags": [
+          "Authentication"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "recovery_codes": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "422": {
+            "$ref": "#/components/responses/Validation"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "423": {
+            "$ref": "#/components/responses/ConfirmationRequired"
+          },
+          "428": {
+            "$ref": "#/components/responses/MfaEnrollmentRequired"
+          }
+        }
+      },
+      "post": {
+        "operationId": "post_me_mfa_recovery_codes",
+        "summary": "Replace all recovery codes",
+        "tags": [
+          "Authentication"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "recovery_codes": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "422": {
+            "$ref": "#/components/responses/Validation"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "419": {
+            "$ref": "#/components/responses/CsrfExpired"
+          },
+          "423": {
+            "$ref": "#/components/responses/ConfirmationRequired"
+          },
+          "428": {
+            "$ref": "#/components/responses/MfaEnrollmentRequired"
+          }
+        },
+        "security": [
+          {
+            "sessionCookie": [],
+            "csrfToken": []
+          }
+        ]
+      }
+    },
+    "/admin/overview": {
+      "get": {
+        "operationId": "get_admin_overview",
+        "summary": "Read catalog counts; member counts are permission scoped",
+        "tags": [
+          "Administration"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "tracks": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "published_playlists": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "draft_playlists": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "processing_imports": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "failed_imports": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "media_bytes": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "members": {
+                          "oneOf": [
+                            {
+                              "type": "object",
+                              "properties": {
+                                "total": {
+                                  "type": "integer",
+                                  "minimum": 0
+                                },
+                                "capacity": {
+                                  "const": 10
+                                }
+                              }
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "422": {
+            "$ref": "#/components/responses/Validation"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "423": {
+            "$ref": "#/components/responses/ConfirmationRequired"
+          },
+          "428": {
+            "$ref": "#/components/responses/MfaEnrollmentRequired"
+          }
+        }
+      }
+    },
+    "/admin/operations": {
+      "get": {
+        "operationId": "get_admin_operations",
+        "summary": "Read bounded diagnostics; queue counts do not establish worker health",
+        "tags": [
+          "Administration"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "php_version": {
+                          "type": "string"
+                        },
+                        "laravel_version": {
+                          "type": "string"
+                        },
+                        "database_driver": {
+                          "type": "string"
+                        },
+                        "queue_driver": {
+                          "type": "string"
+                        },
+                        "queued_jobs": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "failed_jobs": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "ffprobe_available": {
+                          "type": "boolean"
+                        },
+                        "checked_at": {
+                          "type": "string",
+                          "format": "date-time"
+                        }
+                      }
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "422": {
+            "$ref": "#/components/responses/Validation"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "423": {
+            "$ref": "#/components/responses/ConfirmationRequired"
+          },
+          "428": {
+            "$ref": "#/components/responses/MfaEnrollmentRequired"
+          }
+        }
+      }
+    },
+    "/admin/audit-events": {
+      "get": {
+        "operationId": "get_admin_audit_events",
+        "summary": "Read immutable application audit events with cursor pagination",
+        "tags": [
+          "Administration"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/AuditEvent"
+                      }
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "next_cursor": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "prev_cursor": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        }
+                      }
+                    },
+                    "links": {
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "422": {
+            "$ref": "#/components/responses/Validation"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "423": {
+            "$ref": "#/components/responses/ConfirmationRequired"
+          },
+          "428": {
+            "$ref": "#/components/responses/MfaEnrollmentRequired"
+          }
+        },
+        "parameters": [
+          {
+            "name": "action",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "since",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "until",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "user_id",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ]
+      }
+    },
+    "/admin/artists": {
+      "get": {
+        "operationId": "get_admin_artists",
+        "summary": "Search artists without inferring identity from names",
+        "tags": [
+          "Administration"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Artist"
+                      }
+                    },
+                    "meta": {
+                      "type": "object"
+                    },
+                    "links": {
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "422": {
+            "$ref": "#/components/responses/Validation"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "423": {
+            "$ref": "#/components/responses/ConfirmationRequired"
+          },
+          "428": {
+            "$ref": "#/components/responses/MfaEnrollmentRequired"
+          }
+        },
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "maxLength": 120
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ]
+      },
+      "post": {
+        "operationId": "post_admin_artists",
+        "summary": "Create a distinct artist",
+        "tags": [
+          "Administration"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Artist"
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "422": {
+            "$ref": "#/components/responses/Validation"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "201": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Artist"
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "419": {
+            "$ref": "#/components/responses/CsrfExpired"
+          },
+          "423": {
+            "$ref": "#/components/responses/ConfirmationRequired"
+          },
+          "428": {
+            "$ref": "#/components/responses/MfaEnrollmentRequired"
+          }
+        },
+        "security": [
+          {
+            "sessionCookie": [],
+            "csrfToken": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "maxLength": 255
+                  },
+                  "sort_name": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "maxLength": 255
+                  },
+                  "description": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "maxLength": 3000
+                  },
+                  "country_code": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "pattern": "^[A-Z]{2}$"
+                  },
+                  "revision": {
+                    "type": "integer",
+                    "minimum": 0
+                  }
+                },
+                "required": [
+                  "name"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/artists/{artist}": {
+      "patch": {
+        "operationId": "patch_admin_artists_artist",
+        "summary": "Edit artist at the current revision",
+        "tags": [
+          "Administration"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Artist"
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "422": {
+            "$ref": "#/components/responses/Validation"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "419": {
+            "$ref": "#/components/responses/CsrfExpired"
+          },
+          "423": {
+            "$ref": "#/components/responses/ConfirmationRequired"
+          },
+          "428": {
+            "$ref": "#/components/responses/MfaEnrollmentRequired"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          }
+        },
+        "parameters": [
+          {
+            "name": "artist",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "security": [
+          {
+            "sessionCookie": [],
+            "csrfToken": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "maxLength": 255
+                  },
+                  "sort_name": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "maxLength": 255
+                  },
+                  "description": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "maxLength": 3000
+                  },
+                  "country_code": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "pattern": "^[A-Z]{2}$"
+                  },
+                  "revision": {
+                    "type": "integer",
+                    "minimum": 0
+                  }
+                },
+                "required": [
+                  "name",
+                  "revision"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/releases": {
+      "get": {
+        "operationId": "get_admin_releases",
+        "summary": "Search releases without inferring identity from names",
+        "tags": [
+          "Administration"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Release"
+                      }
+                    },
+                    "meta": {
+                      "type": "object"
+                    },
+                    "links": {
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "422": {
+            "$ref": "#/components/responses/Validation"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "423": {
+            "$ref": "#/components/responses/ConfirmationRequired"
+          },
+          "428": {
+            "$ref": "#/components/responses/MfaEnrollmentRequired"
+          }
+        },
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "maxLength": 120
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ]
+      },
+      "post": {
+        "operationId": "post_admin_releases",
+        "summary": "Create a distinct release",
+        "tags": [
+          "Administration"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Release"
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "422": {
+            "$ref": "#/components/responses/Validation"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "201": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Release"
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "419": {
+            "$ref": "#/components/responses/CsrfExpired"
+          },
+          "423": {
+            "$ref": "#/components/responses/ConfirmationRequired"
+          },
+          "428": {
+            "$ref": "#/components/responses/MfaEnrollmentRequired"
+          }
+        },
+        "security": [
+          {
+            "sessionCookie": [],
+            "csrfToken": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string"
+                  },
+                  "type": {
+                    "enum": [
+                      "album",
+                      "single",
+                      "ep",
+                      "compilation"
+                    ]
+                  },
+                  "released_on": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "format": "date"
+                  },
+                  "artist_ids": {
+                    "type": "array",
+                    "items": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "minItems": 1,
+                    "maxItems": 20,
+                    "uniqueItems": true
+                  },
+                  "revision": {
+                    "type": "integer",
+                    "minimum": 0
+                  }
+                },
+                "required": [
+                  "title",
+                  "type",
+                  "artist_ids"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/releases/{release}": {
+      "patch": {
+        "operationId": "patch_admin_releases_release",
+        "summary": "Edit release at the current revision",
+        "tags": [
+          "Administration"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Release"
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "422": {
+            "$ref": "#/components/responses/Validation"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "419": {
+            "$ref": "#/components/responses/CsrfExpired"
+          },
+          "423": {
+            "$ref": "#/components/responses/ConfirmationRequired"
+          },
+          "428": {
+            "$ref": "#/components/responses/MfaEnrollmentRequired"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          }
+        },
+        "parameters": [
+          {
+            "name": "release",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "security": [
+          {
+            "sessionCookie": [],
+            "csrfToken": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string"
+                  },
+                  "type": {
+                    "enum": [
+                      "album",
+                      "single",
+                      "ep",
+                      "compilation"
+                    ]
+                  },
+                  "released_on": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "format": "date"
+                  },
+                  "artist_ids": {
+                    "type": "array",
+                    "items": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "minItems": 1,
+                    "maxItems": 20,
+                    "uniqueItems": true
+                  },
+                  "revision": {
+                    "type": "integer",
+                    "minimum": 0
+                  }
+                },
+                "required": [
+                  "title",
+                  "type",
+                  "artist_ids",
+                  "revision"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "operationId": "get_admin_releases_release",
+        "summary": "Read release credits and disc/track positions",
+        "tags": [
+          "Administration"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Release"
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "422": {
+            "$ref": "#/components/responses/Validation"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "423": {
+            "$ref": "#/components/responses/ConfirmationRequired"
+          },
+          "428": {
+            "$ref": "#/components/responses/MfaEnrollmentRequired"
+          }
+        },
+        "parameters": [
+          {
+            "name": "release",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ]
+      }
+    },
+    "/admin/releases/{release}/tracks": {
+      "put": {
+        "operationId": "put_admin_releases_release_tracks",
+        "summary": "Replace release track list with unique disc positions",
+        "tags": [
+          "Administration"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Release"
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "422": {
+            "$ref": "#/components/responses/Validation"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "419": {
+            "$ref": "#/components/responses/CsrfExpired"
+          },
+          "423": {
+            "$ref": "#/components/responses/ConfirmationRequired"
+          },
+          "428": {
+            "$ref": "#/components/responses/MfaEnrollmentRequired"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          }
+        },
+        "parameters": [
+          {
+            "name": "release",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "security": [
+          {
+            "sessionCookie": [],
+            "csrfToken": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "revision": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "tracks": {
+                    "type": "array",
+                    "maxItems": 500,
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "track_id": {
+                          "type": "integer",
+                          "minimum": 1
+                        },
+                        "disc_number": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 999
+                        },
+                        "track_number": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 999
+                        }
+                      },
+                      "required": [
+                        "track_id",
+                        "disc_number",
+                        "track_number"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "revision",
+                  "tracks"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/tracks": {
+      "get": {
+        "operationId": "get_admin_tracks",
+        "summary": "Search complete catalog with artist and release identities",
+        "tags": [
+          "Administration"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Track"
+                      }
+                    },
+                    "meta": {
+                      "type": "object"
+                    },
+                    "links": {
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "422": {
+            "$ref": "#/components/responses/Validation"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "423": {
+            "$ref": "#/components/responses/ConfirmationRequired"
+          },
+          "428": {
+            "$ref": "#/components/responses/MfaEnrollmentRequired"
+          }
+        },
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "maxLength": 120
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ]
+      }
+    },
+    "/admin/tracks/{track}": {
+      "patch": {
+        "operationId": "patch_admin_tracks_track",
+        "summary": "Edit shared recording metadata, preserving identity and likes",
+        "tags": [
+          "Administration"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Track"
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "422": {
+            "$ref": "#/components/responses/Validation"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "419": {
+            "$ref": "#/components/responses/CsrfExpired"
+          },
+          "423": {
+            "$ref": "#/components/responses/ConfirmationRequired"
+          },
+          "428": {
+            "$ref": "#/components/responses/MfaEnrollmentRequired"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          }
+        },
+        "parameters": [
+          {
+            "name": "track",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "security": [
+          {
+            "sessionCookie": [],
+            "csrfToken": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "revision": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "title": {
+                    "type": "string",
+                    "maxLength": 255
+                  },
+                  "primary_release_id": {
+                    "type": [
+                      "integer",
+                      "null"
+                    ],
+                    "minimum": 1
+                  },
+                  "credits": {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 30,
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "artist_id": {
+                          "type": "integer",
+                          "minimum": 1
+                        },
+                        "role": {
+                          "enum": [
+                            "primary",
+                            "featured",
+                            "composer",
+                            "producer"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "artist_id",
+                        "role"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "revision",
+                  "title",
+                  "credits"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/tracks/{track}/renditions": {
+      "post": {
+        "operationId": "post_admin_tracks_track_renditions",
+        "summary": "Register a private rendition asset; duration is checked, music identity is operator verified",
+        "tags": [
+          "Administration"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "attached": {
+                          "const": true
+                        }
+                      }
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "422": {
+            "$ref": "#/components/responses/Validation"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "201": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "attached": {
+                          "const": true
+                        }
+                      }
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "419": {
+            "$ref": "#/components/responses/CsrfExpired"
+          },
+          "423": {
+            "$ref": "#/components/responses/ConfirmationRequired"
+          },
+          "428": {
+            "$ref": "#/components/responses/MfaEnrollmentRequired"
+          }
+        },
+        "parameters": [
+          {
+            "name": "track",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "security": [
+          {
+            "sessionCookie": [],
+            "csrfToken": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "asset_id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "label": {
+                    "type": "string",
+                    "maxLength": 80
+                  }
+                },
+                "required": [
+                  "asset_id",
+                  "label"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/playlists": {
+      "post": {
+        "operationId": "post_admin_playlists",
+        "summary": "Create an empty draft playlist",
+        "tags": [
+          "Administration"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Playlist"
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "422": {
+            "$ref": "#/components/responses/Validation"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "201": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Playlist"
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "419": {
+            "$ref": "#/components/responses/CsrfExpired"
+          },
+          "423": {
+            "$ref": "#/components/responses/ConfirmationRequired"
+          },
+          "428": {
+            "$ref": "#/components/responses/MfaEnrollmentRequired"
+          }
+        },
+        "security": [
+          {
+            "sessionCookie": [],
+            "csrfToken": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "maxLength": 160
+                  },
+                  "description": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "maxLength": 2000
+                  },
+                  "mood": {
+                    "enum": [
+                      "focus",
+                      "night",
+                      "calm",
+                      "energy",
+                      "other"
+                    ]
+                  }
+                },
+                "required": [
+                  "name",
+                  "mood"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/playlists/{playlist}/tracks": {
+      "put": {
+        "operationId": "put_admin_playlists_playlist_tracks",
+        "summary": "Replace ordered track IDs; no duplicate recordings in v1",
+        "tags": [
+          "Administration"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Playlist"
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "422": {
+            "$ref": "#/components/responses/Validation"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "419": {
+            "$ref": "#/components/responses/CsrfExpired"
+          },
+          "423": {
+            "$ref": "#/components/responses/ConfirmationRequired"
+          },
+          "428": {
+            "$ref": "#/components/responses/MfaEnrollmentRequired"
+          }
+        },
+        "parameters": [
+          {
+            "name": "playlist",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "security": [
+          {
+            "sessionCookie": [],
+            "csrfToken": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "revision": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "track_ids": {
+                    "type": "array",
+                    "items": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "maxItems": 500,
+                    "uniqueItems": true
+                  }
+                },
+                "required": [
+                  "revision",
+                  "track_ids"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/users/{user}/password": {
+      "put": {
+        "operationId": "put_admin_users_user_password",
+        "summary": "Reset a permitted member password, preserving MFA and revoking sessions",
+        "tags": [
+          "Administration"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "reset": {
+                          "const": true
+                        }
+                      }
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "422": {
+            "$ref": "#/components/responses/Validation"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "419": {
+            "$ref": "#/components/responses/CsrfExpired"
+          },
+          "423": {
+            "$ref": "#/components/responses/ConfirmationRequired"
+          },
+          "428": {
+            "$ref": "#/components/responses/MfaEnrollmentRequired"
+          }
+        },
+        "parameters": [
+          {
+            "name": "user",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "security": [
+          {
+            "sessionCookie": [],
+            "csrfToken": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "password": {
+                    "type": "string",
+                    "minLength": 12,
+                    "maxLength": 128
+                  },
+                  "password_confirmation": {
+                    "type": "string",
+                    "maxLength": 128
+                  }
+                },
+                "required": [
+                  "password",
+                  "password_confirmation"
                 ]
               }
             }
@@ -2225,7 +4600,11 @@
           "email",
           "is_admin",
           "is_active",
-          "theme"
+          "theme",
+          "role",
+          "role_label",
+          "permissions",
+          "mfa_enabled"
         ],
         "properties": {
           "id": {
@@ -2239,7 +4618,8 @@
             "format": "email"
           },
           "is_admin": {
-            "type": "boolean"
+            "type": "boolean",
+            "deprecated": true
           },
           "is_active": {
             "type": "boolean"
@@ -2250,6 +4630,37 @@
               "dark",
               "system"
             ]
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "owner",
+              "administrator",
+              "curator",
+              "listener"
+            ]
+          },
+          "role_label": {
+            "type": "string"
+          },
+          "permissions": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "admin.access",
+                "dashboard.read",
+                "catalog.manage",
+                "media.manage",
+                "imports.manage",
+                "users.manage",
+                "roles.manage",
+                "audit.read",
+                "operations.read"
+              ]
+            }
+          },
+          "mfa_enabled": {
+            "type": "boolean"
           }
         }
       },
@@ -2261,7 +4672,9 @@
           "artist",
           "duration_seconds",
           "stream_url",
-          "is_liked"
+          "is_liked",
+          "revision",
+          "primary_release_id"
         ],
         "properties": {
           "id": {
@@ -2288,6 +4701,64 @@
           },
           "is_liked": {
             "type": "boolean"
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "primary_release_id": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 1
+          },
+          "artists": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "name": {
+                  "type": "string"
+                },
+                "role": {
+                  "enum": [
+                    "primary",
+                    "featured",
+                    "composer",
+                    "producer"
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "name",
+                "role"
+              ]
+            }
+          },
+          "releases": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "title": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "title"
+              ]
+            }
           }
         }
       },
@@ -2300,7 +4771,8 @@
           "status",
           "is_saved",
           "artwork_seed",
-          "cover_url"
+          "cover_url",
+          "revision"
         ],
         "properties": {
           "id": {
@@ -2328,7 +4800,8 @@
           "status": {
             "enum": [
               "draft",
-              "published"
+              "published",
+              "archived"
             ]
           },
           "artwork_seed": {
@@ -2351,6 +4824,10 @@
             "items": {
               "$ref": "#/components/schemas/Track"
             }
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 0
           }
         }
       },
@@ -2383,6 +4860,20 @@
               "null"
             ],
             "maxLength": 255
+          },
+          "artist_id": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 1
+          },
+          "release_id": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 1
           }
         }
       },
@@ -2572,6 +5063,237 @@
             }
           }
         }
+      },
+      "Artist": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 255
+          },
+          "sort_name": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 255
+          },
+          "description": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 3000
+          },
+          "country_code": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^[A-Z]{2}$"
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "tracks_count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "needs_review": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "revision"
+        ]
+      },
+      "Release": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 255
+          },
+          "type": {
+            "enum": [
+              "album",
+              "single",
+              "ep",
+              "compilation"
+            ]
+          },
+          "released_on": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date"
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "artists": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Artist"
+            }
+          },
+          "tracks_count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "tracks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "title": {
+                  "type": "string"
+                },
+                "disc_number": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "track_number": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            }
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "type",
+          "revision",
+          "artists"
+        ]
+      },
+      "AuditEvent": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "actor": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "name": {
+                    "type": "string"
+                  }
+                }
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "action": {
+            "type": "string"
+          },
+          "subject_type": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "subject_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "request_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          },
+          "metadata": {
+            "type": "object"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "action",
+          "metadata",
+          "created_at"
+        ]
+      },
+      "LoginSuccess": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "user": {
+                "$ref": "#/components/schemas/User"
+              },
+              "csrf_token": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "user",
+              "csrf_token"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "LoginChallenge": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "two_factor_required": {
+                "const": true
+              },
+              "csrf_token": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "two_factor_required",
+              "csrf_token"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
       }
     },
     "responses": {
@@ -2616,7 +5338,7 @@
         }
       },
       "Conflict": {
-        "description": "Stale revision or idempotency key mismatch",
+        "description": "Conflicting state: already authenticated, stale revision or an idempotency-key mismatch.",
         "content": {
           "application/json": {
             "schema": {
@@ -2627,6 +5349,36 @@
       },
       "RateLimited": {
         "description": "Rate limit exceeded",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "CsrfExpired": {
+        "description": "CSRF token expired",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "ConfirmationRequired": {
+        "description": "Recent password and, for enrolled accounts, fresh MFA confirmation required",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "MfaEnrollmentRequired": {
+        "description": "Administrator must finish MFA enrollment",
         "content": {
           "application/json": {
             "schema": {

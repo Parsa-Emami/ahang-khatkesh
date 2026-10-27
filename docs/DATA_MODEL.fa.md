@@ -1,44 +1,55 @@
-# مدل داده
+# مدل داده و قواعد یکپارچگی
 
-## موجودیت‌ها
+مرجع ساختار، migrationهای نسخه‌بندی‌شده است. MySQL 8.4 با InnoDB، utf8mb4 و UTC هدف است. phpMyAdmin فقط ابزار مشاهده و عملیات اپراتور است. صوت در BLOB دیتابیس ذخیره نمی‌شود.
 
-| جدول | ستون‌های دامنه | قاعده |
+```mermaid
+erDiagram
+  ARTISTS }o--o{ TRACKS : artist_track
+  ARTISTS }o--o{ RELEASES : artist_release
+  RELEASES }o--o{ TRACKS : release_track
+  TRACKS ||--o{ MEDIA_ASSETS : track_media
+  PLAYLISTS }o--o{ TRACKS : playlist_track
+```
+
+در نمودار، رابطه‌ها مفهومی‌اند؛ جدول‌های واسط زیر قیدهای واقعی را دارند.
+
+| جدول | کلید و ستون‌های مهم | قاعده |
 | --- | --- | --- |
-| users | id, name, email, password, is_admin, is_active, theme, remember_token | ایمیل یکتا، رمز hash؛ ظرفیت کل ۱۰ از مسیر Action |
-| library_settings | id, lock_version | ردیف ثابت ۱ برای سری‌سازی نوشتن‌های حساس |
-| media_assets | UUID id, sha256, path, original_name, mime_type, size_bytes, duration_seconds, uploaded_by | hash یکتا؛ یک فایل واقعی برای هر محتوای صوتی |
-| tracks | id, media_asset_id, title, artist, album, search_text | هر asset حداکثر یک Track و متادیتای مشترک دارد |
-| playlists | id, name, description, mood, status, cover_path, artwork_seed, created_by, search_text | published/draft؛ دسترسی با policy |
-| playlist_track | playlist_id, track_id, position | هر آهنگ و هر position در یک پلی‌لیست یکتا |
-| playlist_imports | UUID id, created_by, idempotency_key, payload_hash, name, description, mood, rows, status, report, playlist_id, publish, error | کلید idempotency در محدودهٔ مدیر یکتا؛ snapshot ردیف‌ها |
-| liked_tracks | user_id, track_id | کلید مرکب و ثبت idempotent |
-| saved_playlists | user_id, playlist_id | کلید مرکب و دادهٔ شخصی |
-| playback_states | id, user_id, track_id, queue, position_seconds, volume, shuffle, repeat_mode, revision | یک ردیف برای هر کاربر؛ queue فهرست شناسه‌ها |
-| audit_events | id, user_id, action, subject_id, metadata | ثبت اعمال مدیریتی بدون رمز یا payload کامل درخواست |
+| users | bigint id، email unique، role enum، access_version، is_active | owner/administrator/curator/listener؛ ده حساب شامل غیرفعال‌ها |
+| users: MFA | secret و recovery_codes از نوع TEXT رمز‌شده، confirmed_at | API عمومی آن‌ها را serialize نمی‌کند |
+| library_settings | id=1، lock_version | نقطهٔ سری‌سازی عملیات محدود دامنه |
+| artists | bigint id، name، sort_name، description، country_code، provenance unique nullable، revision | name عمداً unique نیست؛ هم‌نامی دلیل ادغام نیست |
+| releases | bigint id، title، type، released_on، provenance، revision | album/single/ep/compilation؛ عنوان تکراری مجاز |
+| artist_track | track_id + artist_id + role، position | primary/featured/composer/producer؛ نقش تکراری برای یک هنرمند ممنوع |
+| artist_release | release_id + artist_id، position unique در انتشار | اعتبار هنرمندان به ترتیب مشخص |
+| release_track | release_id + disc_number + track_number؛ release_id + track_id unique | یک ضبط در چند انتشار؛ شمارهٔ هر دیسک یکتا |
+| tracks | bigint id، title، primary_release_id، media_asset_id unique، catalog_revision | اثر/ضبط و رسانه جدا؛ artist/album projection سازگاری |
+| media_assets | UUID، sha256 unique، path خصوصی، MIME، bytes، duration، uploaded_by | dedup باینری؛ نام فایل اصلی هویت یا مسیر فایل نیست |
+| track_media | track_id + media_asset_id؛ asset unique؛ track_id + label unique | original/rendition؛ فایل یک نسخه به یک ضبط تعلق دارد |
+| playlists | bigint id، name ≤160، mood، status، revision، created_by | draft/published/archived؛ نام هویت نیست |
+| playlist_track | playlist_id + track_id؛ playlist_id + position unique | ترتیب پیوستهٔ یک‌مبنایی؛ تکرار Track در همین پلی‌لیست v1 ممنوع |
+| playlist_imports | UUID، created_by + idempotency_key unique، payload_hash، JSON rows | ready/processing/completed/failed؛ گزارش و مرجع پلی‌لیست |
+| liked_tracks / saved_playlists | user_id + related_id composite primary | دادهٔ شخصی؛ رابطهٔ تکراری ساخته نمی‌شود |
+| playback_states | user_id unique، track_id nullable، JSON queue، revision | وضعیت شخصی با conflict 409؛ queue در Action اعتبارسنجی می‌شود |
+| audit_events | bigint id، actor nullable، action، subject، request_id، metadata | ایجاد رویداد؛ serialization محدود و cursor pagination |
+| sessions / jobs / failed_jobs / cache | زیرساخت Laravel | session و queue در DB؛ migration حساب جدا از runtime |
 
-timestampهای معمول created_at/updated_at در جدول‌های دامنه وجود دارند. session، cache، jobs و failed_jobs از migrationهای استاندارد Laravel ایجاد می‌شوند.
+## هویت و مهاجرت اطلاعات قبلی
 
-## روابط و حذف
+هر Track همان شناسهٔ قبلی را نگه می‌دارد. backfill از artist/album متنی، هنرمند و انتشار دارای provenance مربوط به همان Track می‌سازد. متن یکسان به‌تنهایی شناسهٔ مشترک نمی‌سازد؛ ممکن است موارد نیازمند بازبینی تکراری دیده شوند. curator با ویرایش اعتبار هنری، شناسهٔ درست را انتخاب می‌کند. `artist_id` و `release_id` اختیاری در manifest جدید، امکان استفادهٔ صریح از هویت موجود را می‌دهند. متادیتای Track مشترک موجود هنگام import تغییر نمی‌کند.
 
-کاربر سازندهٔ فایل و پلی‌لیست است و حذف او به‌دلیل FK محدود می‌شود؛ در UI به‌جای حذف، حساب غیرفعال می‌شود. فایل صوتی مورد استفادهٔ Track قابل حذف مستقیم نیست. حذف playlist رابطه‌های آن را cascade می‌کند و حذف Track به‌دلیل playlist_track محدود است. شناسهٔ import و asset از نوع UUID، و شناسهٔ Track/Playlist از نوع bigint است. مجوز به نوع یا قابل حدس بودن شناسه متکی نیست.
+Track می‌تواند در چند Release باشد؛ `primary_release_id` انتشار نمایشی اصلی را مشخص می‌کند و باید در فهرست release_track آن Track باشد. عنوان آلبوم یا نام هنرمند آزاد، جای کلید خارجی را نمی‌گیرد. تغییر نام هنرمند یا انتشار از Actionهای کاتالوگ، projection و revisionهای وابسته را هم به‌روز می‌کند.
 
-از باینری صوت در ستون BLOB استفاده نمی‌شود. `path` و `cover_path` مسیر داخلی‌اند. `queue` یک snapshot منطقی از شناسه‌هاست و FK جدا برای هر عضو JSON ندارد؛ پیش از نوشتن اعتبارسنجی و هنگام بازگردانی دوباره بر اساس دسترسی جاری فیلتر می‌شود.
+## حذف، بایگانی و فایل‌ها
 
-## قواعد مهم
+رابط حذف فیزیکی حساب یا Track ندارد. حساب غیرفعال و پلی‌لیست بایگانی می‌شود؛ بایگانی از دید شنونده و ارائهٔ صوت/کاور خارج است، مگر Track در پلی‌لیست منتشرشدهٔ دیگری باشد. حذف عضو/اثر با SQL مستقیم می‌تواند تاریخچه و قانون برنامه را بشکند. FKهای restrict/cascade/nullOnDelete متناسب با مالکیت در migrationها مشخص‌اند.
 
-- حالت انتشار فقط draft یا published از API پذیرفته می‌شود.
-- mood یکی از focus/night/calm/energy/other است.
-- تکرار فایل در یک manifest پذیرفته نمی‌شود؛ یک Track می‌تواند در چند Playlist باشد.
-- هنگام استفادهٔ دوباره از Track، متادیتای قبلی حفظ و در گزارش اعلام می‌شود.
-- مقدار volume بین صفر و یک و position حداکثر برابر طول واقعی فایل ذخیره می‌شود.
-- revision با هر ذخیرهٔ موفق یک واحد افزایش می‌یابد؛ مقدار قدیمی 409 می‌گیرد.
-- سقف ۵۰۰ آهنگ مربوط به هر import است؛ تعداد کل کاتالوگ محدود به ظرفیت فضای فایل و سرور است.
-- تعداد ۱۰، تعداد حساب است؛ تعداد session و اتصال همزمان صوت یک معیار عملیاتی جداست.
+رسانهٔ اصلی همان media_asset_id سازگار قبلی است و در track_media هم ثبت می‌شود. API ثبت rendition، مدت را با اصل مقایسه و اتصال مجدد فایل را رد می‌کند. تشخیص اینکه دو فایل واقعاً یک اجرای موسیقایی‌اند همچنان به اپراتور مربوط است؛ مدت برابر اثبات هویت نیست. انتخاب خودکار codec، transcoding و UI مدیریت rendition در این نسخه تکمیل نشده‌اند؛ پلیر نسخهٔ اصلی را پخش می‌کند.
 
-## ایندکس‌ها
+## همزمانی و ایندکس‌ها
 
-email، sha256، media_asset_id و user_id وضعیت پخش یکتا هستند. جدول‌های واسط روی کلید مرکب و ترتیب پلی‌لیست قید دارند. کاتالوگ روی status/id و ایمپورت روی status/created_at ایندکس دارد. جستجوی نسخهٔ اول با search_text نرمال‌شده و LIKE است؛ contains search به ایندکس معمولی متکی نیست. افزودن موتور جستجوی مستقل باید از اندازه‌گیری واقعی حجم و زمان query ناشی شود.
+ویرایش Track، Artist، Release و Playlist نیازمند revision جاری است. بازنویسی کور با 409 رد می‌شود. جایگزینی ترتیب پلی‌لیست در تراکنش detach/attach می‌شود تا قید موقعیت یکتا نقض نشود. likes و شناسهٔ فایل حفظ می‌شوند.
 
-## تغییر schema
+کلیدهای FK و compositeها برای join و ترتیب‌اند؛ status,id برای کتابخانه و action,id برای audit وجود دارند. جستجوی فعلی `LIKE` پارامتری روی search_text نرمال‌شده است؛ B-tree آن را برای `%term%` سریع نمی‌کند. برای کاتالوگ بزرگ، EXPLAIN با دادهٔ واقعی و سپس FULLTEXT یا موتور جستجو تصمیم بعدی است. تعداد کاربر کم، معادل تعداد آهنگ کم نیست.
 
-migrationهای منتشرشده تغییر نمی‌کنند؛ برای توسعهٔ بعدی migration جدید ایجاد کنید. قبل از استقرار، backup از دیتابیس و پوشهٔ private رسانه لازم است. rollback ساختار که جدول را حذف می‌کند داده را برنمی‌گرداند؛ راه پیش‌فرض تولید forward fix است.
+backup باید schema، داده، فایل‌های خصوصی و APP_KEY را پوشش دهد. export دیتابیس بدون کلید رمزگشایی MFA و بدون فایل‌ها بازیابی کامل نیست. rollback ساختاری کاتالوگ دادهٔ جدید روابط را حذف می‌کند؛ در محیط عملیاتی forward fix با backup ارجح است.

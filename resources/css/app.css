@@ -1216,10 +1216,9 @@ input[type="range"] {
 }
 .track-row {
     display: grid;
-    grid-template-columns: 33px minmax(130px, 1fr) minmax(
-            90px,
-            0.65fr
-        ) 35px 40px;
+    grid-template-columns:
+        33px minmax(130px, 1fr) minmax(90px, 0.65fr)
+        35px 40px;
     align-items: center;
     gap: 13px;
     padding: 12px 10px;
@@ -2221,10 +2220,9 @@ input[type="file"]::file-selector-button {
         gap: 20px;
     }
     .track-row {
-        grid-template-columns: 25px minmax(100px, 1fr) minmax(
-                70px,
-                0.5fr
-            ) 32px 35px;
+        grid-template-columns:
+            25px minmax(100px, 1fr) minmax(70px, 0.5fr)
+            32px 35px;
         gap: 8px;
     }
     .playlist-grid {
@@ -2689,10 +2687,9 @@ input[type="file"]::file-selector-button {
         gap: 10px;
     }
     .track-row {
-        grid-template-columns: 30px minmax(130px, 1fr) minmax(
-                90px,
-                0.6fr
-            ) 35px 40px;
+        grid-template-columns:
+            30px minmax(130px, 1fr) minmax(90px, 0.6fr)
+            35px 40px;
         gap: 10px;
     }
     .admin-page .page-intro h1 {
@@ -3109,4 +3106,11 @@ input[type="file"]::file-selector-button {
     outline: none;
     font-size: 11px;
     box-shadow: none;
+}
+
+.dialog-overlay.dialog-priority {
+    z-index: 120;
+}
+.dialog-content.dialog-priority {
+    z-index: 130;
 }

@@ -2,17 +2,16 @@
 
 یک کتابخانهٔ موسیقی خصوصی با تجربهٔ آشنای پلیرهای موسیقی، برای حداکثر ۱۰ حساب شامل مدیران و حساب‌های غیرفعال. نام و هویت محصول **ahang-khatkesh** است.
 
-این مخزن شامل یک پایهٔ اجرایی برای ادامهٔ توسعه است: Laravel 13، PHP 8.5، React 19، TypeScript و Vite؛ رابط فارسی، RTL و تم روشن/تیره؛ مدیریت اعضا و ورود پلی‌لیست از پنل ادمین؛ پخش فایل خصوصی، جستجو، علاقه‌مندی، ذخیرهٔ پلی‌لیست و بازگرداندن صف پخش. اتصال‌های زمان اجرای برنامه از API همان Laravel عبور می‌کنند. فایل صوت در فضای خصوصی فایل ذخیره می‌شود و متادیتا و رابطهٔ پلی‌لیست‌ها در دیتابیس قرار می‌گیرد.
+این مخزن شامل نسخهٔ 0.2 و پایهٔ اجرایی برای ادامهٔ توسعه است: Laravel 13، PHP 8.5، React 19، TypeScript و Vite؛ رابط فارسی، RTL و تم روشن/تیره؛ مدیریت اعضا و ورود پلی‌لیست از پنل ادمین؛ پخش فایل خصوصی، جستجو، علاقه‌مندی، ذخیرهٔ پلی‌لیست و بازگرداندن صف پخش. اتصال‌های زمان اجرای برنامه از API همان Laravel عبور می‌کنند. فایل صوت در فضای خصوصی فایل ذخیره می‌شود و متادیتا و رابطهٔ پلی‌لیست‌ها در دیتابیس قرار می‌گیرد.
 
 ## شروع توسعه
 
-پیش‌نیازها: PHP 8.5.x با افزونه‌های معمول Laravel به‌همراه SQLite یا PDO MySQL، Composer 2، Node.js 24 و FFprobe از مجموعهٔ FFmpeg. PHP CLI و سرویس وب باید از نسخهٔ یکسان استفاده کنند.
+ابتدا MySQL و حساب دیتابیس را طبق [راهنمای MySQL و phpMyAdmin](docs/MYSQL_PHPMYADMIN.fa.md) آماده و تنظیمات DB را در `.env` وارد کنید. پیش‌نیازها: PHP 8.5.x با افزونه‌های معمول Laravel به‌همراه PDO MySQL و MySQL 8.4، Composer 2، Node.js 24 و FFprobe از مجموعهٔ FFmpeg. PHP CLI و سرویس وب باید از نسخهٔ یکسان استفاده کنند.
 
 ```bash
 composer install
 cp .env.example .env
 php artisan key:generate
-php -r "file_exists('database/database.sqlite') || touch('database/database.sqlite');"
 php artisan migrate --seed
 npm ci
 npm run build
@@ -20,9 +19,9 @@ php artisan app:create-admin
 npm run dev
 ```
 
-`app:create-admin` نام، ایمیل و رمز را تعاملی می‌پرسد؛ رمز در مخزن یا فرمان نمونه قرار ندارد. `npm run dev` وب‌سرور محلی Laravel روی پورت 8000، worker دیتابیس و Vite روی پورت 5173 را با هم اجرا می‌کند. آدرس توسعهٔ رابط `http://localhost:5173` است. برای مشاهدهٔ نسخهٔ ساخته‌شده می‌توان `php artisan serve` و worker را اجرا کرد و `http://localhost:8000` را باز کرد. هنگام راه‌اندازی مجدد، فایل `public/hot` باید به Vite در حال اجرا اشاره کند؛ اگر Vite خاموش است آن فایل موقت را حذف کنید.
+`app:create-admin` نام، ایمیل و رمز را تعاملی می‌پرسد؛ رمز در مخزن یا فرمان نمونه قرار ندارد. اولین مدیر در نبود مالک فعال به مالک تبدیل می‌شود؛ برای دسترسی پنل باید رمزساز را فعال و کدهای بازیابی را ذخیره کند. `npm run dev` وب‌سرور محلی Laravel روی پورت 8000، worker دیتابیس و Vite روی پورت 5173 را با هم اجرا می‌کند. آدرس توسعهٔ رابط `http://localhost:5173` است. برای مشاهدهٔ نسخهٔ ساخته‌شده می‌توان `php artisan serve` و worker را اجرا کرد و `http://localhost:8000` را باز کرد. هنگام راه‌اندازی مجدد، فایل `public/hot` باید به Vite در حال اجرا اشاره کند؛ اگر Vite خاموش است آن فایل موقت را حذف کنید.
 
-در Windows کپی `.env.example` و ایجاد فایل SQLite را با فرمان معادل انجام دهید. اجرای PHP و Node باید در PATH در دسترس باشد. FFprobe با `FFPROBE_BINARY` قابل تنظیم است. حساب عمومی برای ثبت‌نام وجود ندارد؛ مدیر اعضای بعدی را از پنل می‌سازد.
+در Windows کپی `.env.example` را با فرمان معادل انجام دهید؛ اتصال MySQL را در همین فایل تنظیم کنید. اجرای PHP و Node باید در PATH در دسترس باشد. FFprobe با `FFPROBE_BINARY` قابل تنظیم است. حساب عمومی برای ثبت‌نام وجود ندارد؛ مدیر اعضای بعدی را از پنل می‌سازد.
 
 برای تجربهٔ محلی همراه با صدای نمونه:
 
@@ -46,6 +45,9 @@ php artisan app:demo
 
 - [طرح جامع محصول و سناریوها](docs/PROJECT_BLUEPRINT.fa.md)
 - [معماری، مرز ماژول‌ها و الگوها](docs/ARCHITECTURE.fa.md)
+- [معماری فرانت و کامپوننت‌ها](docs/FRONTEND_ARCHITECTURE.fa.md)
+- [نقش‌ها، MFA و امنیت پنل](docs/ADMIN_SECURITY.fa.md)
+- [بازبینی رابط و محدودیت‌های آزمون](docs/DESIGN_REVIEW.fa.md)
 - [مدل داده و قواعد یکپارچگی](docs/DATA_MODEL.fa.md)
 - [سیستم طراحی و کامپوننت‌ها](docs/DESIGN_SYSTEM.fa.md)
 - [قرارداد API](docs/API.fa.md) و [OpenAPI 3.1](docs/openapi.json)
@@ -64,7 +66,9 @@ npm test
 npm run build
 composer validate --strict
 composer audit
-npm audit --omit=dev
+php vendor/bin/pint --test
+npm run format:check
+npm audit
 php artisan optimize
 php artisan optimize:clear
 ```

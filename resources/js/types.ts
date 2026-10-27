@@ -1,9 +1,24 @@
 export type Theme = "light" | "dark" | "system";
+export type Role = "owner" | "administrator" | "curator" | "listener";
+export type Permission =
+    | "admin.access"
+    | "dashboard.read"
+    | "catalog.manage"
+    | "media.manage"
+    | "imports.manage"
+    | "users.manage"
+    | "roles.manage"
+    | "audit.read"
+    | "operations.read";
 export type User = {
     id: number;
     name: string;
     email: string;
     is_admin: boolean;
+    role: Role;
+    role_label: string;
+    permissions: Permission[];
+    mfa_enabled: boolean;
     is_active: boolean;
     theme: Theme;
 };
@@ -12,6 +27,10 @@ export type Track = {
     title: string;
     artist: string;
     album: string | null;
+    revision: number;
+    primary_release_id: number | null;
+    artists?: { id: number; name: string; role: string }[];
+    releases?: { id: number; title: string }[];
     duration_seconds: number;
     stream_url: string;
     is_liked: boolean;
@@ -24,7 +43,8 @@ export type Playlist = {
     name: string;
     description: string | null;
     mood: Mood;
-    status: "draft" | "published";
+    status: "draft" | "published" | "archived";
+    revision: number;
     artwork_seed: number;
     cover_url: string | null;
     tracks_count: number;
@@ -37,6 +57,8 @@ export type Page<T> = {
     links: Record<string, string | null>;
 };
 export type ManifestRow = {
+    artist_id?: number;
+    release_id?: number;
     asset_id: string;
     title: string;
     artist: string;
@@ -87,3 +109,6 @@ export function duration(value: number) {
     const safe = Number.isFinite(value) ? Math.max(0, value) : 0;
     return `${Math.floor(safe / 60)}:${String(Math.floor(safe % 60)).padStart(2, "0")}`;
 }
+
+export const can = (user: User | null | undefined, permission: Permission) =>
+    user?.permissions.includes(permission) ?? false;

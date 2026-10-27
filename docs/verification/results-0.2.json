@@ -1,0 +1,92 @@
+{
+  "checked_at": "2026-10-27",
+  "versions": {
+    "php": "8.5.12",
+    "mysql": "8.4.13",
+    "laravel/fortify": "v1.41.0",
+    "laravel/framework": "v13.38.0",
+    "react": "19.3.1",
+    "typescript": "5.9.3",
+    "vite": "8.3.5",
+    "vitest": "4.1.12",
+    "prettier": "3.9.10"
+  },
+  "backend": {
+    "sqlite": {
+      "name": "phpunit.xml",
+      "tests": "52",
+      "assertions": "277",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "time": "10.778682"
+    },
+    "mysql": {
+      "name": "phpunit.xml",
+      "tests": "52",
+      "assertions": "277",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "time": "12.541619"
+    }
+  },
+  "frontend": {
+    "vitest_tests_passed": 5,
+    "typecheck": "passed",
+    "production_build": "passed",
+    "prettier": "passed"
+  },
+  "quality": {
+    "pint": "passed",
+    "composer_validate": "passed",
+    "composer_audit_advisories": 0,
+    "npm_audit_vulnerabilities_all_dependencies": 0,
+    "optimize_and_clear": "passed",
+    "cached_config_requires_mfa_confirmation": true,
+    "public_registration_enabled": false
+  },
+  "api": {
+    "openapi": "3.1.0",
+    "route_operations_excluding_implicit_head": 53,
+    "unique_documented_operations_including_explicit_head": 55,
+    "resolved_internal_references": 389,
+    "local_networkless_checks": "passed",
+    "third_party_cli_completion": "not claimed: automatic approval review rejected telemetry risk"
+  },
+  "browser": {
+    "viewport": "1363x936",
+    "account": "synthetic local owner",
+    "observed": [
+      "login screen",
+      "MFA enrollment gate without displaying secrets",
+      "overview light/dark",
+      "draft creation persisted",
+      "track selection and movement",
+      "expired step-up dialog and cancellation"
+    ],
+    "not_claimed": [
+      "real credential entry",
+      "phone QR enrollment",
+      "full final track save through browser",
+      "real mobile or screen reader audit"
+    ]
+  },
+  "upgrade": {
+    "legacy_data_fixture": "passed on isolated SQLite connection",
+    "preserved": [
+      "recording IDs",
+      "likes",
+      "playlist order"
+    ],
+    "homonyms_automatically_merged": false
+  },
+  "release_gates_remaining": [
+    "multi-process concurrency exercise on staging",
+    "10 simultaneous real streams and seeking",
+    "backup restore exercise",
+    "real device and accessibility matrix",
+    "independent security review",
+    "production TLS, worker and restricted phpMyAdmin setup"
+  ]
+}

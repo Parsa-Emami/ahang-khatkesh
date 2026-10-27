@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+  <testsuite name="./phpunit.xml" tests="52" assertions="277" errors="0" failures="0" skipped="0" time="12.541619">
+    <testsuite name="Feature" tests="52" assertions="277" errors="0" failures="0" skipped="0" time="12.541619">
+      <testsuite name="Tests\Feature\AccountAccessTest" file="./tests/Feature/AccountAccessTest.php" tests="7" assertions="31" errors="0" failures="0" skipped="0" time="6.681513">
+        <testcase name="test_guests_cannot_read_catalog_and_registration_is_closed" file="./tests/Feature/AccountAccessTest.php" line="13" class="Tests\Feature\AccountAccessTest" classname="Tests.Feature.AccountAccessTest" assertions="5" time="0.715860"/>
+        <testcase name="test_member_cannot_create_accounts_or_import_media" file="./tests/Feature/AccountAccessTest.php" line="19" class="Tests\Feature\AccountAccessTest" classname="Tests.Feature.AccountAccessTest" assertions="4" time="5.213145"/>
+        <testcase name="test_tenth_account_is_created_and_eleventh_is_rejected_even_with_inactive_accounts" file="./tests/Feature/AccountAccessTest.php" line="28" class="Tests\Feature\AccountAccessTest" classname="Tests.Feature.AccountAccessTest" assertions="7" time="0.130203"/>
+        <testcase name="test_disabled_account_is_blocked_and_admin_cannot_disable_self" file="./tests/Feature/AccountAccessTest.php" line="38" class="Tests\Feature\AccountAccessTest" classname="Tests.Feature.AccountAccessTest" assertions="3" time="0.048443"/>
+        <testcase name="test_theme_update_does_not_accept_privilege_escalation" file="./tests/Feature/AccountAccessTest.php" line="47" class="Tests\Feature\AccountAccessTest" classname="Tests.Feature.AccountAccessTest" assertions="4" time="0.048590"/>
+        <testcase name="test_password_change_requires_current_password" file="./tests/Feature/AccountAccessTest.php" line="54" class="Tests\Feature\AccountAccessTest" classname="Tests.Feature.AccountAccessTest" assertions="3" time="0.046147"/>
+        <testcase name="test_login_uses_normalized_email_and_does_not_expose_password" file="./tests/Feature/AccountAccessTest.php" line="60" class="Tests\Feature\AccountAccessTest" classname="Tests.Feature.AccountAccessTest" assertions="5" time="0.479126"/>
+      </testsuite>
+      <testsuite name="Tests\Feature\AdministrationTest" file="./tests/Feature/AdministrationTest.php" tests="6" assertions="31" errors="0" failures="0" skipped="0" time="0.602551">
+        <testcase name="test_curator_can_manage_catalog_but_cannot_manage_people_or_read_operations_and_audit" file="./tests/Feature/AdministrationTest.php" line="23" class="Tests\Feature\AdministrationTest" classname="Tests.Feature.AdministrationTest" assertions="6" time="0.260435"/>
+        <testcase name="test_administrator_cannot_grant_a_privileged_role_or_modify_an_owner" file="./tests/Feature/AdministrationTest.php" line="33" class="Tests\Feature\AdministrationTest" classname="Tests.Feature.AdministrationTest" assertions="4" time="0.095269"/>
+        <testcase name="test_last_active_owner_is_preserved_and_self_deactivation_is_refused" file="./tests/Feature/AdministrationTest.php" line="44" class="Tests\Feature\AdministrationTest" classname="Tests.Feature.AdministrationTest" assertions="8" time="0.073762"/>
+        <testcase name="test_expired_step_up_cannot_change_access" file="./tests/Feature/AdministrationTest.php" line="53" class="Tests\Feature\AdministrationTest" classname="Tests.Feature.AdministrationTest" assertions="3" time="0.068818"/>
+        <testcase name="test_revoked_session_version_is_rejected_even_if_a_session_row_survives" file="./tests/Feature/AdministrationTest.php" line="62" class="Tests\Feature\AdministrationTest" classname="Tests.Feature.AdministrationTest" assertions="2" time="0.046682"/>
+        <testcase name="test_audit_is_cursor_paginated_and_redacts_unapproved_metadata" file="./tests/Feature/AdministrationTest.php" line="70" class="Tests\Feature\AdministrationTest" classname="Tests.Feature.AdministrationTest" assertions="8" time="0.057585"/>
+      </testsuite>
+      <testsuite name="Tests\Feature\ApiContractTest" file="./tests/Feature/ApiContractTest.php" tests="1" assertions="1" errors="0" failures="0" skipped="0" time="0.026629">
+        <testcase name="test_openapi_and_internal_api_operations_remain_in_sync" file="./tests/Feature/ApiContractTest.php" line="10" class="Tests\Feature\ApiContractTest" classname="Tests.Feature.ApiContractTest" assertions="1" time="0.026629"/>
+      </testsuite>
+      <testsuite name="Tests\Feature\ApplicationShellTest" file="./tests/Feature/ApplicationShellTest.php" tests="1" assertions="4" errors="0" failures="0" skipped="0" time="0.074478">
+        <testcase name="test_application_shell_is_private_and_loads_the_frontend_entry" file="./tests/Feature/ApplicationShellTest.php" line="9" class="Tests\Feature\ApplicationShellTest" classname="Tests.Feature.ApplicationShellTest" assertions="4" time="0.074478"/>
+      </testsuite>
+      <testsuite name="Tests\Feature\CatalogAdministrationTest" file="./tests/Feature/CatalogAdministrationTest.php" tests="5" assertions="35" errors="0" failures="0" skipped="0" time="1.060035">
+        <testcase name="test_homonymous_artists_remain_separate_identities" file="./tests/Feature/CatalogAdministrationTest.php" line="26" class="Tests\Feature\CatalogAdministrationTest" classname="Tests.Feature.CatalogAdministrationTest" assertions="4" time="0.084152"/>
+        <testcase name="test_shared_recording_metadata_edits_preserve_likes_memberships_and_media" file="./tests/Feature/CatalogAdministrationTest.php" line="35" class="Tests\Feature\CatalogAdministrationTest" classname="Tests.Feature.CatalogAdministrationTest" assertions="8" time="0.121503"/>
+        <testcase name="test_release_track_slots_are_unique_and_recordings_can_appear_in_multiple_releases" file="./tests/Feature/CatalogAdministrationTest.php" line="52" class="Tests\Feature\CatalogAdministrationTest" classname="Tests.Feature.CatalogAdministrationTest" assertions="9" time="0.334364"/>
+        <testcase name="test_playlist_order_is_transactional_and_stale_changes_are_refused" file="./tests/Feature/CatalogAdministrationTest.php" line="65" class="Tests\Feature\CatalogAdministrationTest" classname="Tests.Feature.CatalogAdministrationTest" assertions="6" time="0.176020"/>
+        <testcase name="test_publishing_an_empty_playlist_is_refused_and_archiving_hides_its_tracks" file="./tests/Feature/CatalogAdministrationTest.php" line="77" class="Tests\Feature\CatalogAdministrationTest" classname="Tests.Feature.CatalogAdministrationTest" assertions="8" time="0.343996"/>
+      </testsuite>
+      <testsuite name="Tests\Feature\CatalogUpgradeTest" file="./tests/Feature/CatalogUpgradeTest.php" tests="1" assertions="8" errors="0" failures="0" skipped="0" time="0.104150">
+        <testcase name="test_legacy_upgrade_preserves_recording_ids_likes_and_playlist_order" file="./tests/Feature/CatalogUpgradeTest.php" line="10" class="Tests\Feature\CatalogUpgradeTest" classname="Tests.Feature.CatalogUpgradeTest" assertions="8" time="0.104150"/>
+      </testsuite>
+      <testsuite name="Tests\Feature\MediaProbeTest" file="./tests/Feature/MediaProbeTest.php" tests="2" assertions="2" errors="0" failures="0" skipped="0" time="0.301977">
+        <testcase name="test_actual_ffprobe_reads_duration_of_local_audio" file="./tests/Feature/MediaProbeTest.php" line="12" class="Tests\Feature\MediaProbeTest" classname="Tests.Feature.MediaProbeTest" assertions="1" time="0.201781"/>
+        <testcase name="test_actual_ffprobe_rejects_non_audio_content" file="./tests/Feature/MediaProbeTest.php" line="22" class="Tests\Feature\MediaProbeTest" classname="Tests.Feature.MediaProbeTest" assertions="1" time="0.100196"/>
+      </testsuite>
+      <testsuite name="Tests\Feature\MfaFlowTest" file="./tests/Feature/MfaFlowTest.php" tests="5" assertions="36" errors="0" failures="0" skipped="0" time="1.676957">
+        <testcase name="test_password_alone_does_not_authorize_a_two_factor_account" file="./tests/Feature/MfaFlowTest.php" line="15" class="Tests\Feature\MfaFlowTest" classname="Tests.Feature.MfaFlowTest" assertions="8" time="0.278759"/>
+        <testcase name="test_recovery_code_is_consumed_once" file="./tests/Feature/MfaFlowTest.php" line="28" class="Tests\Feature\MfaFlowTest" classname="Tests.Feature.MfaFlowTest" assertions="7" time="0.521424"/>
+        <testcase name="test_disabling_an_account_invalidates_its_pending_challenge" file="./tests/Feature/MfaFlowTest.php" line="41" class="Tests\Feature\MfaFlowTest" classname="Tests.Feature.MfaFlowTest" assertions="4" time="0.248224"/>
+        <testcase name="test_admin_enrollment_requires_a_valid_code_and_encrypts_secrets" file="./tests/Feature/MfaFlowTest.php" line="51" class="Tests\Feature\MfaFlowTest" classname="Tests.Feature.MfaFlowTest" assertions="12" time="0.598852"/>
+        <testcase name="test_authenticated_login_requests_return_json_conflict_without_switching_accounts" file="./tests/Feature/MfaFlowTest.php" line="68" class="Tests\Feature\MfaFlowTest" classname="Tests.Feature.MfaFlowTest" assertions="5" time="0.029698"/>
+      </testsuite>
+      <testsuite name="Tests\Feature\MusicLibraryTest" file="./tests/Feature/MusicLibraryTest.php" tests="8" assertions="47" errors="0" failures="0" skipped="0" time="0.678281">
+        <testcase name="test_unpublished_playlist_and_audio_are_hidden_from_member" file="./tests/Feature/MusicLibraryTest.php" line="29" class="Tests\Feature\MusicLibraryTest" classname="Tests.Feature.MusicLibraryTest" assertions="6" time="0.103054"/>
+        <testcase name="test_policies_allow_active_members_only_for_published_content" file="./tests/Feature/MusicLibraryTest.php" line="40" class="Tests\Feature\MusicLibraryTest" classname="Tests.Feature.MusicLibraryTest" assertions="8" time="0.050638"/>
+        <testcase name="test_private_stream_supports_ranges_and_rejects_invalid_ranges" file="./tests/Feature/MusicLibraryTest.php" line="59" class="Tests\Feature\MusicLibraryTest" classname="Tests.Feature.MusicLibraryTest" assertions="8" time="0.062162"/>
+        <testcase name="test_stream_does_not_follow_path_outside_private_media_root" file="./tests/Feature/MusicLibraryTest.php" line="69" class="Tests\Feature\MusicLibraryTest" classname="Tests.Feature.MusicLibraryTest" assertions="1" time="0.056068"/>
+        <testcase name="test_search_normalizes_persian_arabic_letters_and_treats_wildcards_literally" file="./tests/Feature/MusicLibraryTest.php" line="78" class="Tests\Feature\MusicLibraryTest" classname="Tests.Feature.MusicLibraryTest" assertions="4" time="0.075413"/>
+        <testcase name="test_likes_and_saves_are_idempotent_and_personal" file="./tests/Feature/MusicLibraryTest.php" line="86" class="Tests\Feature\MusicLibraryTest" classname="Tests.Feature.MusicLibraryTest" assertions="8" time="0.104131"/>
+        <testcase name="test_playback_is_restored_without_allowing_stale_revisions_to_overwrite" file="./tests/Feature/MusicLibraryTest.php" line="101" class="Tests\Feature\MusicLibraryTest" classname="Tests.Feature.MusicLibraryTest" assertions="8" time="0.132305"/>
+        <testcase name="test_playback_rejects_draft_tracks_and_current_track_outside_queue" file="./tests/Feature/MusicLibraryTest.php" line="114" class="Tests\Feature\MusicLibraryTest" classname="Tests.Feature.MusicLibraryTest" assertions="4" time="0.094510"/>
+      </testsuite>
+      <testsuite name="Tests\Feature\PlaylistImportTest" file="./tests/Feature/PlaylistImportTest.php" tests="11" assertions="57" errors="0" failures="0" skipped="0" time="0.791618">
+        <testcase name="test_preview_is_atomic_and_does_not_publish_content" file="./tests/Feature/PlaylistImportTest.php" line="28" class="Tests\Feature\PlaylistImportTest" classname="Tests.Feature.PlaylistImportTest" assertions="5" time="0.053057"/>
+        <testcase name="test_invalid_row_and_unknown_fields_prevent_all_import_writes" file="./tests/Feature/PlaylistImportTest.php" line="38" class="Tests\Feature\PlaylistImportTest" classname="Tests.Feature.PlaylistImportTest" assertions="6" time="0.037363"/>
+        <testcase name="test_duplicate_rows_are_rejected" file="./tests/Feature/PlaylistImportTest.php" line="48" class="Tests\Feature\PlaylistImportTest" classname="Tests.Feature.PlaylistImportTest" assertions="4" time="0.035578"/>
+        <testcase name="test_idempotency_key_reuses_preview_and_rejects_different_payload" file="./tests/Feature/PlaylistImportTest.php" line="57" class="Tests\Feature\PlaylistImportTest" classname="Tests.Feature.PlaylistImportTest" assertions="5" time="0.050131"/>
+        <testcase name="test_confirmation_and_job_retries_do_not_duplicate_playlist" file="./tests/Feature/PlaylistImportTest.php" line="69" class="Tests\Feature\PlaylistImportTest" classname="Tests.Feature.PlaylistImportTest" assertions="9" time="0.101928"/>
+        <testcase name="test_failed_job_rolls_back_every_playlist_and_track_write" file="./tests/Feature/PlaylistImportTest.php" line="89" class="Tests\Feature\PlaylistImportTest" classname="Tests.Feature.PlaylistImportTest" assertions="3" time="0.049677"/>
+        <testcase name="test_csv_supports_bom_and_quoted_artist_names" file="./tests/Feature/PlaylistImportTest.php" line="106" class="Tests\Feature\PlaylistImportTest" classname="Tests.Feature.PlaylistImportTest" assertions="2" time="0.046336"/>
+        <testcase name="test_malformed_json_is_rejected_without_creating_preview" file="./tests/Feature/PlaylistImportTest.php" line="114" class="Tests\Feature\PlaylistImportTest" classname="Tests.Feature.PlaylistImportTest" assertions="4" time="0.023214"/>
+        <testcase name="test_audio_upload_is_deduplicated_and_never_exposes_disk_path" file="./tests/Feature/PlaylistImportTest.php" line="121" class="Tests\Feature\PlaylistImportTest" classname="Tests.Feature.PlaylistImportTest" assertions="7" time="0.041427"/>
+        <testcase name="test_manifest_above_five_hundred_rows_is_rejected_before_writes" file="./tests/Feature/PlaylistImportTest.php" line="133" class="Tests\Feature\PlaylistImportTest" classname="Tests.Feature.PlaylistImportTest" assertions="4" time="0.258316"/>
+        <testcase name="test_cover_is_private_and_requires_admin_to_replace" file="./tests/Feature/PlaylistImportTest.php" line="141" class="Tests\Feature\PlaylistImportTest" classname="Tests.Feature.PlaylistImportTest" assertions="8" time="0.094591"/>
+      </testsuite>
+      <testsuite name="Tests\Feature\SecurityRegressionTest" file="./tests/Feature/SecurityRegressionTest.php" tests="5" assertions="25" errors="0" failures="0" skipped="0" time="0.543431">
+        <testcase name="test_controlled_password_reset_revokes_sessions_without_disabling_mfa" file="./tests/Feature/SecurityRegressionTest.php" line="29" class="Tests\Feature\SecurityRegressionTest" classname="Tests.Feature.SecurityRegressionTest" assertions="7" time="0.038220"/>
+        <testcase name="test_administrator_cannot_reset_an_owners_password" file="./tests/Feature/SecurityRegressionTest.php" line="42" class="Tests\Feature\SecurityRegressionTest" classname="Tests.Feature.SecurityRegressionTest" assertions="2" time="0.031444"/>
+        <testcase name="test_pending_mfa_challenge_expires_after_ten_minutes" file="./tests/Feature/SecurityRegressionTest.php" line="51" class="Tests\Feature\SecurityRegressionTest" classname="Tests.Feature.SecurityRegressionTest" assertions="4" time="0.256351"/>
+        <testcase name="test_import_can_reuse_explicit_artist_and_release_identities" file="./tests/Feature/SecurityRegressionTest.php" line="60" class="Tests\Feature\SecurityRegressionTest" classname="Tests.Feature.SecurityRegressionTest" assertions="7" time="0.143631"/>
+        <testcase name="test_csv_optional_identity_columns_accept_empty_cells" file="./tests/Feature/SecurityRegressionTest.php" line="78" class="Tests\Feature\SecurityRegressionTest" classname="Tests.Feature.SecurityRegressionTest" assertions="5" time="0.073784"/>
+      </testsuite>
+    </testsuite>
+  </testsuite>
+</testsuites>

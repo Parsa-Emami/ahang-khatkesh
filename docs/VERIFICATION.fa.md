@@ -1,49 +1,27 @@
-# وضعیت بررسی نسخهٔ 0.1
+# وضعیت بررسی نسخهٔ 0.2، ۲۷ اکتبر ۲۰۲۶
 
-تاریخ ثبت: ۲۶ اکتبر ۲۰۲۶. نتیجه‌ها متعلق به همین ساخت محلی‌اند.
+این سند گزارش شواهد است، نه گواهی رتبهٔ جهانی، WCAG یا امنیت production.
 
 | بررسی | نتیجه |
 | --- | --- |
-| PHP | 8.5.12 |
-| Laravel نصب‌شده | v13.38.0 |
-| React نصب‌شده | 19.3.1 |
-| Vite نصب‌شده | 8.3.5 |
-| migration تازه روی SQLite | موفق |
-| PHPUnit | **29 تست، 141 assertion، موفق** |
-| تشخیص صوت با FFprobe واقعی | فایل WAV معتبر پذیرفته و فایل غیرصوتی رد شد |
-| منطق صف با Vitest | **5 تست، موفق** |
-| TypeScript و production build | موفق |
-| Pint | فایل‌های PHP قالب‌بندی شدند |
-| composer validate --strict | موفق |
-| composer audit | advisory گزارش نشد |
-| npm audit --omit=dev | آسیب‌پذیری گزارش نشد |
-| cache تنظیمات، مسیرها و view | optimize و optimize:clear موفق |
-| OpenAPI | JSON، referenceهای داخلی و پارامترهای مسیر بررسی شدند؛ lint رسمی کامل اجرا نشده |
-| GitHub Actions | workflow آماده؛ نتیجهٔ هر کامیت در تب Actions همین مخزن ثبت می‌شود |
-| MySQL | workflow ماتریس آماده؛ اجرای محلی MySQL انجام نشده |
-| آزمون همزمانی چندپردازشی MySQL | هنوز انجام نشده |
-| مرورگر واقعی، گوشی و کنترل Audio | هنوز تأیید نشده |
-| تست بار 10 شنونده و بازیابی backup | هنوز انجام نشده |
-| استقرار عمومی | انجام نشده |
+| PHP 8.5.12 + SQLite | ۵۲ تست، ۲۷۷ assertion؛ بدون failure/error |
+| PHP 8.5.12 + MySQL 8.4.13 واقعی | ۵۲ تست، ۲۷۷ assertion؛ بدون failure/error |
+| ارتقای دادهٔ قدیمی | fixture مستقل SQLite؛ حفظ ID، لایک و ترتیب؛ عدم ادغام هم‌نام‌ها |
+| Vitest 4.1.12 | ۵ تست رفتار صف پخش موفق |
+| TypeScript و build تولید | موفق؛ chunk مستقل پنل |
+| Pint و Prettier | موفق |
+| composer validate | موفق |
+| composer audit | بدون advisory و abandoned package در زمان بررسی |
+| npm audit، شامل dev | صفر آسیب‌پذیری گزارش‌شده پس از ارتقای Vitest |
+| optimize و optimize:clear | موفق؛ در config cache نیز confirm MFA فعال و registration بسته است |
+| قرارداد API | تطابق ۵۳ عملیات با routeها؛ ۵۵ عملیات سند با HEADهای صریح؛ ۳۸۹ ارجاع داخلی resolve و operationId یکتا |
+| compose محلی DB/phpMyAdmin | YAML parse شد؛ Docker و phpMyAdmin در این محیط اجرا نشده‌اند |
+| مرورگر دسکتاپ | ورود اولیه، enrollment gate، overview روشن/تیره، ساخت draft، انتخاب/حرکت آهنگ، step-up منقضی و cancel مشاهده شدند |
 
-## پوشش تست
+مسیر موقت bootstrap نشست ساختگی پیش از commit حذف شد. credential واقعی در مرورگر وارد نشده است. ذخیرهٔ نهایی ترتیب، MFA و recovery با HTTP feature test بررسی شدند؛ تأیید QR با گوشی، full browser E2E با credential و تست دستگاه واقعی ادعا نمی‌شود. مسیرها در فایل XML به مسیر نسبی مخزن تبدیل شده‌اند.
 
-29 تست شامل نشست و نقش‌ها، سقف حساب، جلوگیری از ارتقای نقش، رمز فعلی، پوستهٔ برنامه، policy، draft، فایل خصوصی، Range 206/416، خروج از مسیر رسانه، تطبیق حروف و wildcard، لایک/نشانک شخصی و تکرارپذیر، revision پخش، ردیف نامعتبر، idempotency، تکرار job، rollback، CSV با BOM/quote، JSON خراب، سقف ردیف‌ها، dedup آپلود، کاور و FFprobe واقعی است. نتیجهٔ دقیق در `verification/phpunit.txt` و XML همراه موجود است.
+گزارش ماشینی: [results-0.2.json](verification/results-0.2.json). خروجی‌های PHPUnit SQLite/MySQL، Vitest و build در همین پوشه نگهداری می‌شوند. مرجع نتیجهٔ CI هر commit، [GitHub Actions](https://github.com/Parsa-Emami/ahang-khatkesh/actions) است؛ این گزارش محلی به‌تنهایی موفقیت CI را ثابت نمی‌کند.
 
-5 تست frontend، منطق ترتیب و shuffle/repeat را بررسی می‌کنند. این‌ها جای آزمون HTMLAudioElement و مرورگر را نمی‌گیرند. تغییر صفحه حین پخش، حفظ focus، طراحی گوشی و رفتار Safari/Firefox باید در فاز گیت انتشار اجرا شوند.
+ادامهٔ اجرای CLI ثالث Redocly توسط بررسی خودکار مجوز، به‌دلیل احتمال telemetry به سرویس ثالث رد شد. خروجی اولیهٔ آن اعتبار ساختار و دو هشدار توضیح tag را نشان داده بود؛ توضیح tagها اصلاح و سپس بررسی محلی JSON، reference و تطابق route بدون اتصال شبکه انجام شد. تکمیل مجاز آن CLI یا ارسال telemetry ادعا نمی‌شود.
 
-## محدودیت محیط بررسی
-
-پیش‌نمایش مدیریت‌شدهٔ این محیط به اجرای PHP پروژه دسترسی نداشت و با خطای پیدا نشدن executable متوقف شد. به همین دلیل screenshot یا بررسی ظاهری و تعاملی مرورگر به‌عنوان نتیجهٔ موفق ثبت نشده است. PHP 8.5 و تمام تست‌های backend در محیط اجرای محلی واقعی اجرا شدند؛ build رابط نیز موفق است.
-
-## وضعیت تحویل به GitHub
-
-مخزن مستقل و خصوصی `Parsa-Emami/ahang-khatkesh` در GitHub ساخته شده است. این گزارش نتایج بررسی محلی را ثبت می‌کند؛ نتیجهٔ اجرای ریموت هر کامیت از تب Actions همان مخزن قابل پیگیری است. معیار تأیید CI، نتیجهٔ مربوط به SHA دقیق همان کامیت است.
-
-## گزارش‌ها
-
-- `verification/phpunit.txt` و `verification/phpunit.xml`
-- `verification/frontend.txt`
-- `verification/build.txt`
-
-بنچمارک عملکرد، ادعای پوشش درصدی تست، امتیاز WCAG/Lighthouse یا تضمین یکسان بودن تمام قابلیت‌های Spotify در این گزارش وجود ندارد. وضعیت هر قابلیت به پیاده‌سازی و شواهد مربوط به همان قابلیت محدود است.
+پیش از انتشار: همزمانی چندپردازهٔ سقف کاربران، بار ده stream با seek، بازیابی backup، ماتریس گوشی/مرورگر/صفحه‌خوان، بازبینی امنیت مستقل و پیکربندی واقعی HTTPS/worker/phpMyAdmin لازم‌اند. UI انتخاب rendition، transcoding و پاک‌سازی خودکار orphan نیز تکمیل نشده‌اند. برنامهٔ دقیق در DEVELOPMENT_PLAN.fa.md است.

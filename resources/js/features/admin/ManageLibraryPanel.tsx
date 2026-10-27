@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ImagePlus, Pencil } from "lucide-react";
+import { ImagePlus, Pencil, ListMusic, Plus } from "lucide-react";
+import { PlaylistTracksEditor } from "./PlaylistTracksEditor";
 import { Link } from "react-router-dom";
 import { api, json } from "../../lib/api";
 import { useToast } from "../../context/AppContext";
@@ -28,11 +29,29 @@ export function ManageLibraryPanel() {
         queryKey: ["playlists", "admin", page],
         queryFn: () => api<Page<Playlist>>(`/playlists?page=${page}`),
     });
+    const [creating, setCreating] = useState(false),
+        [newName, setNewName] = useState(""),
+        [arranging, setArranging] = useState<Playlist | null>(null);
+    const create = useMutation({
+        mutationFn: () =>
+            api("/admin/playlists", {
+                method: "POST",
+                body: json({ name: newName, mood: "other" }),
+            }),
+        onSuccess: () => {
+            setCreating(false);
+            setNewName("");
+            void client.invalidateQueries({ queryKey: ["playlists"] });
+            notify("پیش‌نویس ساخته شد؛ آهنگ‌هایش را انتخاب کن.");
+        },
+        onError: (e) => notify(e.message, true),
+    });
     const update = useMutation({
         mutationFn: () =>
             api(`/admin/playlists/${editing!.id}`, {
                 method: "PATCH",
                 body: json({
+                    revision: editing!.revision,
                     name: editing!.name,
                     description: editing!.description,
                     mood: editing!.mood,
@@ -57,6 +76,7 @@ export function ManageLibraryPanel() {
         }) => {
             const form = new FormData();
             form.append("cover", file);
+            form.append("revision", String(playlist.revision));
             return api(`/admin/playlists/${playlist.id}/cover`, {
                 method: "POST",
                 body: form,
@@ -79,9 +99,18 @@ export function ManageLibraryPanel() {
         );
     return (
         <>
+            <div className="admin-toolbar">
+                <p className="muted">
+                    نام‌های روشن و کوتاه، پیدا کردن مجموعه را آسان می‌کنند.
+                </p>
+                <button className="button" onClick={() => setCreating(true)}>
+                    <Plus size={16} />
+                    پلی‌لیست تازه
+                </button>
+            </div>
             <p className="muted">
-                پیش‌نویس‌ها فقط برای مدیر دیده می‌شوند. با انتشار، همهٔ اعضا به
-                مجموعه دسترسی دارند.
+                پیش‌نویس‌ها فقط برای نقش‌های مدیریت محتوا دیده می‌شوند. با
+                انتشار، همهٔ اعضا به مجموعه دسترسی دارند.
             </p>
             <div className="manage-list">
                 {query.data.data.map((playlist) => (
@@ -104,7 +133,9 @@ export function ManageLibraryPanel() {
                         >
                             {playlist.status === "published"
                                 ? "منتشرشده"
-                                : "پیش‌نویس"}
+                                : playlist.status === "archived"
+                                  ? "بایگانی‌شده"
+                                  : "پیش‌نویس"}
                         </span>
                         <label
                             className="icon-button cover-upload"
@@ -123,6 +154,12 @@ export function ManageLibraryPanel() {
                                 }}
                             />
                         </label>
+                        <IconButton
+                            label={`ترتیب آهنگ‌های ${playlist.name}`}
+                            onClick={() => setArranging(playlist)}
+                        >
+                            <ListMusic size={18} />
+                        </IconButton>
                         <IconButton
                             label={`ویرایش ${playlist.name}`}
                             onClick={() => setEditing({ ...playlist })}
@@ -153,6 +190,41 @@ export function ManageLibraryPanel() {
                         بعدی
                     </button>
                 </div>
+            )}
+            <Dialog
+                open={creating}
+                onOpenChange={(v) => {
+                    if (!create.isPending) setCreating(v);
+                }}
+                title="یک مجموعهٔ تازه"
+                description="پلی‌لیست به‌صورت پیش‌نویس ساخته می‌شود؛ سپس آهنگ و کاور اضافه کن."
+            >
+                <form
+                    className="stack-form"
+                    onSubmit={(e) => {
+                        e.preventDefault();
+                        create.mutate();
+                    }}
+                >
+                    <label>
+                        نام مجموعه
+                        <input
+                            required
+                            maxLength={160}
+                            value={newName}
+                            onChange={(e) => setNewName(e.target.value)}
+                        />
+                    </label>
+                    <button className="button" disabled={create.isPending}>
+                        ساخت پیش‌نویس
+                    </button>
+                </form>
+            </Dialog>
+            {arranging && (
+                <PlaylistTracksEditor
+                    playlist={arranging}
+                    close={() => setArranging(null)}
+                />
             )}
             <Dialog
                 open={!!editing}
@@ -231,6 +303,7 @@ export function ManageLibraryPanel() {
                                 }
                             >
                                 <option value="draft">پیش‌نویس</option>
+                                <option value="archived">بایگانی‌شده</option>
                                 <option value="published">منتشرشده</option>
                             </select>
                         </label>

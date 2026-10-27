@@ -2,11 +2,11 @@
 
 namespace App\Jobs;
 
+use App\Actions\RegisterTrack;
 use App\Models\AuditEvent;
 use App\Models\LibrarySetting;
 use App\Models\Playlist;
 use App\Models\PlaylistImport;
-use App\Models\Track;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\DB;
@@ -24,9 +24,9 @@ class PublishPlaylistImport implements ShouldQueue
 
     public function __construct(public string $importId) {}
 
-    public function handle(): void
+    public function handle(RegisterTrack $register): void
     {
-        DB::transaction(function (): void {
+        DB::transaction(function () use ($register): void {
             LibrarySetting::whereKey(1)->increment('lock_version');
             $import = PlaylistImport::whereKey($this->importId)->lockForUpdate()->firstOrFail();
             if ($import->status !== PlaylistImport::PROCESSING) {
@@ -39,7 +39,7 @@ class PublishPlaylistImport implements ShouldQueue
             ]);
             $reused = 0;
             foreach ($import->rows as $index => $row) {
-                $track = Track::firstOrCreate(['media_asset_id' => $row['asset_id']], ['title' => $row['title'], 'artist' => $row['artist'], 'album' => $row['album']]);
+                $track = $register->handle($row);
                 $reused += $track->wasRecentlyCreated ? 0 : 1;
                 $playlist->tracks()->attach($track->id, ['position' => $index + 1]);
             }

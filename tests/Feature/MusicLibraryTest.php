@@ -34,7 +34,7 @@ class MusicLibraryTest extends TestCase
         $this->actingAs($member)->getJson('/api/v1/playlists')->assertOk()->assertJsonCount(0, 'data');
         $this->getJson('/api/v1/playlists/'.$playlist->id)->assertNotFound();
         $this->getJson('/api/v1/tracks/'.$track->id.'/stream')->assertNotFound();
-        $this->actingAs($admin)->getJson('/api/v1/playlists/'.$playlist->id)->assertOk()->assertJsonPath('data.tracks.0.id', $track->id);
+        $this->actingAs($admin)->withSession(['auth.password_confirmed_at' => now()->timestamp, 'auth.mfa_confirmed_at' => now()->timestamp, 'auth.mfa_authenticated' => true])->getJson('/api/v1/playlists/'.$playlist->id)->assertOk()->assertJsonPath('data.tracks.0.id', $track->id);
     }
 
     public function test_policies_allow_active_members_only_for_published_content(): void

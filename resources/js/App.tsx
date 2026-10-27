@@ -10,7 +10,9 @@ import {
     PlaylistPage,
     SearchPage,
 } from "./pages/LibraryPages";
-import { AdminPage } from "./pages/AdminPage";
+import { lazy, Suspense } from "react";
+import { SessionConfirmation } from "./features/security/SessionConfirmation";
+const AdminPage = lazy(() => import("./features/admin/AdminPage"));
 
 export function App() {
     const { user, pending, error, refresh } = useSession();
@@ -24,30 +26,37 @@ export function App() {
     if (error) return <ErrorState error={error} retry={refresh} />;
     if (!user) return <LoginPage />;
     return (
-        <PlayerProvider key={user.id}>
-            <a className="skip-link" href="#main-content">
-                رفتن به محتوای اصلی
-            </a>
-            <Routes>
-                <Route element={<AppLayout />}>
-                    <Route index element={<LibraryPage />} />
-                    <Route path="library" element={<LibraryPage saved />} />
-                    <Route path="liked" element={<LikedPage />} />
-                    <Route path="search" element={<SearchPage />} />
-                    <Route path="playlists/:id" element={<PlaylistPage />} />
-                    <Route
-                        path="admin"
-                        element={
-                            user.is_admin ? (
-                                <AdminPage />
-                            ) : (
-                                <Navigate to="/" replace />
-                            )
-                        }
-                    />
-                    <Route path="*" element={<Navigate to="/" replace />} />
-                </Route>
-            </Routes>
-        </PlayerProvider>
+        <SessionConfirmation>
+            <PlayerProvider key={user.id}>
+                <a className="skip-link" href="#main-content">
+                    رفتن به محتوای اصلی
+                </a>
+                <Routes>
+                    <Route element={<AppLayout />}>
+                        <Route index element={<LibraryPage />} />
+                        <Route path="library" element={<LibraryPage saved />} />
+                        <Route path="liked" element={<LikedPage />} />
+                        <Route path="search" element={<SearchPage />} />
+                        <Route
+                            path="playlists/:id"
+                            element={<PlaylistPage />}
+                        />
+                        <Route
+                            path="admin"
+                            element={
+                                user.permissions.includes("admin.access") ? (
+                                    <Suspense fallback={<Loading />}>
+                                        <AdminPage />
+                                    </Suspense>
+                                ) : (
+                                    <Navigate to="/" replace />
+                                )
+                            }
+                        />
+                        <Route path="*" element={<Navigate to="/" replace />} />
+                    </Route>
+                </Routes>
+            </PlayerProvider>
+        </SessionConfirmation>
     );
 }

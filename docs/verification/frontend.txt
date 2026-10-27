@@ -1,12 +1,13 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
 
-> ahang-khatkesh@0.1.0 test
+> ahang-khatkesh@0.2.0 test
 > vitest run
 
 
- RUN  v4.1.11 /workspace/scratch/3ecdd4ffbbde/ahang-khatkesh
+ RUN  v4.1.12 /workspace/scratch/3ecdd4ffbbde/ahang-khatkesh
 
 
  Test Files  1 passed (1)
       Tests  5 passed (5)
-   Start at  17:08:13
-   Duration  233ms (transform 27ms, setup 0ms, import 39ms, tests 4ms, environment 0ms)
+   Start at  05:57:11
+   Duration  1.11s (transform 102ms, setup 0ms, import 139ms, tests 14ms, environment 0ms)
