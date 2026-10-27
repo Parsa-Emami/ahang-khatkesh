@@ -1,5 +1,7 @@
 # معماری فرانت‌اند و کامپوننت‌ها
 
+این سند پایهٔ 0.2 است. قرارداد اصلاحی draft/refetch و retry وابسته به هویت در [معماری هدف](ARCHITECTURE_TARGET.fa.md)، ساختار کامل دو زبان و دو جهت در [UNIVERSAL_UI](UNIVERSAL_UI.fa.md) و inventory هدف در [کاتالوگ کامپوننت](COMPONENT_CATALOG.fa.md) آمده‌اند. وجود فارسی/RTL فعلی، اثبات کامل‌بودن LTR یا همهٔ حالت‌های UI نیست.
+
 ## مرز state و API
 
 React 19 و TypeScript روی Vite اجرا می‌شوند؛ تولید نهایی را Blade لاراول بارگذاری می‌کند. در توسعه، index.html پوستهٔ همان SPA است و `/api` به Laravel محلی proxy می‌شود. تمام عملیات تجاری با API همان مبدأ انجام می‌گیرند. مرورگر به MySQL، phpMyAdmin یا مسیر واقعی فایل صوتی وصل نمی‌شود.

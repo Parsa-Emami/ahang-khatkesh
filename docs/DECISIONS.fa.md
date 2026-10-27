@@ -1,36 +1,33 @@
 # تصمیم‌های معماری
 
-| ADR | تصمیم | چرایی و بازنگری |
+شناسه‌ها در این بازبینی یکتا شده‌اند؛ شماره‌های تکراری در سند قبلی مبنای ارجاع جدید نباشند. وضعیت «موجود» توصیف انتخاب یا رفتار پایه است و به معنی بی‌نقص‌بودن تمام مسیرها نیست؛ شکاف‌های باز در [بازبینی](ARCHITECTURE_REVIEW.fa.md) ثبت شده‌اند. «هدف پذیرفته‌شده» تصمیم طراحی برای اجراست و runtime آماده معرفی نمی‌شود.
+
+| ADR | وضعیت | تصمیم و دلیل |
 | --- | --- | --- |
-| 001 | یک برنامهٔ Laravel با مرزهای دامنه | برای ۱۰ حساب، استقرار و تراکنش ساده‌تر است؛ تفکیک سرویس پس از نیاز اندازه‌گیری‌شده |
-| 002 | React SPA در همان origin و session وب | تمام business API در Laravel؛ CSRF استاندارد و پخش صوت با cookie؛ برای mobile API مستقل Sanctum قابل بررسی است |
-| 003 | رسانه روی disk خصوصی و متادیتا در DB | دیتابیس سبک‌تر و کنترل دسترسی یکپارچه؛ S3 یا X-Accel با قرارداد جدید و تست Range اضافه شود |
-| 004 | preview و commit جدا برای ایمپورت | امکان بررسی قبل از انتشار؛ snapshot ثابت و rollback کامل |
-| 005 | Database queue در همان DB | job و status در تراکنش مشترک؛ مهاجرت به Redis نیازمند outbox یا مکانیزم تحویل قابل اعتماد جدید است |
-| 006 | قفل نوشتن ردیف ثابت برای قوانین حساس | رفتار قابل فهم در MySQL و SQLite؛ اندازه‌گیری contention پیش از پیچیده‌کردن |
-| 007 | revision برای وضعیت پخش | تب قدیمی نمی‌تواند وضعیت جدید را بازنویسی کند؛ تحویل کنترل بین دستگاه‌ها توسعهٔ مستقل است |
-| 008 | Track مشترک برای هر asset | دادهٔ فایل تکرار نمی‌شود؛ بازاستفادهٔ Track متادیتای موجود را حفظ می‌کند |
-| 009 | CSS token و کامپوننت‌های اختصاصی | تم روشن/تیره و RTL مستقل با الهام از منابع طراحی؛ کپی کد با مجوز نامشخص انجام نشده است |
-| 010 | قالب JSON/CSV با asset_id داخلی | لینک خارجی و مسیر فایل از manifest پذیرفته نمی‌شود؛ رسانه باید قبلاً بارگذاری شده باشد |
+| 001 | موجود | modular monolith در Laravel؛ تراکنش و استقرار ساده برای ده حساب؛ تفکیک سرویس پس از نیاز اندازه‌گیری‌شده |
+| 002 | موجود | React SPA همان origin با session/CSRF و API داخلی؛ player مستقل از route؛ Sanctum فقط برای client مستقل آینده |
+| 003 | موجود | فایل private و متادیتا در MySQL؛ blob باینری در جدول نگهداری نمی‌شود |
+| 004 | موجود، شکاف R01 | جدایی preview و commit؛ gate نهایی و effective plan در ADR-017 تکمیل می‌شود |
+| 005 | موجود | queue دیتابیس روی همان SQL connection و تراکنش؛ Redis/DB دیگر طراحی تحویل تازه می‌خواهد |
+| 006 | موجود | قفل ردیف ثابت و ترتیب مشخص برای نوشتن حساس؛ صرفاً برای ده حساب و تا مشاهدهٔ contention |
+| 007 | موجود | revision وضعیت پخش؛ snapshot قدیمی، نسخهٔ تازه را overwrite نکند |
+| 008 | موجود، شکاف R07 | Track مشترک برای asset اصلی و حفظ متادیتای موجود؛ blob فیزیکی در ADR-019 جدا می‌شود |
+| 009 | موجود | CSS token، composition و primitive مشترک؛ تم‌ها و RTL؛ از کپی بی‌مجوز پرهیز شود |
+| 010 | موجود | manifest JSON/CSV با asset_id داخلی؛ نه URL سرویس خارجی یا مسیر فایل |
+| 011 | موجود | MySQL 8.4/InnoDB/utf8mb4 و UTC هدف؛ phpMyAdmin ابزار اپراتور با credential جدا و دسترسی محدود |
+| 012 | موجود | پنل مشترک React، lazy و capability؛ owner/administrator/curator/listener؛ is_admin مرجع مجوز نیست |
+| 013 | موجود، شکاف R02 | Fortify MFA/recovery و recent verification؛ بدون TOTP سفارشی؛ epoch مشترک در ADR-018 تکمیل می‌شود |
+| 014 | موجود | Artist/Release/Track/credit مستقل و ID قدیمی پایدار؛ homonym خودکار merge نمی‌شود؛ artist/album projection هستند |
+| 015 | موجود | ویرایش revisionدار و archive؛ حذف فیزیکی عمومی و تکرار Track در playlist v1 وجود ندارد |
+| 016 | هدف پذیرفته‌شده | final authorization و invariant gate در Action با actor تازه، epoch، مالکیت و revision در تراکنش؛ اعتبار preview کافی نیست |
+| 017 | هدف پذیرفته‌شده | effective immutable import plan با resolved metadata/hash/version؛ تغییر مؤثر، review تازه؛ خطای دائمی retry کور ندارد |
+| 018 | هدف پذیرفته‌شده | mutation مشترک امنیت با fresh epoch و compare snapshot؛ hash بیرون قفل و audit اتمیک؛ نشست قدیمی حق stamp تازه ندارد |
+| 019 | هدف پذیرفته‌شده | media_blobs هویت بایت و media_assets هویت منطقی؛ duplicate bytes دلیل ادغام recording نیست؛ cutover با سازگاری ID/API |
+| 020 | هدف پذیرفته‌شده | immutable file publish + durable DB cleanup + GC دارای مرجع/retention/fencing؛ شکست cleanup ارجاع جدید را خراب نکند |
+| 021 | هدف پذیرفته‌شده | generation، lease و reconciler برای import/conversion؛ failed و callback قدیمی حق تغییر نسل تازه ندارند |
+| 022 | هدف پذیرفته‌شده | universal UI با fa-IR/en-US، dir ریشه، CSS منطقی، bdi و message catalog؛ theme/motion مستقل و Audio پایدار |
+| 023 | هدف پذیرفته‌شده | Lucide محلی و Dither Flow از 21st.dev با commit/license pin شده؛ wrapper، fallback، بودجه و بدون اتصال runtime ثالث |
+| 024 | هدف پذیرفته‌شده | FLAC اصلی محفوظ؛ MP3 CBR320 با libmp3lame به‌صورت مشتق private، source lineage و validation کامل؛ بدون overwrite master |
+| 025 | هدف پذیرفته‌شده | release با شواهد schema/API، browser، MySQL concurrency، load، restore، ASVS و WCAG؛ عدد هدف یا checker ساختار نتیجهٔ production نیست |
 
-وضعیت این تصمیم‌ها accepted برای نسخهٔ 0.1 است. تغییر نقش‌ها، دسترسی خصوصی هر پلی‌لیست، نوع queue و storage باید همراه ADR و migration/test مناسب باشد.
-
-## ADR-008: MySQL هدف و phpMyAdmin ابزار اپراتور
-
-MySQL 8.4/InnoDB/utf8mb4 مرجع داده است. migrationها مرجع schema هستند؛ phpMyAdmin جدا از برنامه و محدود به اپراتور است. SQLite برای تست سریع و توسعهٔ موقت باقی می‌ماند.
-
-## ADR-009: پنل مشترک React و capability
-
-یک رابط، یک سیستم طراحی و API نسخه‌دار حفظ می‌شود. owner/administrator/curator/listener از enum به capability نگاشت می‌شوند. boolean قدیمی is_admin مرجع مجوز نیست. پنل lazy است و player با تغییر route از نو ساخته نمی‌شود.
-
-## ADR-010: MFA با Fortify و step-up
-
-رمزنگاری یا الگوریتم TOTP سفارشی نوشته نمی‌شود. Fortify، enrollment تأییدشده، recovery و OTP را فراهم می‌کند. challenge با lock و access_version به وضعیت حساب پیوند می‌خورد؛ نوشتن مدیریتی تأیید حداکثر ۱۵ دقیقه می‌خواهد. credential در browser storage/cache پایدار نمی‌رود.
-
-## ADR-011: هویت کاتالوگ و سازگاری
-
-Artist، Release، credit، release_track و track_media مستقل‌اند. نام مشابه خودکار ادغام نمی‌شود. IDs قدیمی Track، لایک و عضویت‌ها حفظ می‌شوند؛ artist/album projection هستند. چند انتشار برای یک ضبط ممکن است. اجرای transcoding و انتخاب rendition توسعهٔ بعدی است.
-
-## ADR-012: ویرایش نسخه‌دار و بایگانی
-
-Artist/Release/Track/Playlist revision دارند؛ تعارض 409 مانع overwrite می‌شود. پلی‌لیست بایگانی می‌شود و حساب غیرفعال می‌شود؛ حذف فیزیکی از پنل، قرارداد فعلی نیست. تکرار Track در playlist v1 مجاز نیست و تغییر آن به مدل occurrence نیاز دارد.
+جزئیات قراردادها در [معماری هدف](ARCHITECTURE_TARGET.fa.md)، [universal UI](UNIVERSAL_UI.fa.md)، [رسانه](MEDIA_PIPELINE.fa.md) و [نقشهٔ پیاده‌سازی](IMPLEMENTATION_ROADMAP.fa.md) قرار دارند. migrationهای منتشرشده تغییر نمی‌کنند؛ expand/backfill/verify/contract برای evolution جدید لازم است. تغییر source یا dependency ثالث نیازمند بررسی مجوز، کد و lockfile است؛ انتخاب نام تجاریِ یک الگو یا ابزار، جای رفع مسئلهٔ واقعی را نمی‌گیرد.

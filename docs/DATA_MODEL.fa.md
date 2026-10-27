@@ -1,5 +1,7 @@
 # مدل داده و قواعد یکپارچگی
 
+ساختار زیر متعلق به runtime نسخهٔ 0.2 است. [بازبینی](ARCHITECTURE_REVIEW.fa.md) تضاد ممکن مالکیت original/rendition را بازتولید کرده است؛ نوشتن یک قاعده در این سند، اثبات enforce شدن تمام مسیرها نیست. جداسازی media_blobs از media_assets، conversion/reservation و backfill مرحله‌ای، قرارداد هدف [معماری 0.3](ARCHITECTURE_TARGET.fa.md) و [رسانه](MEDIA_PIPELINE.fa.md) هستند و هنوز migration اجرایی ندارند.
+
 مرجع ساختار، migrationهای نسخه‌بندی‌شده است. MySQL 8.4 با InnoDB، utf8mb4 و UTC هدف است. phpMyAdmin فقط ابزار مشاهده و عملیات اپراتور است. صوت در BLOB دیتابیس ذخیره نمی‌شود.
 
 ```mermaid

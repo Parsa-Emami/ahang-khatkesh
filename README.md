@@ -4,6 +4,8 @@
 
 این مخزن شامل نسخهٔ 0.2 و پایهٔ اجرایی برای ادامهٔ توسعه است: Laravel 13، PHP 8.5، React 19، TypeScript و Vite؛ رابط فارسی، RTL و تم روشن/تیره؛ مدیریت اعضا و ورود پلی‌لیست از پنل ادمین؛ پخش فایل خصوصی، جستجو، علاقه‌مندی، ذخیرهٔ پلی‌لیست و بازگرداندن صف پخش. اتصال‌های زمان اجرای برنامه از API همان Laravel عبور می‌کنند. فایل صوت در فضای خصوصی فایل ذخیره می‌شود و متادیتا و رابطهٔ پلی‌لیست‌ها در دیتابیس قرار می‌گیرد.
 
+**وضعیت پس از بازبینی:** سه نقص runtime در مالکیت ایمپورت، epoch تغییر رمز و cleanup کاور بازتولید شده و هنوز بازند. این پروژه بی‌نقص یا آمادهٔ production تأیید نشده است. طرح هدف 0.3، شامل RTL/LTR سراسری، ۶۴ قرارداد کامپوننت، منبع pin شدهٔ 21st.dev و pipeline تبدیل FLAC به MP3 320kbps، در اسناد زیر مشخص شده است؛ این قابلیت‌های هدف هنوز به runtime اضافه نشده‌اند. ادامهٔ پیاده‌سازی از A01 تا A03 در [نقشهٔ اجرا](docs/IMPLEMENTATION_ROADMAP.fa.md) آغاز شود.
+
 ## شروع توسعه
 
 ابتدا MySQL و حساب دیتابیس را طبق [راهنمای MySQL و phpMyAdmin](docs/MYSQL_PHPMYADMIN.fa.md) آماده و تنظیمات DB را در `.env` وارد کنید. پیش‌نیازها: PHP 8.5.x با افزونه‌های معمول Laravel به‌همراه PDO MySQL و MySQL 8.4، Composer 2، Node.js 24 و FFprobe از مجموعهٔ FFmpeg. PHP CLI و سرویس وب باید از نسخهٔ یکسان استفاده کنند.
@@ -43,6 +45,13 @@ php artisan app:demo
 
 ## سندهای توسعه
 
+- [بازبینی معماری، نقص‌های باز و شواهد](docs/ARCHITECTURE_REVIEW.fa.md)
+- [معماری هدف 0.3 و invariantهای اصلاحی](docs/ARCHITECTURE_TARGET.fa.md)
+- [قرارداد universal، RTL/LTR، locale و 21st.dev](docs/UNIVERSAL_UI.fa.md)
+- [کاتالوگ ۶۴ کامپوننت و حالت‌های پذیرش](docs/COMPONENT_CATALOG.fa.md)
+- [ساختار FLAC به MP3 320kbps و پنل تبدیل](docs/MEDIA_PIPELINE.fa.md)
+- [بسته‌ها و ترتیب دقیق پیاده‌سازی](docs/IMPLEMENTATION_ROADMAP.fa.md)
+- [ساختار ماشین‌خوان و checker معماری](docs/architecture/README.fa.md)
 - [طرح جامع محصول و سناریوها](docs/PROJECT_BLUEPRINT.fa.md)
 - [معماری، مرز ماژول‌ها و الگوها](docs/ARCHITECTURE.fa.md)
 - [معماری فرانت و کامپوننت‌ها](docs/FRONTEND_ARCHITECTURE.fa.md)
@@ -61,6 +70,7 @@ php artisan app:demo
 ## بررسی تغییرات
 
 ```bash
+node scripts/check-architecture.mjs
 php vendor/bin/phpunit
 npm test
 npm run build

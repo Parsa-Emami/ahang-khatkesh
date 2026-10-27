@@ -1,0 +1,1565 @@
+{
+  "format_version": 1,
+  "product": "ahang-khatkesh",
+  "status": "design_target",
+  "runtime_version": "0.2",
+  "target_version": "0.3",
+  "implementation_complete": false,
+  "review": {
+    "date": "2026-10-27",
+    "timezone": "Asia/Tehran",
+    "base_commit": "b9e62be3e0f4e995bc7a96e714677ae4dc8a2403",
+    "production_approved": false
+  },
+  "stack": {
+    "architecture": "modular_monolith",
+    "backend": "Laravel 13",
+    "php": "8.5",
+    "frontend": "React 19 + TypeScript + Vite 8",
+    "database": "MySQL 8.4",
+    "encoding": "utf8mb4",
+    "api": "same-origin /api/v1",
+    "authentication": "session + CSRF + Fortify",
+    "queue": "database_same_sql_connection",
+    "database_admin": "restricted phpMyAdmin"
+  },
+  "scope": {
+    "max_accounts_including_admin_and_inactive": 10,
+    "max_playlist_tracks": 500,
+    "max_import_rows": 500,
+    "manifest_max_bytes": 2097152
+  },
+  "documents": [
+    "docs/ARCHITECTURE_REVIEW.fa.md",
+    "docs/ARCHITECTURE_TARGET.fa.md",
+    "docs/UNIVERSAL_UI.fa.md",
+    "docs/COMPONENT_CATALOG.fa.md",
+    "docs/MEDIA_PIPELINE.fa.md",
+    "docs/IMPLEMENTATION_ROADMAP.fa.md"
+  ],
+  "findings": [
+    {
+      "id": "R01",
+      "priority": "P0",
+      "status": "open_runtime",
+      "evidence": "diagnostic_reproduced",
+      "package_ids": [
+        "A01"
+      ]
+    },
+    {
+      "id": "R02",
+      "priority": "P0",
+      "status": "open_runtime",
+      "evidence": "diagnostic_reproduced",
+      "package_ids": [
+        "A02"
+      ]
+    },
+    {
+      "id": "R03",
+      "priority": "P0",
+      "status": "open_runtime",
+      "evidence": "diagnostic_reproduced",
+      "package_ids": [
+        "A03"
+      ]
+    },
+    {
+      "id": "R04",
+      "priority": "P1",
+      "status": "open_runtime",
+      "evidence": "code_review",
+      "package_ids": [
+        "A05"
+      ]
+    },
+    {
+      "id": "R05",
+      "priority": "P1",
+      "status": "open_runtime",
+      "evidence": "code_review",
+      "package_ids": [
+        "A05"
+      ]
+    },
+    {
+      "id": "R06",
+      "priority": "P1",
+      "status": "open_runtime",
+      "evidence": "code_review",
+      "package_ids": [
+        "A04"
+      ]
+    },
+    {
+      "id": "R07",
+      "priority": "P1",
+      "status": "open_runtime",
+      "evidence": "code_review",
+      "package_ids": [
+        "A01",
+        "A03",
+        "A08"
+      ]
+    },
+    {
+      "id": "R08",
+      "priority": "P1",
+      "status": "open_runtime",
+      "evidence": "code_review",
+      "package_ids": [
+        "A09"
+      ]
+    },
+    {
+      "id": "R09",
+      "priority": "P1",
+      "status": "open_runtime",
+      "evidence": "code_review",
+      "package_ids": [
+        "A10"
+      ]
+    },
+    {
+      "id": "R10",
+      "priority": "P1",
+      "status": "open_runtime",
+      "evidence": "code_review",
+      "package_ids": [
+        "A05",
+        "A11"
+      ]
+    },
+    {
+      "id": "R11",
+      "priority": "P1",
+      "status": "open_runtime",
+      "evidence": "code_review",
+      "package_ids": [
+        "A06",
+        "A07",
+        "A11"
+      ]
+    },
+    {
+      "id": "R12",
+      "priority": "P1",
+      "status": "open_runtime",
+      "evidence": "code_review_and_encoder_probe",
+      "package_ids": [
+        "A08",
+        "A11"
+      ]
+    }
+  ],
+  "packages": [
+    {
+      "id": "A01",
+      "title": "Recording ownership and effective import plan",
+      "status": "planned",
+      "depends_on": [],
+      "finding_ids": [
+        "R01",
+        "R07"
+      ]
+    },
+    {
+      "id": "A02",
+      "title": "Fresh security epoch and credential mutations",
+      "status": "planned",
+      "depends_on": [],
+      "finding_ids": [
+        "R02"
+      ]
+    },
+    {
+      "id": "A03",
+      "title": "Immutable file lifecycle, blobs and quota",
+      "status": "planned",
+      "depends_on": [
+        "A01"
+      ],
+      "finding_ids": [
+        "R03",
+        "R07"
+      ]
+    },
+    {
+      "id": "A04",
+      "title": "Import generations, leases and reconciliation",
+      "status": "planned",
+      "depends_on": [
+        "A01",
+        "A02"
+      ],
+      "finding_ids": [
+        "R06"
+      ]
+    },
+    {
+      "id": "A05",
+      "title": "Drafts, session-bound replay and API contracts",
+      "status": "planned",
+      "depends_on": [
+        "A01",
+        "A02",
+        "A04"
+      ],
+      "finding_ids": [
+        "R04",
+        "R05",
+        "R10"
+      ]
+    },
+    {
+      "id": "A06",
+      "title": "Universal components and complete fa/en locale",
+      "status": "planned",
+      "depends_on": [
+        "A05"
+      ],
+      "finding_ids": [
+        "R11"
+      ]
+    },
+    {
+      "id": "A07",
+      "title": "21st.dev source admission and bounded visual effects",
+      "status": "planned",
+      "depends_on": [
+        "A06"
+      ],
+      "finding_ids": [
+        "R11"
+      ]
+    },
+    {
+      "id": "A08",
+      "title": "Durable FLAC to MP3 conversion and admin UI",
+      "status": "planned",
+      "depends_on": [
+        "A01",
+        "A02",
+        "A03",
+        "A04",
+        "A05",
+        "A06"
+      ],
+      "finding_ids": [
+        "R07",
+        "R12"
+      ]
+    },
+    {
+      "id": "A09",
+      "title": "MySQL upgrades and coherent backup restore",
+      "status": "planned",
+      "depends_on": [
+        "A03",
+        "A04",
+        "A08"
+      ],
+      "finding_ids": [
+        "R08"
+      ]
+    },
+    {
+      "id": "A10",
+      "title": "Authorized offload and measured operations",
+      "status": "planned",
+      "depends_on": [
+        "A03",
+        "A08"
+      ],
+      "finding_ids": [
+        "R09"
+      ]
+    },
+    {
+      "id": "A11",
+      "title": "Release evidence, accessibility and security",
+      "status": "planned",
+      "depends_on": [
+        "A01",
+        "A02",
+        "A03",
+        "A04",
+        "A05",
+        "A06",
+        "A07",
+        "A08",
+        "A09",
+        "A10"
+      ],
+      "finding_ids": [
+        "R10",
+        "R11",
+        "R12"
+      ]
+    }
+  ],
+  "quality_gates": [
+    {
+      "id": "G01",
+      "package_id": "A01",
+      "status": "open",
+      "evidence_required": true
+    },
+    {
+      "id": "G02",
+      "package_id": "A02",
+      "status": "open",
+      "evidence_required": true
+    },
+    {
+      "id": "G03",
+      "package_id": "A03",
+      "status": "open",
+      "evidence_required": true
+    },
+    {
+      "id": "G04",
+      "package_id": "A04",
+      "status": "open",
+      "evidence_required": true
+    },
+    {
+      "id": "G05",
+      "package_id": "A05",
+      "status": "open",
+      "evidence_required": true
+    },
+    {
+      "id": "G06",
+      "package_id": "A06",
+      "status": "open",
+      "evidence_required": true
+    },
+    {
+      "id": "G07",
+      "package_id": "A07",
+      "status": "open",
+      "evidence_required": true
+    },
+    {
+      "id": "G08",
+      "package_id": "A08",
+      "status": "open",
+      "evidence_required": true
+    },
+    {
+      "id": "G09",
+      "package_id": "A09",
+      "status": "open",
+      "evidence_required": true
+    },
+    {
+      "id": "G10",
+      "package_id": "A10",
+      "status": "open",
+      "evidence_required": true
+    },
+    {
+      "id": "G11",
+      "package_id": "A11",
+      "status": "open",
+      "evidence_required": true
+    }
+  ],
+  "universal_ui": {
+    "initial_locales": [
+      {
+        "tag": "fa-IR",
+        "direction": "rtl",
+        "message_file": "resources/js/i18n/messages/fa-IR.json"
+      },
+      {
+        "tag": "en-US",
+        "direction": "ltr",
+        "message_file": "resources/js/i18n/messages/en-US.json"
+      }
+    ],
+    "directions": [
+      "rtl",
+      "ltr"
+    ],
+    "themes": [
+      "light",
+      "dark",
+      "system"
+    ],
+    "motion": [
+      "system",
+      "full",
+      "reduced"
+    ],
+    "translation_library": {
+      "name": "react-intl",
+      "status": "planned"
+    },
+    "text_direction": "auto_with_bdi_isolation",
+    "layout": "logical_css_properties",
+    "time_storage": "UTC",
+    "time_zone": "IANA user preference",
+    "all_components_inherit_contract": true,
+    "required_contracts": [
+      "translated_labels_and_errors",
+      "keyboard_and_focus",
+      "direction_and_bidi",
+      "semantic_theme_tokens",
+      "reduced_motion",
+      "loading_empty_error_conflict_where_applicable"
+    ],
+    "validation_status": "not_browser_verified",
+    "test_viewports_px": [
+      360,
+      390,
+      768,
+      1280,
+      1440
+    ],
+    "reflow_effective_width_px": 320,
+    "seek_axis": "ltr",
+    "seek_arrow_right_seconds": 5,
+    "seek_arrow_left_seconds": -5,
+    "player_remount_on_preference_change": false
+  },
+  "components": [
+    {
+      "id": "C01",
+      "name": "Button",
+      "group": "ui",
+      "status": "planned",
+      "target_path": "resources/js/components/ui/Button.tsx",
+      "existing_sources": [],
+      "quality_gates": [
+        "G06",
+        "G11"
+      ]
+    },
+    {
+      "id": "C02",
+      "name": "IconButton",
+      "group": "ui",
+      "status": "existing_requires_work",
+      "target_path": "resources/js/components/ui/IconButton.tsx",
+      "existing_sources": [
+        "resources/js/components/UI.tsx"
+      ],
+      "quality_gates": [
+        "G06",
+        "G11"
+      ]
+    },
+    {
+      "id": "C03",
+      "name": "UiIcon",
+      "group": "ui",
+      "status": "planned",
+      "target_path": "resources/js/components/icons/UiIcon.tsx",
+      "existing_sources": [],
+      "quality_gates": [
+        "G06",
+        "G11"
+      ]
+    },
+    {
+      "id": "C04",
+      "name": "Field",
+      "group": "ui",
+      "status": "planned",
+      "target_path": "resources/js/components/ui/Field.tsx",
+      "existing_sources": [],
+      "quality_gates": [
+        "G06",
+        "G11"
+      ]
+    },
+    {
+      "id": "C05",
+      "name": "SelectField",
+      "group": "ui",
+      "status": "planned",
+      "target_path": "resources/js/components/ui/SelectField.tsx",
+      "existing_sources": [],
+      "quality_gates": [
+        "G06",
+        "G11"
+      ]
+    },
+    {
+      "id": "C06",
+      "name": "Dialog",
+      "group": "ui",
+      "status": "existing_requires_work",
+      "target_path": "resources/js/components/ui/Dialog.tsx",
+      "existing_sources": [
+        "resources/js/components/UI.tsx"
+      ],
+      "quality_gates": [
+        "G06",
+        "G11"
+      ]
+    },
+    {
+      "id": "C07",
+      "name": "ConfirmDialog",
+      "group": "ui",
+      "status": "planned",
+      "target_path": "resources/js/components/ui/ConfirmDialog.tsx",
+      "existing_sources": [],
+      "quality_gates": [
+        "G06",
+        "G11"
+      ]
+    },
+    {
+      "id": "C08",
+      "name": "Tabs",
+      "group": "ui",
+      "status": "planned",
+      "target_path": "resources/js/components/ui/Tabs.tsx",
+      "existing_sources": [],
+      "quality_gates": [
+        "G06",
+        "G11"
+      ]
+    },
+    {
+      "id": "C09",
+      "name": "Menu",
+      "group": "ui",
+      "status": "planned",
+      "target_path": "resources/js/components/ui/Menu.tsx",
+      "existing_sources": [],
+      "quality_gates": [
+        "G06",
+        "G11"
+      ]
+    },
+    {
+      "id": "C10",
+      "name": "DataTable",
+      "group": "ui",
+      "status": "planned",
+      "target_path": "resources/js/components/ui/DataTable.tsx",
+      "existing_sources": [],
+      "quality_gates": [
+        "G06",
+        "G11"
+      ]
+    },
+    {
+      "id": "C11",
+      "name": "Pagination",
+      "group": "ui",
+      "status": "planned",
+      "target_path": "resources/js/components/ui/Pagination.tsx",
+      "existing_sources": [],
+      "quality_gates": [
+        "G06",
+        "G11"
+      ]
+    },
+    {
+      "id": "C12",
+      "name": "StatusBadge",
+      "group": "ui",
+      "status": "planned",
+      "target_path": "resources/js/components/ui/StatusBadge.tsx",
+      "existing_sources": [],
+      "quality_gates": [
+        "G06",
+        "G11"
+      ]
+    },
+    {
+      "id": "C13",
+      "name": "AsyncState",
+      "group": "ui",
+      "status": "existing_requires_work",
+      "target_path": "resources/js/components/ui/AsyncState.tsx",
+      "existing_sources": [
+        "resources/js/components/UI.tsx"
+      ],
+      "quality_gates": [
+        "G06",
+        "G11"
+      ]
+    },
+    {
+      "id": "C14",
+      "name": "ToastRegion",
+      "group": "ui",
+      "status": "existing_requires_work",
+      "target_path": "resources/js/components/ui/ToastRegion.tsx",
+      "existing_sources": [
+        "resources/js/context/AppContext.tsx"
+      ],
+      "quality_gates": [
+        "G06",
+        "G11"
+      ]
+    },
+    {
+      "id": "C15",
+      "name": "ErrorBoundary",
+      "group": "ui",
+      "status": "existing_requires_work",
+      "target_path": "resources/js/components/ErrorBoundary.tsx",
+      "existing_sources": [
+        "resources/js/components/ErrorBoundary.tsx"
+      ],
+      "quality_gates": [
+        "G06",
+        "G11"
+      ]
+    },
+    {
+      "id": "C16",
+      "name": "AppShell",
+      "group": "shell",
+      "status": "existing_requires_work",
+      "target_path": "resources/js/layout/AppShell.tsx",
+      "existing_sources": [
+        "resources/js/layout/AppLayout.tsx"
+      ],
+      "quality_gates": [
+        "G06",
+        "G11"
+      ]
+    },
+    {
+      "id": "C17",
+      "name": "Navigation",
+      "group": "shell",
+      "status": "existing_requires_work",
+      "target_path": "resources/js/layout/Navigation.tsx",
+      "existing_sources": [
+        "resources/js/layout/AppLayout.tsx"
+      ],
+      "quality_gates": [
+        "G06",
+        "G11"
+      ]
+    },
+    {
+      "id": "C18",
+      "name": "SearchBox",
+      "group": "shell",
+      "status": "existing_requires_work",
+      "target_path": "resources/js/components/ui/SearchBox.tsx",
+      "existing_sources": [
+        "resources/js/layout/AppLayout.tsx"
+      ],
+      "quality_gates": [
+        "G06",
+        "G11"
+      ]
+    },
+    {
+      "id": "C19",
+      "name": "LocaleSwitcher",
+      "group": "shell",
+      "status": "planned",
+      "target_path": "resources/js/i18n/LocaleSwitcher.tsx",
+      "existing_sources": [],
+      "quality_gates": [
+        "G06",
+        "G11"
+      ]
+    },
+    {
+      "id": "C20",
+      "name": "ThemeSwitcher",
+      "group": "shell",
+      "status": "existing_requires_work",
+      "target_path": "resources/js/components/ThemeSwitcher.tsx",
+      "existing_sources": [
+        "resources/js/components/SettingsDialog.tsx"
+      ],
+      "quality_gates": [
+        "G06",
+        "G11"
+      ]
+    },
+    {
+      "id": "C21",
+      "name": "MotionPreference",
+      "group": "shell",
+      "status": "planned",
+      "target_path": "resources/js/components/MotionPreference.tsx",
+      "existing_sources": [],
+      "quality_gates": [
+        "G06",
+        "G11"
+      ]
+    },
+    {
+      "id": "C22",
+      "name": "Artwork",
+      "group": "library",
+      "status": "existing_requires_work",
+      "target_path": "resources/js/components/Artwork.tsx",
+      "existing_sources": [
+        "resources/js/components/UI.tsx"
+      ],
+      "quality_gates": [
+        "G06",
+        "G11"
+      ]
+    },
+    {
+      "id": "C23",
+      "name": "PlaylistCard",
+      "group": "library",
+      "status": "existing_requires_work",
+      "target_path": "resources/js/features/library/PlaylistCard.tsx",
+      "existing_sources": [
+        "resources/js/components/Music.tsx"
+      ],
+      "quality_gates": [
+        "G06",
+        "G11"
+      ]
+    },
+    {
+      "id": "C24",
+      "name": "TrackRow",
+      "group": "library",
+      "status": "existing_requires_work",
+      "target_path": "resources/js/features/library/TrackRow.tsx",
+      "existing_sources": [
+        "resources/js/components/Music.tsx"
+      ],
+      "quality_gates": [
+        "G06",
+        "G11"
+      ]
+    },
+    {
+      "id": "C25",
+      "name": "TrackList",
+      "group": "library",
+      "status": "existing_requires_work",
+      "target_path": "resources/js/features/library/TrackList.tsx",
+      "existing_sources": [
+        "resources/js/components/Music.tsx"
+      ],
+      "quality_gates": [
+        "G06",
+        "G11"
+      ]
+    },
+    {
+      "id": "C26",
+      "name": "LikeButton",
+      "group": "library",
+      "status": "existing_requires_work",
+      "target_path": "resources/js/features/library/LikeButton.tsx",
+      "existing_sources": [
+        "resources/js/components/Music.tsx"
+      ],
+      "quality_gates": [
+        "G06",
+        "G11"
+      ]
+    },
+    {
+      "id": "C27",
+      "name": "SavePlaylistButton",
+      "group": "library",
+      "status": "existing_requires_work",
+      "target_path": "resources/js/features/library/SavePlaylistButton.tsx",
+      "existing_sources": [
+        "resources/js/components/Music.tsx"
+      ],
+      "quality_gates": [
+        "G06",
+        "G11"
+      ]
+    },
+    {
+      "id": "C28",
+      "name": "PlayerBar",
+      "group": "player",
+      "status": "existing_requires_work",
+      "target_path": "resources/js/features/player/PlayerBar.tsx",
+      "existing_sources": [
+        "resources/js/components/Music.tsx"
+      ],
+      "quality_gates": [
+        "G06",
+        "G11"
+      ]
+    },
+    {
+      "id": "C29",
+      "name": "SeekSlider",
+      "group": "player",
+      "status": "existing_requires_work",
+      "target_path": "resources/js/features/player/SeekSlider.tsx",
+      "existing_sources": [
+        "resources/js/components/Music.tsx"
+      ],
+      "quality_gates": [
+        "G06",
+        "G11"
+      ]
+    },
+    {
+      "id": "C30",
+      "name": "VolumeControl",
+      "group": "player",
+      "status": "existing_requires_work",
+      "target_path": "resources/js/features/player/VolumeControl.tsx",
+      "existing_sources": [
+        "resources/js/components/Music.tsx"
+      ],
+      "quality_gates": [
+        "G06",
+        "G11"
+      ]
+    },
+    {
+      "id": "C31",
+      "name": "QueuePanel",
+      "group": "player",
+      "status": "existing_requires_work",
+      "target_path": "resources/js/features/player/QueuePanel.tsx",
+      "existing_sources": [
+        "resources/js/components/Music.tsx"
+      ],
+      "quality_gates": [
+        "G06",
+        "G11"
+      ]
+    },
+    {
+      "id": "C32",
+      "name": "NowPlaying",
+      "group": "player",
+      "status": "existing_requires_work",
+      "target_path": "resources/js/features/player/NowPlaying.tsx",
+      "existing_sources": [
+        "resources/js/components/Music.tsx"
+      ],
+      "quality_gates": [
+        "G06",
+        "G11"
+      ]
+    },
+    {
+      "id": "C33",
+      "name": "PlaybackError",
+      "group": "player",
+      "status": "existing_requires_work",
+      "target_path": "resources/js/features/player/PlaybackError.tsx",
+      "existing_sources": [
+        "resources/js/context/PlayerContext.tsx"
+      ],
+      "quality_gates": [
+        "G06",
+        "G11"
+      ]
+    },
+    {
+      "id": "C34",
+      "name": "ShaderBackdrop",
+      "group": "effects",
+      "status": "planned",
+      "target_path": "resources/js/components/effects/ShaderBackdrop.tsx",
+      "existing_sources": [],
+      "quality_gates": [
+        "G06",
+        "G07",
+        "G11"
+      ]
+    },
+    {
+      "id": "C35",
+      "name": "EffectBoundary",
+      "group": "effects",
+      "status": "planned",
+      "target_path": "resources/js/components/effects/EffectBoundary.tsx",
+      "existing_sources": [],
+      "quality_gates": [
+        "G06",
+        "G07",
+        "G11"
+      ]
+    },
+    {
+      "id": "C36",
+      "name": "LoginForm",
+      "group": "security",
+      "status": "existing_requires_work",
+      "target_path": "resources/js/features/security/LoginForm.tsx",
+      "existing_sources": [
+        "resources/js/pages/LoginPage.tsx"
+      ],
+      "quality_gates": [
+        "G06",
+        "G11"
+      ]
+    },
+    {
+      "id": "C37",
+      "name": "MfaChallenge",
+      "group": "security",
+      "status": "existing_requires_work",
+      "target_path": "resources/js/features/security/MfaChallenge.tsx",
+      "existing_sources": [
+        "resources/js/pages/LoginPage.tsx"
+      ],
+      "quality_gates": [
+        "G06",
+        "G11"
+      ]
+    },
+    {
+      "id": "C38",
+      "name": "MfaEnrollment",
+      "group": "security",
+      "status": "existing_requires_work",
+      "target_path": "resources/js/features/security/MfaEnrollment.tsx",
+      "existing_sources": [
+        "resources/js/features/security/MfaPanel.tsx"
+      ],
+      "quality_gates": [
+        "G06",
+        "G11"
+      ]
+    },
+    {
+      "id": "C39",
+      "name": "RecoveryCodes",
+      "group": "security",
+      "status": "existing_requires_work",
+      "target_path": "resources/js/features/security/RecoveryCodes.tsx",
+      "existing_sources": [
+        "resources/js/features/security/MfaPanel.tsx"
+      ],
+      "quality_gates": [
+        "G06",
+        "G11"
+      ]
+    },
+    {
+      "id": "C40",
+      "name": "StepUpDialog",
+      "group": "security",
+      "status": "existing_requires_work",
+      "target_path": "resources/js/features/security/StepUpDialog.tsx",
+      "existing_sources": [
+        "resources/js/features/security/SessionConfirmation.tsx"
+      ],
+      "quality_gates": [
+        "G06",
+        "G11"
+      ]
+    },
+    {
+      "id": "C41",
+      "name": "SettingsDialog",
+      "group": "security",
+      "status": "existing_requires_work",
+      "target_path": "resources/js/components/SettingsDialog.tsx",
+      "existing_sources": [
+        "resources/js/components/SettingsDialog.tsx"
+      ],
+      "quality_gates": [
+        "G06",
+        "G11"
+      ]
+    },
+    {
+      "id": "C42",
+      "name": "AdminWorkspace",
+      "group": "admin",
+      "status": "existing_requires_work",
+      "target_path": "resources/js/features/admin/AdminPage.tsx",
+      "existing_sources": [
+        "resources/js/features/admin/AdminPage.tsx"
+      ],
+      "quality_gates": [
+        "G06",
+        "G11"
+      ]
+    },
+    {
+      "id": "C43",
+      "name": "OverviewPanel",
+      "group": "admin",
+      "status": "existing_requires_work",
+      "target_path": "resources/js/features/admin/OverviewPanel.tsx",
+      "existing_sources": [
+        "resources/js/features/admin/ReadPanels.tsx"
+      ],
+      "quality_gates": [
+        "G06",
+        "G11"
+      ]
+    },
+    {
+      "id": "C44",
+      "name": "UploadQueue",
+      "group": "imports",
+      "status": "existing_requires_work",
+      "target_path": "resources/js/features/admin/imports/UploadQueue.tsx",
+      "existing_sources": [
+        "resources/js/features/admin/ImportsPanel.tsx"
+      ],
+      "quality_gates": [
+        "G06",
+        "G11"
+      ]
+    },
+    {
+      "id": "C45",
+      "name": "ImportWizard",
+      "group": "imports",
+      "status": "existing_requires_work",
+      "target_path": "resources/js/features/admin/imports/ImportWizard.tsx",
+      "existing_sources": [
+        "resources/js/features/admin/ImportsPanel.tsx"
+      ],
+      "quality_gates": [
+        "G06",
+        "G11"
+      ]
+    },
+    {
+      "id": "C46",
+      "name": "ImportPreviewTable",
+      "group": "imports",
+      "status": "existing_requires_work",
+      "target_path": "resources/js/features/admin/imports/ImportPreviewTable.tsx",
+      "existing_sources": [
+        "resources/js/features/admin/ImportsPanel.tsx"
+      ],
+      "quality_gates": [
+        "G06",
+        "G11"
+      ]
+    },
+    {
+      "id": "C47",
+      "name": "ImportStatus",
+      "group": "imports",
+      "status": "existing_requires_work",
+      "target_path": "resources/js/features/admin/imports/ImportStatus.tsx",
+      "existing_sources": [
+        "resources/js/features/admin/ImportsPanel.tsx"
+      ],
+      "quality_gates": [
+        "G06",
+        "G11"
+      ]
+    },
+    {
+      "id": "C48",
+      "name": "PlaylistEditor",
+      "group": "admin",
+      "status": "existing_requires_work",
+      "target_path": "resources/js/features/admin/playlists/PlaylistEditor.tsx",
+      "existing_sources": [
+        "resources/js/features/admin/ManageLibraryPanel.tsx"
+      ],
+      "quality_gates": [
+        "G06",
+        "G11"
+      ]
+    },
+    {
+      "id": "C49",
+      "name": "PlaylistTracksEditor",
+      "group": "admin",
+      "status": "existing_requires_work",
+      "target_path": "resources/js/features/admin/PlaylistTracksEditor.tsx",
+      "existing_sources": [
+        "resources/js/features/admin/PlaylistTracksEditor.tsx"
+      ],
+      "quality_gates": [
+        "G06",
+        "G11"
+      ]
+    },
+    {
+      "id": "C50",
+      "name": "CoverUploader",
+      "group": "admin",
+      "status": "existing_requires_work",
+      "target_path": "resources/js/features/admin/playlists/CoverUploader.tsx",
+      "existing_sources": [
+        "resources/js/features/admin/ManageLibraryPanel.tsx"
+      ],
+      "quality_gates": [
+        "G06",
+        "G11"
+      ]
+    },
+    {
+      "id": "C51",
+      "name": "EntityPicker",
+      "group": "admin",
+      "status": "existing_requires_work",
+      "target_path": "resources/js/features/admin/catalog/EntityPicker.tsx",
+      "existing_sources": [
+        "resources/js/features/admin/Pickers.tsx"
+      ],
+      "quality_gates": [
+        "G06",
+        "G11"
+      ]
+    },
+    {
+      "id": "C52",
+      "name": "ArtistEditor",
+      "group": "admin",
+      "status": "existing_requires_work",
+      "target_path": "resources/js/features/admin/catalog/ArtistEditor.tsx",
+      "existing_sources": [
+        "resources/js/features/admin/CatalogPanel.tsx"
+      ],
+      "quality_gates": [
+        "G06",
+        "G11"
+      ]
+    },
+    {
+      "id": "C53",
+      "name": "ReleaseEditor",
+      "group": "admin",
+      "status": "existing_requires_work",
+      "target_path": "resources/js/features/admin/catalog/ReleaseEditor.tsx",
+      "existing_sources": [
+        "resources/js/features/admin/CatalogPanel.tsx"
+      ],
+      "quality_gates": [
+        "G06",
+        "G11"
+      ]
+    },
+    {
+      "id": "C54",
+      "name": "RecordingEditor",
+      "group": "admin",
+      "status": "existing_requires_work",
+      "target_path": "resources/js/features/admin/catalog/RecordingEditor.tsx",
+      "existing_sources": [
+        "resources/js/features/admin/CatalogPanel.tsx"
+      ],
+      "quality_gates": [
+        "G06",
+        "G11"
+      ]
+    },
+    {
+      "id": "C55",
+      "name": "MembersPanel",
+      "group": "admin",
+      "status": "existing_requires_work",
+      "target_path": "resources/js/features/admin/MembersPanel.tsx",
+      "existing_sources": [
+        "resources/js/features/admin/MembersPanel.tsx"
+      ],
+      "quality_gates": [
+        "G06",
+        "G11"
+      ]
+    },
+    {
+      "id": "C56",
+      "name": "MemberPasswordReset",
+      "group": "admin",
+      "status": "existing_requires_work",
+      "target_path": "resources/js/features/admin/MemberPasswordResetDialog.tsx",
+      "existing_sources": [
+        "resources/js/features/admin/MemberPasswordResetDialog.tsx"
+      ],
+      "quality_gates": [
+        "G06",
+        "G11"
+      ]
+    },
+    {
+      "id": "C57",
+      "name": "AuditTimeline",
+      "group": "admin",
+      "status": "existing_requires_work",
+      "target_path": "resources/js/features/admin/AuditTimeline.tsx",
+      "existing_sources": [
+        "resources/js/features/admin/ReadPanels.tsx"
+      ],
+      "quality_gates": [
+        "G06",
+        "G11"
+      ]
+    },
+    {
+      "id": "C58",
+      "name": "OperationsPanel",
+      "group": "admin",
+      "status": "existing_requires_work",
+      "target_path": "resources/js/features/admin/OperationsPanel.tsx",
+      "existing_sources": [
+        "resources/js/features/admin/ReadPanels.tsx"
+      ],
+      "quality_gates": [
+        "G06",
+        "G11"
+      ]
+    },
+    {
+      "id": "C59",
+      "name": "MediaProfileBadge",
+      "group": "media",
+      "status": "planned",
+      "target_path": "resources/js/features/media/MediaProfileBadge.tsx",
+      "existing_sources": [],
+      "quality_gates": [
+        "G06",
+        "G11"
+      ]
+    },
+    {
+      "id": "C60",
+      "name": "ConversionPanel",
+      "group": "media",
+      "status": "planned",
+      "target_path": "resources/js/features/admin/media/ConversionPanel.tsx",
+      "existing_sources": [],
+      "quality_gates": [
+        "G06",
+        "G11"
+      ]
+    },
+    {
+      "id": "C61",
+      "name": "ConversionStatus",
+      "group": "media",
+      "status": "planned",
+      "target_path": "resources/js/features/admin/media/ConversionStatus.tsx",
+      "existing_sources": [],
+      "quality_gates": [
+        "G06",
+        "G11"
+      ]
+    },
+    {
+      "id": "C62",
+      "name": "ConversionDetail",
+      "group": "media",
+      "status": "planned",
+      "target_path": "resources/js/features/admin/media/ConversionDetail.tsx",
+      "existing_sources": [],
+      "quality_gates": [
+        "G06",
+        "G11"
+      ]
+    },
+    {
+      "id": "C63",
+      "name": "StorageBudget",
+      "group": "media",
+      "status": "planned",
+      "target_path": "resources/js/features/admin/media/StorageBudget.tsx",
+      "existing_sources": [],
+      "quality_gates": [
+        "G06",
+        "G11"
+      ]
+    },
+    {
+      "id": "C64",
+      "name": "ConflictResolution",
+      "group": "ui",
+      "status": "planned",
+      "target_path": "resources/js/components/ui/ConflictResolution.tsx",
+      "existing_sources": [],
+      "quality_gates": [
+        "G06",
+        "G11"
+      ]
+    }
+  ],
+  "icons": {
+    "family": "Lucide",
+    "license": "ISC",
+    "discovery_url": "https://21st.dev/community/icons",
+    "package": "lucide-react",
+    "runtime_external_requests": false,
+    "mirror_only_semantic_navigation": true,
+    "never_mirror": [
+      "play",
+      "pause",
+      "skip-previous",
+      "skip-next",
+      "shuffle",
+      "repeat",
+      "volume"
+    ]
+  },
+  "shader": {
+    "name": "Dither Flow",
+    "author": "Hamza Al-Bulushi",
+    "discovery_url": "https://21st.dev/@ham7a311/components/dither-flow",
+    "repository": "ham7a311/Vitrine",
+    "commit": "3adb12a6173883561dc40213fa39ae9dc4d0ce20",
+    "source_path": "src/registry/backgrounds/dither-flow/DitherFlow.tsx",
+    "source_blob_sha": "eb8273aef893113ead05c4915623d61a68876418",
+    "license": "MIT",
+    "license_blob_sha": "dc7f5a9b79f500372338ba1287cf67851c2033e3",
+    "status": "selected_source_verified",
+    "runtime_integrated": false,
+    "runtime_external_requests": false,
+    "allowed_surfaces": [
+      "library_hero",
+      "expanded_now_playing"
+    ],
+    "fallback": "local_static_css",
+    "reduced_motion_stops_loop": true,
+    "hidden_or_offscreen_stops_loop": true,
+    "max_active_canvases": 1,
+    "max_dpr": 1.5,
+    "max_fps": 30,
+    "max_optional_gzip_bytes": 61440,
+    "budgets_measured": false
+  },
+  "media": {
+    "profile": {
+      "id": "mp3-cbr-320-v1",
+      "version": 1,
+      "status": "design_target",
+      "input_codec": "flac",
+      "output_codec": "mp3",
+      "encoder": "libmp3lame",
+      "bitrate_mode": "CBR",
+      "bitrate_bps": 320000,
+      "abr": false,
+      "sample_rate_policy": {
+        "preserve_hz": [
+          44100,
+          48000
+        ],
+        "fallback_hz": 44100
+      },
+      "allowed_channels": [
+        1,
+        2
+      ],
+      "channel_policy": "preserve_reject_multichannel",
+      "remove_input_metadata": true,
+      "retain_original": true,
+      "full_decode_required": true,
+      "max_duration_delta_seconds": 0.25,
+      "arguments_template": [
+        "ffmpeg",
+        "-hide_banner",
+        "-loglevel",
+        "error",
+        "-nostdin",
+        "-n",
+        "-protocol_whitelist",
+        "file,pipe",
+        "-f",
+        "flac",
+        "-i",
+        "{input_path}",
+        "-map",
+        "0:a:0",
+        "-map_metadata",
+        "-1",
+        "-map_chapters",
+        "-1",
+        "-vn",
+        "-sn",
+        "-dn",
+        "-c:a",
+        "libmp3lame",
+        "-b:a",
+        "320k",
+        "-abr",
+        "0",
+        "-ar",
+        "{sample_rate_hz}",
+        "-ac",
+        "{channels}",
+        "-threads",
+        "1",
+        "-id3v2_version",
+        "3",
+        "-write_xing",
+        "1",
+        "-f",
+        "mp3",
+        "{staging_path}"
+      ]
+    },
+    "identity": {
+      "physical": "media_blobs",
+      "semantic": "media_assets",
+      "deduplicate_bytes_not_recordings": true,
+      "canonical_upload_blob_nullable_unique": true
+    },
+    "publication": {
+      "require_ready_mp3_for_flac": true,
+      "convert_inside_publication_transaction": false,
+      "source_asset_can_be_unclaimed": true
+    },
+    "queue": {
+      "configuration_connection": "media_database",
+      "sql_connection": "same_as_application",
+      "queue": "media",
+      "parallel_workers": 1,
+      "max_nonterminal_conversions": 20,
+      "encoder_timeout_seconds": 600,
+      "validation_timeout_seconds": 30,
+      "job_timeout_seconds": 660,
+      "retry_after_seconds": 900,
+      "lease_seconds": 960,
+      "heartbeat_seconds": 10,
+      "supervisor_stopwait_seconds": 720,
+      "max_attempts": 3,
+      "process_group_stop_required": true
+    },
+    "limits": {
+      "current_upload_max_bytes": 104857600,
+      "target_flac_upload_max_bytes": 536870912,
+      "target_multipart_limit_bytes": 570425344,
+      "max_duration_seconds": 14400,
+      "max_output_bytes": 629145600,
+      "total_quota_bytes": null,
+      "minimum_free_bytes": null,
+      "production_enable_requires_configured_quota": true
+    },
+    "states": [
+      "queued",
+      "processing",
+      "validating",
+      "ready",
+      "failed",
+      "needs_review",
+      "cancelled"
+    ],
+    "transitions": {
+      "queued": [
+        "processing",
+        "cancelled"
+      ],
+      "processing": [
+        "validating",
+        "failed",
+        "cancelled"
+      ],
+      "validating": [
+        "ready",
+        "failed",
+        "needs_review"
+      ],
+      "ready": [],
+      "failed": [
+        "queued"
+      ],
+      "needs_review": [
+        "queued"
+      ],
+      "cancelled": []
+    }
+  },
+  "planned_api": [
+    {
+      "method": "GET",
+      "path": "/api/v1/admin/media-policy",
+      "mutation": false,
+      "permissions": [
+        "media.manage"
+      ],
+      "recent_verification": false,
+      "status": "planned",
+      "implemented": false
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/admin/media/{asset}/conversions/{profile}",
+      "mutation": true,
+      "permissions": [
+        "media.manage"
+      ],
+      "conditional_permissions": [
+        "catalog.manage"
+      ],
+      "recent_verification": true,
+      "status": "planned",
+      "implemented": false
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/admin/media-conversions",
+      "mutation": false,
+      "permissions": [
+        "media.manage"
+      ],
+      "recent_verification": false,
+      "status": "planned",
+      "implemented": false
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/admin/media-conversions/{conversion}",
+      "mutation": false,
+      "permissions": [
+        "media.manage"
+      ],
+      "recent_verification": false,
+      "status": "planned",
+      "implemented": false
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/admin/media-conversions/{conversion}/retry",
+      "mutation": true,
+      "permissions": [
+        "media.manage"
+      ],
+      "recent_verification": true,
+      "status": "planned",
+      "implemented": false
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/admin/media-conversions/{conversion}/cancel",
+      "mutation": true,
+      "permissions": [
+        "media.manage"
+      ],
+      "recent_verification": true,
+      "status": "planned",
+      "implemented": false
+    }
+  ],
+  "import_states": [
+    "ready",
+    "queued",
+    "processing",
+    "completed",
+    "needs_review",
+    "failed",
+    "cancelled"
+  ],
+  "release_targets": {
+    "status": "unmeasured_targets",
+    "simultaneous_listeners": 10,
+    "synthetic_catalog_tracks": 10000,
+    "json_p95_ms": 500,
+    "audio_first_byte_p95_ms": 1000,
+    "concurrent_admin_requests_per_second": 2,
+    "load_duration_seconds": 900,
+    "rpo_hours": 24,
+    "rto_hours": 4,
+    "security_target": "ASVS 5 L2",
+    "accessibility_target": "WCAG 2.2 AA"
+  }
+}

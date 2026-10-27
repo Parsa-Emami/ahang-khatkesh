@@ -1,5 +1,7 @@
 # قرارداد ورود پلی‌لیست
 
+این سند API فعلی 0.2 را شرح می‌دهد. محدودیتِ rendition در preview بررسی می‌شود، اما بازبینی R01 نشان داد کنترل مالکیت در job نهایی کافی نیست. effective plan، revalidation و generation در [معماری هدف](ARCHITECTURE_TARGET.fa.md) و شرط MP3 آماده برای FLAC در [MEDIA_PIPELINE](MEDIA_PIPELINE.fa.md) قرارداد آینده‌اند. تبدیل خودکار در کد فعلی وجود ندارد.
+
 ## فایل صوتی
 
 POST `/api/v1/admin/media` با multipart و فیلد `audio` یک فایل را می‌پذیرد. پاسخ حاوی `data.id` از نوع UUID است. اندازه تا 100 MiB و مدت تا چهار ساعت است. پسوند و MIME بررسی و FFprobe با timeout پانزده ثانیه اجرا می‌شود. رشتهٔ فرمان با آرگومان‌های جدا ساخته می‌شود. hash محتوای فایل موجب deduplication می‌شود. صوت ویدیویی رد و تصویر کاور embedded در فایل صوتی پذیرفته می‌شود.

@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "check:architecture": "node scripts/check-architecture.mjs",
     "dev": "node scripts/dev.mjs",
     "build": "tsc --noEmit && vite build",
     "test": "vitest run",

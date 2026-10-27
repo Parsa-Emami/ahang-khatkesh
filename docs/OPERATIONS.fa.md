@@ -1,5 +1,7 @@
 # راه‌اندازی، استقرار و عملیات
 
+تنظیم‌های زیر برای پایهٔ 0.2 هستند؛ media worker با timeout طولانی‌تر، X-Accel، quota و restore هماهنگ هنوز در config اجرایی اعمال نشده‌اند. پیش از staging ویژگی‌های تازه، A01 تا A03 و سپس بسته‌های مربوط در [نقشهٔ اجرا](IMPLEMENTATION_ROADMAP.fa.md) بسته شوند. قرارداد آیندهٔ deploy در [معماری هدف](ARCHITECTURE_TARGET.fa.md) و [رسانه](MEDIA_PIPELINE.fa.md) است؛ افزایش upload limit بدون همسان‌کردن تمام لایه‌ها مجاز نیست.
+
 ## محیط هدف
 
 نسخهٔ PHP وب و CLI هر دو 8.5.x باشند. افزونه‌های ctype، curl، dom، fileinfo، mbstring، openssl، PDO، session، tokenizer، XML و درایور دیتابیس لازم‌اند. FFprobe باید در PATH یا FFPROBE_BINARY باشد. برای توسعه Node 24 و Composer 2 استفاده شده است. MySQL 8.4 با utf8mb4 هدف سرور است؛ SQLite برای تست و توسعهٔ موقت پشتیبانی می‌شود. تست‌ها روی MySQL 8.4.13 واقعی نیز اجرا شده‌اند؛ نتیجهٔ آخرین commit در سند بررسی و GitHub Actions کنترل شود.

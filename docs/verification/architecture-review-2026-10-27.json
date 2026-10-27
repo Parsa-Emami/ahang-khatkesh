@@ -1,0 +1,161 @@
+{
+  "report_type": "architecture_review_and_design_evidence",
+  "date": "2026-10-27",
+  "timezone": "Asia/Tehran",
+  "repository": "Parsa-Emami/ahang-khatkesh",
+  "base_commit": "b9e62be3e0f4e995bc7a96e714677ae4dc8a2403",
+  "base_tree": "21f72503e90196ecd6192c1a637b5dc03360ecad",
+  "baseline_source_recovery_verification": {
+    "matched_git_blobs": 255,
+    "mismatches": 0,
+    "stage": "before_design_edits"
+  },
+  "scope": "architecture_structure_before_runtime_implementation",
+  "architecture_assessment": "not_flawless",
+  "runtime_fixes_in_this_change": false,
+  "new_runtime_features_in_this_change": false,
+  "production_approved": false,
+  "diagnostic_probes": {
+    "executed_earlier_in_same_session": true,
+    "runtime": {
+      "php": "8.5.12",
+      "laravel": "13.38.0",
+      "database": "SQLite :memory:"
+    },
+    "scenarios": 3,
+    "assertions": 9,
+    "failures": 0,
+    "errors": 0,
+    "assertion_purpose": "confirm_observed_defects_not_acceptance_of_correct_behavior",
+    "methods": [
+      "controlled_cached_model_interleaving",
+      "filesystem_delete_failure_injection"
+    ],
+    "multi_process_mysql_concurrency": false,
+    "permanent_raw_probe_artifacts_in_repository": false,
+    "results": [
+      {
+        "id": "R01",
+        "result": "reproduced",
+        "observed": "Import completed with Track C original asset B while track_media retained B as Track A rendition."
+      },
+      {
+        "id": "R02",
+        "result": "reproduced",
+        "observed": "A request using cached V0 user credentials overwrote an intervening administrator password reset and reused access_version V1."
+      },
+      {
+        "id": "R03",
+        "result": "reproduced",
+        "observed": "Failure deleting old cover after commit caused the catch handler to delete the newly referenced cover."
+      }
+    ]
+  },
+  "baseline_regression_evidence": {
+    "php_tests": 52,
+    "php_assertions": 277,
+    "databases": [
+      "SQLite",
+      "MySQL 8.4.13"
+    ],
+    "vitest_tests": 5,
+    "historical_report": "docs/verification/results-0.2.json",
+    "new_diagnostics_not_covered": true
+  },
+  "encoder_probe": {
+    "ffmpeg_version": "ffmpeg version 6.1.1-3ubuntu5 Copyright (c) 2000-2023 the FFmpeg developers",
+    "synthetic_fixtures_only": true,
+    "cases": [
+      {
+        "source_sample_rate_hz": 44100,
+        "channels": 2,
+        "output_sample_rate_hz": 44100,
+        "codec": "mp3",
+        "bit_rate_bps": 320000,
+        "duration_seconds": 3.030204,
+        "output_bytes": 122297,
+        "fully_decoded": true
+      },
+      {
+        "source_sample_rate_hz": 48000,
+        "channels": 1,
+        "output_sample_rate_hz": 48000,
+        "codec": "mp3",
+        "bit_rate_bps": 320000,
+        "duration_seconds": 3.024,
+        "output_bytes": 121965,
+        "fully_decoded": true
+      },
+      {
+        "source_sample_rate_hz": 96000,
+        "channels": 2,
+        "output_sample_rate_hz": 44100,
+        "codec": "mp3",
+        "bit_rate_bps": 320000,
+        "duration_seconds": 3.030204,
+        "output_bytes": 122297,
+        "fully_decoded": true
+      }
+    ],
+    "invalid_flac_rejected": true,
+    "invalid_conversion_left_staging_file": true,
+    "application_pipeline_implemented": false,
+    "production_load_tested": false
+  },
+  "design_inventory": {
+    "components": 64,
+    "packages": 11,
+    "findings": 12,
+    "all_implementation_packages": "planned",
+    "universal_browser_coverage": "not_verified",
+    "shader_status": "selected_source_verified_not_integrated"
+  },
+  "structure_check": {
+    "command": "node scripts/check-architecture.mjs",
+    "node": "24.22.1",
+    "result": "pass",
+    "scope": "architecture_structure_only",
+    "not_a_runtime_proof": true
+  },
+  "additional_local_checks": {
+    "javascript_syntax": "pass",
+    "json_parse": "pass",
+    "markdown_local_links_checked": 104,
+    "missing_local_links": 0,
+    "unchanged_application_runtime_files": 150,
+    "dependency_lockfiles_unchanged": true,
+    "checker_rejected_invalid_inputs": [
+      "dependency_cycle",
+      "duplicate_component",
+      "wrong_bitrate"
+    ]
+  },
+  "ci": {
+    "result_not_embedded": true,
+    "reason": "The CI run for the containing commit must be checked independently.",
+    "url": "https://github.com/Parsa-Emami/ahang-khatkesh/actions"
+  },
+  "not_verified": [
+    "runtime_regressions_after_fixes",
+    "real_multi_process_mysql_concurrency",
+    "real_mysql_old_data_upgrade",
+    "durable_laravel_conversion_pipeline",
+    "user_audio_conversion",
+    "complete_fa_en_translation",
+    "all_component_rtl_ltr_theme_matrix",
+    "shader_browser_gpu_and_accessibility",
+    "ten_stream_load",
+    "coherent_backup_restore",
+    "independent_security_review",
+    "production_deployment"
+  ],
+  "next_package": "A01",
+  "documents": [
+    "docs/ARCHITECTURE_REVIEW.fa.md",
+    "docs/ARCHITECTURE_TARGET.fa.md",
+    "docs/UNIVERSAL_UI.fa.md",
+    "docs/COMPONENT_CATALOG.fa.md",
+    "docs/MEDIA_PIPELINE.fa.md",
+    "docs/IMPLEMENTATION_ROADMAP.fa.md"
+  ]
+}
