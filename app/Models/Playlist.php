@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\Permission;
 use App\Support\TextNormalizer;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
@@ -16,6 +17,8 @@ class Playlist extends Model
     public const PUBLISHED = 'published';
 
     public const DRAFT = 'draft';
+
+    public const ARCHIVED = 'archived';
 
     public const MOODS = ['focus', 'night', 'calm', 'energy', 'other'];
 
@@ -43,6 +46,6 @@ class Playlist extends Model
     #[Scope]
     protected function visibleTo(Builder $query, User $user): Builder
     {
-        return $query->when(! $user->is_admin, fn (Builder $q) => $q->where('status', self::PUBLISHED));
+        return $query->when(! $user->hasPermission(Permission::CatalogManage), fn (Builder $q) => $q->where('status', self::PUBLISHED));
     }
 }

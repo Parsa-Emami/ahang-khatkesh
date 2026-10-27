@@ -29,7 +29,7 @@ class AccountAccessTest extends TestCase
     {
         $admin = User::factory()->create(['is_admin' => true]);
         User::factory()->count(8)->create(['is_active' => false]);
-        $this->actingAs($admin)->postJson('/api/v1/admin/users', ['name' => 'Tenth', 'email' => 'tenth@example.com', 'password' => 'StrongPassword123'])->assertCreated()->assertJsonPath('data.email', 'tenth@example.com');
+        $this->actingAs($admin)->withSession(['auth.password_confirmed_at' => now()->timestamp, 'auth.mfa_confirmed_at' => now()->timestamp, 'auth.mfa_authenticated' => true])->postJson('/api/v1/admin/users', ['name' => 'Tenth', 'email' => 'tenth@example.com', 'password' => 'StrongPassword123'])->assertCreated()->assertJsonPath('data.email', 'tenth@example.com');
         $this->postJson('/api/v1/admin/users', ['name' => 'Eleventh', 'email' => 'eleventh@example.com', 'password' => 'StrongPassword123'])->assertUnprocessable()->assertJsonValidationErrors('email');
         $this->assertDatabaseCount('users', 10);
         $this->assertDatabaseMissing('users', ['email' => 'eleventh@example.com']);
@@ -40,7 +40,7 @@ class AccountAccessTest extends TestCase
         $member = User::factory()->create(['is_active' => false]);
         $this->actingAs($member)->getJson('/api/v1/stats')->assertForbidden();
         $admin = User::factory()->create(['is_admin' => true]);
-        $this->actingAs($admin)->patchJson('/api/v1/admin/users/'.$admin->id, ['is_active' => false])->assertUnprocessable();
+        $this->actingAs($admin)->withSession(['auth.password_confirmed_at' => now()->timestamp, 'auth.mfa_confirmed_at' => now()->timestamp, 'auth.mfa_authenticated' => true])->patchJson('/api/v1/admin/users/'.$admin->id, ['is_active' => false])->assertUnprocessable();
         $this->assertDatabaseHas('users', ['id' => $admin->id, 'is_active' => true]);
     }
 
@@ -54,7 +54,7 @@ class AccountAccessTest extends TestCase
     public function test_password_change_requires_current_password(): void
     {
         $member = User::factory()->create();
-        $this->actingAs($member)->putJson('/api/v1/me/password', ['current_password' => 'wrong', 'password' => 'NewPassword123456', 'password_confirmation' => 'NewPassword123456'])->assertUnprocessable()->assertJsonValidationErrors('current_password');
+        $this->actingAs($member)->withSession(['auth.password_confirmed_at' => now()->timestamp])->putJson('/api/v1/me/password', ['current_password' => 'wrong', 'password' => 'NewPassword123456', 'password_confirmation' => 'NewPassword123456'])->assertUnprocessable()->assertJsonValidationErrors('current_password');
     }
 
     public function test_login_uses_normalized_email_and_does_not_expose_password(): void

@@ -11,7 +11,6 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
-use Illuminate\Validation\ValidationException;
 
 class SessionController extends Controller
 {
@@ -20,17 +19,6 @@ class SessionController extends Controller
         $user = $request->user();
 
         return response()->json(['data' => ['csrf_token' => csrf_token(), 'user' => $user?->is_active ? new UserResource($user) : null]]);
-    }
-
-    public function store(Request $request): JsonResponse
-    {
-        $data = $request->validate(['email' => ['required', 'email', 'max:255'], 'password' => ['required', 'string', 'max:128']]);
-        if (! Auth::attempt(['email' => mb_strtolower(trim($data['email'])), 'password' => $data['password'], 'is_active' => true])) {
-            throw ValidationException::withMessages(['email' => 'ایمیل یا رمز عبور درست نیست.']);
-        }
-        $request->session()->regenerate();
-
-        return $this->show($request);
     }
 
     public function destroy(Request $request): JsonResponse
@@ -56,11 +44,12 @@ class SessionController extends Controller
             'current_password' => ['required', 'current_password:web'],
             'password' => ['required', 'string', 'confirmed', 'different:current_password', Password::min(12)->letters()->numbers(), 'max:128'],
         ]);
-        $request->user()->update(['password' => $data['password'], 'remember_token' => Str::random(60)]);
+        $request->user()->forceFill(['password' => $data['password'], 'remember_token' => Str::random(60), 'access_version' => $request->user()->access_version + 1])->save();
         if (config('session.driver') === 'database') {
             DB::table('sessions')->where('user_id', $request->user()->id)->where('id', '!=', $request->session()->getId())->delete();
         }
         $request->session()->regenerate(true);
+        $request->session()->passwordConfirmed();
 
         return response()->json(['data' => ['csrf_token' => csrf_token(), 'message' => 'رمز عبور تغییر کرد.']]);
     }

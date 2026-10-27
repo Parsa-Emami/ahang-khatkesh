@@ -2,13 +2,14 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\Permission;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UploadMediaRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()?->is_admin === true;
+        return $this->user()?->hasPermission(Permission::MediaManage) === true;
     }
 
     public function rules(): array
