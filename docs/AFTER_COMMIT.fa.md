@@ -7,10 +7,12 @@
 ۲. کد و dependency و bundle را به‌روز کنید و migration افزایشی را اجرا کنید:
 
 ```bash
+php artisan down
 git pull --ff-only
 composer install --no-dev --prefer-dist --no-interaction
-npm ci
+npm ci --include=dev
 npm run build
+php artisan optimize:clear
 php artisan migrate --force
 ```
 
@@ -36,7 +38,7 @@ php artisan queue:work database --timeout=120
 
 برای اجرا به‌صورت سرویس از Supervisor نمونه استفاده کنید. retry_after باید از timeout بزرگ‌تر بماند؛ lease و بودجه‌ها در config مشخص‌اند. payload صفِ قدیمی و preview نسخهٔ قبل مجوز انتشار جدید نیستند؛ import قدیمی را در صورت needs_review با پیش‌نمایش تازه بسازید. blob contract باعث تغییر هش effective plan شده است.
 
-۶. با سوپرادمین، آپلود کوچک، preview، ساخت playlist، پخش خصوصی، تغییر کاور، سطل بازیافت و بازیابی را smoke test کنید. با listener، نوشتن کاتالوگ و رزرو فضا باید رد شوند. پس از موفقیت، maintenance را بردارید و صف، pending cleanup، دیسک و log را زیر نظر بگیرید.
+۶. با سوپرادمین، آپلود کوچک، preview، ساخت playlist، پخش خصوصی، تغییر کاور، سطل بازیافت و بازیابی را smoke test کنید. با listener، نوشتن کاتالوگ و رزرو فضا باید رد شوند. پس از موفقیت، با `php artisan up` maintenance را بردارید و صف، pending cleanup، دیسک و log را زیر نظر بگیرید.
 
 GC حذف‌کننده را تنها پس از بررسی dry-run و retention فعال کنید. `media:gc --mark` علامت‌گذاری و `media:gc --sweep` حذف candidateهای واجد شرایط را انجام می‌دهند؛ ردیف referenced و فایل تازه حذف نمی‌شوند. برای پیمایش همه batchها next_cursor را دنبال کنید. خاموش‌بودن GC خودکار مانع بازیابی upload/import نمی‌شود.
 

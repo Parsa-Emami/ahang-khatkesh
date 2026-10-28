@@ -2,7 +2,7 @@
   "format_version": 1,
   "product": "ahang-khatkesh",
   "status": "design_target",
-  "runtime_version": "0.2 + security foundation",
+  "runtime_version": "0.2 + verified foundation F01-F07",
   "target_version": "0.3",
   "implementation_complete": false,
   "review": {
@@ -46,74 +46,81 @@
     {
       "id": "R01",
       "priority": "P0",
-      "status": "unverified",
-      "evidence": "runtime_implemented_pending_exact_commit_ci",
+      "status": "resolved",
+      "evidence": "exact_commit_ci",
       "package_ids": [
         "A01"
       ],
-      "current_review": "docs/CURRENT_REVIEW.fa.md"
+      "current_review": "docs/CURRENT_REVIEW.fa.md",
+      "evidence_file": "docs/verification/foundation-through-f07-2026-10-28.json"
     },
     {
       "id": "R02",
       "priority": "P0",
-      "status": "unverified",
-      "evidence": "runtime_implemented_pending_exact_commit_ci",
+      "status": "resolved",
+      "evidence": "exact_commit_ci",
       "package_ids": [
         "A02"
       ],
-      "current_review": "docs/CURRENT_REVIEW.fa.md"
+      "current_review": "docs/CURRENT_REVIEW.fa.md",
+      "evidence_file": "docs/verification/foundation-through-f07-2026-10-28.json"
     },
     {
       "id": "R03",
       "priority": "P0",
-      "status": "unverified",
-      "evidence": "runtime_implemented_pending_exact_commit_ci",
+      "status": "resolved",
+      "evidence": "exact_commit_ci",
       "package_ids": [
         "A03"
       ],
-      "current_review": "docs/CURRENT_REVIEW.fa.md"
+      "current_review": "docs/CURRENT_REVIEW.fa.md",
+      "evidence_file": "docs/verification/foundation-through-f07-2026-10-28.json"
     },
     {
       "id": "R04",
       "priority": "P1",
-      "status": "unverified",
-      "evidence": "runtime_implemented_pending_exact_commit_ci",
+      "status": "resolved",
+      "evidence": "exact_commit_ci",
       "package_ids": [
         "A05"
       ],
-      "current_review": "docs/CURRENT_REVIEW.fa.md"
+      "current_review": "docs/CURRENT_REVIEW.fa.md",
+      "evidence_file": "docs/verification/foundation-through-f07-2026-10-28.json"
     },
     {
       "id": "R05",
       "priority": "P1",
-      "status": "unverified",
-      "evidence": "runtime_implemented_pending_exact_commit_ci",
+      "status": "resolved",
+      "evidence": "exact_commit_ci",
       "package_ids": [
         "A05"
       ],
-      "current_review": "docs/CURRENT_REVIEW.fa.md"
+      "current_review": "docs/CURRENT_REVIEW.fa.md",
+      "evidence_file": "docs/verification/foundation-through-f07-2026-10-28.json"
     },
     {
       "id": "R06",
       "priority": "P1",
-      "status": "unverified",
-      "evidence": "F07_runtime_implemented_pending_exact_commit_ci",
+      "status": "resolved",
+      "evidence": "exact_commit_ci",
       "package_ids": [
         "A04"
       ],
-      "current_review": "docs/F07_STORAGE_AND_RECOVERY.fa.md"
+      "current_review": "docs/F07_STORAGE_AND_RECOVERY.fa.md",
+      "evidence_file": "docs/verification/foundation-through-f07-2026-10-28.json"
     },
     {
       "id": "R07",
       "priority": "P1",
-      "status": "unverified",
-      "evidence": "F07_runtime_implemented_pending_exact_commit_ci",
+      "status": "resolved",
+      "evidence": "exact_commit_ci",
       "package_ids": [
         "A01",
         "A03",
         "A08"
       ],
-      "current_review": "docs/F07_STORAGE_AND_RECOVERY.fa.md"
+      "current_review": "docs/F07_STORAGE_AND_RECOVERY.fa.md",
+      "evidence_file": "docs/verification/foundation-through-f07-2026-10-28.json"
     },
     {
       "id": "R08",

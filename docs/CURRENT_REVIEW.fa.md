@@ -1,6 +1,6 @@
 # وضعیت اجرایی و نقص‌های باقی‌مانده
 
-> F07 اکنون چرخهٔ blob، quota، رزرو، backfill، GC و lease/recovery را به runtime افزوده است. وضعیت جاری N01 تا N03 و بخش‌های متناظر R06/R07 در [قرارداد F07](F07_STORAGE_AND_RECOVERY.fa.md) و evidence رودمپ ثبت می‌شود؛ جدول تاریخی زیر وضعیت قبل از این فاز را نیز حفظ می‌کند. گام بعدی پس از تأیید F07، F08 است.
+> F01 تا F07 با CI موفق همان commit تأیید شدند. F07 چرخهٔ blob، quota، رزرو، backfill، GC و lease/recovery را به runtime افزوده است. N01 تا N03 و R06/R07 در دامنهٔ قرارداد فعلی بسته‌اند؛ [قرارداد F07](F07_STORAGE_AND_RECOVERY.fa.md) و [evidence](verification/foundation-through-f07-2026-10-28.json) مرجع‌اند. جدول اصلاح‌های زیر سابقهٔ قبل از F07 را نیز نگه می‌دارد. گام بعدی F08 است.
 
 
 مبنای این دور، commit `9f58be08fe4c915b35535c6f944f2d7455bcb063` است. این سند وضعیت تازه را توصیف می‌کند؛ گزارش `ARCHITECTURE_REVIEW.fa.md` سند تاریخی رفتار نسخهٔ 0.2 باقی می‌ماند. وضعیت تأیید نهایی و SHA آزمون‌شده از [رودمپ](ROADMAP.fa.md) و evidence مرتبط خوانده شود.
@@ -21,7 +21,7 @@
 | قابلیت پخش | صف شخصی قابل ویرایش، play-next، shuffle متعادل، تایمر خواب | Vitest و پخش WAV مصنوعی در مرورگر |
 | خطای تازه در restore | تغییر نام هنرمند هنگام trash در بازیابی از رابطهٔ canonical تازه می‌شود | تست restore در SuperAdministratorTest |
 
-این جدول به معنی بسته‌شدن کامل R06/R07/R10 نیست. تست deterministic، interleaving کنترل‌شده و CI دیتابیس با بارسنجی یا تست چندپردازه یکی نیستند.
+پس از F07، نقص مشخص R06/R07 با تست واقعی چندپردازهٔ MySQL بسته شده است؛ R10 و معیارهای گستردهٔ انتشار همچنان بازند. تست deterministic، تست چندپردازه و بارسنجی سه شاهد متفاوت‌اند؛ هیچ‌کدام جای دیگری را نمی‌گیرد.
 
 ## مرز مجوزهای فعلی
 
@@ -40,9 +40,9 @@
 
 | شناسه | اولویت | نقص یا عدم اثبات | اقدام بعدی |
 | --- | --- | --- | --- |
-| N01 / R06 | P1 | در F07 پیاده شده؛ شاهد آزمون همان SHA در رودمپ | F07 |
-| N02 / R07 | P1 | blob مستقل، backfill و integrity checker در F07 پیاده شده‌اند | F07 |
-| N03 / R09 | P1 | quota، reservation، cleanup و GC با retention در F07 پیاده شده‌اند | F07 |
+| N01 / R06 | بسته در دامنهٔ F07 | recovery و fencing با kill واقعی worker پاس شد | evidence F07 |
+| N02 / R07 | بسته در دامنهٔ F07 | blob مستقل، backfill و integrity checker با آزمون dedup هم‌زمان پاس شد | evidence F07 |
+| N03 / بخشی از R09 | بسته در دامنهٔ F07 | quota، reservation، cleanup و GC با retention پاس شدند؛ load/offload باقی است | F15 |
 | N04 / R12 | P1 | تبدیل خودکار FLAC→MP3 320k، صف تبدیل و انتخاب کیفیت هنوز runtime ندارند | F08 |
 | N05 / R11 | P1 | فارسی/RTL هست؛ ترجمه و LTR سراسریِ همه فرم‌ها و تمام themeها کامل نیست | F09 |
 | N06 / R11 | P2 | shader 21st.dev فقط منبع pin شده دارد؛ ورود runtime، GPU budget و visual matrix باقی است | F10 |
