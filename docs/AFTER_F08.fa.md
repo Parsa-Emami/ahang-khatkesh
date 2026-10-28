@@ -12,6 +12,8 @@ php artisan optimize:clear
 php artisan migrate --force
 ```
 
+در production، HTTPS، `APP_ENV=production`، `APP_DEBUG=false` و `SESSION_SECURE_COOKIE=true` لازم‌اند. حساب runtime دیتابیس از migrator جدا و phpMyAdmin محدود به دسترسی اپراتور باشد؛ [راهنمای استقرار](OPERATIONS.fa.md) را هم اجرا کنید. APP_KEY موجود را دوباره تولید نکنید.
+
 PHP CLI و FPM باید 8.5 باشند. برای worker، pcntl/posix و Linux لازم است. FFmpeg با libmp3lame، FFprobe و util-linux شامل setsid/prlimit نصب کنید. fingerprint ابزارهای واقعی سرور را بگیرید؛ مسیرها را با نصب خود تطبیق دهید:
 
 ```bash

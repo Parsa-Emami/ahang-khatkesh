@@ -1,8 +1,8 @@
-> F08 تبدیل واقعی، پنل کیفیت و اصلاح redelivery را افزوده است؛ [قرارداد F08](F08_AUDIO_CONVERSION.fa.md) و رودمپ مرجع جاری‌اند. تأیید همهٔ فازهای تغییرکرده تا CI همان SHA به implemented بازمی‌گردد. گام بعد از F08، F09 است.
+> F01 تا F08 با [CI همان commit](https://github.com/Parsa-Emami/ahang-khatkesh/actions/runs/40700486944) تأیید شدند. تبدیل واقعی، پنل کیفیت و اصلاح redelivery اکنون فعال‌اند؛ [قرارداد F08](F08_AUDIO_CONVERSION.fa.md) و [evidence جاری](verification/foundation-through-f08-2026-10-28.json) مقدم‌اند. متن زیر سابقهٔ اصلاحات پیشین را نیز نگه می‌دارد. گام بعدی F09 است.
 
 # وضعیت اجرایی و نقص‌های باقی‌مانده
 
-> F01 تا F07 با CI موفق همان commit تأیید شدند. F07 چرخهٔ blob، quota، رزرو، backfill، GC و lease/recovery را به runtime افزوده است. N01 تا N03 و R06/R07 در دامنهٔ قرارداد فعلی بسته‌اند؛ [قرارداد F07](F07_STORAGE_AND_RECOVERY.fa.md) و [evidence](verification/foundation-through-f07-2026-10-28.json) مرجع‌اند. جدول اصلاح‌های زیر سابقهٔ قبل از F07 را نیز نگه می‌دارد. گام بعدی F08 است.
+> F01 تا F07 با CI موفق همان commit تأیید شدند. F07 چرخهٔ blob، quota، رزرو، backfill، GC و lease/recovery را به runtime افزوده است. N01 تا N03 و R06/R07 در دامنهٔ قرارداد فعلی بسته‌اند؛ [قرارداد F07](F07_STORAGE_AND_RECOVERY.fa.md) و [evidence](verification/foundation-through-f07-2026-10-28.json) مرجع‌اند. جدول اصلاح‌های زیر سابقهٔ قبل از F07 را نیز نگه می‌دارد. این بند سابقهٔ پایان F07 است؛ گام جاری پس از F08، F09 است.
 
 
 مبنای این دور، commit `9f58be08fe4c915b35535c6f944f2d7455bcb063` است. این سند وضعیت تازه را توصیف می‌کند؛ گزارش `ARCHITECTURE_REVIEW.fa.md` سند تاریخی رفتار نسخهٔ 0.2 باقی می‌ماند. وضعیت تأیید نهایی و SHA آزمون‌شده از [رودمپ](ROADMAP.fa.md) و evidence مرتبط خوانده شود.
@@ -45,7 +45,7 @@
 | N01 / R06 | بسته در دامنهٔ F07 | recovery و fencing با kill واقعی worker پاس شد | evidence F07 |
 | N02 / R07 | بسته در دامنهٔ F07 | blob مستقل، backfill و integrity checker با آزمون dedup هم‌زمان پاس شد | evidence F07 |
 | N03 / بخشی از R09 | بسته در دامنهٔ F07 | quota، reservation، cleanup و GC با retention پاس شدند؛ load/offload باقی است | F15 |
-| N04 / R12 | پیاده‌شده، در انتظار CI همان SHA | تبدیل واقعی، guard، سهمیه، recovery، پنل و کیفیت اضافه شده‌اند | evidence F08 |
+| N04 / R12 | بسته در دامنهٔ F08 | تبدیل واقعی، guard، سهمیه، recovery، پنل و کیفیت با تست واقعی پاس شدند | evidence F08 |
 | N05 / R11 | P1 | فارسی/RTL هست؛ ترجمه و LTR سراسریِ همه فرم‌ها و تمام themeها کامل نیست | F09 |
 | N06 / R11 | P2 | shader 21st.dev فقط منبع pin شده دارد؛ ورود runtime، GPU budget و visual matrix باقی است | F10 |
 | N07 | P2 | تاریخچه، private session و پیشنهاد توضیح‌پذیر هنوز ساخته نشده‌اند | F11 |
@@ -71,4 +71,4 @@ MySQL 8.4/InnoDB/utf8mb4، migration افزایشی، کلید خارجی، revi
 
 ## ارزیابی کیفیت
 
-انتخاب modular monolith برای ده حساب، Laravel و React و MySQL و private storage قابل دفاع است. افزایش تعداد service یا نصب Kubernetes معیار کیفیت نیست. معیار این پروژه: مجوز قابل آزمون، صحت داده زیر failure، رابط قابل استفاده، دسترس‌پذیری، بازیابی و عملیات قابل اندازه‌گیری است. رسیدن به کیفیت محصول جدی ممکن است؛ هم‌ترازی فعلی با Apple Music/Spotify یا ادعای امن‌ترین/بی‌نقص‌ترین نرم‌افزار قابل تأیید نیست. حتی پس از این اصلاحات، F08 تا F16 و بازبینی مستقل باقی‌اند.
+انتخاب modular monolith برای ده حساب، Laravel و React و MySQL و private storage قابل دفاع است. افزایش تعداد service یا نصب Kubernetes معیار کیفیت نیست. معیار این پروژه: مجوز قابل آزمون، صحت داده زیر failure، رابط قابل استفاده، دسترس‌پذیری، بازیابی و عملیات قابل اندازه‌گیری است. رسیدن به کیفیت محصول جدی ممکن است؛ هم‌ترازی فعلی با Apple Music/Spotify یا ادعای امن‌ترین/بی‌نقص‌ترین نرم‌افزار قابل تأیید نیست. پس از F08، فازهای F09 تا F16 و بازبینی مستقل باقی‌اند.

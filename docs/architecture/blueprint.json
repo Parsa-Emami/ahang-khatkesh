@@ -2,7 +2,7 @@
   "format_version": 1,
   "product": "ahang-khatkesh",
   "status": "design_target",
-  "runtime_version": "0.2 + F01-F08 implementation pending exact-commit CI",
+  "runtime_version": "0.2 + verified foundation F01-F08",
   "target_version": "0.3",
   "implementation_complete": false,
   "review": {
@@ -48,81 +48,81 @@
     {
       "id": "R01",
       "priority": "P0",
-      "status": "unverified",
-      "evidence": "F08_implementation_pending_exact_commit_ci",
+      "status": "resolved",
+      "evidence": "exact_commit_ci",
       "package_ids": [
         "A01"
       ],
       "current_review": "docs/F08_AUDIO_CONVERSION.fa.md",
-      "evidence_file": "docs/verification/foundation-through-f07-2026-10-28.json"
+      "evidence_file": "docs/verification/foundation-through-f08-2026-10-28.json"
     },
     {
       "id": "R02",
       "priority": "P0",
-      "status": "unverified",
-      "evidence": "F08_implementation_pending_exact_commit_ci",
+      "status": "resolved",
+      "evidence": "exact_commit_ci",
       "package_ids": [
         "A02"
       ],
       "current_review": "docs/F08_AUDIO_CONVERSION.fa.md",
-      "evidence_file": "docs/verification/foundation-through-f07-2026-10-28.json"
+      "evidence_file": "docs/verification/foundation-through-f08-2026-10-28.json"
     },
     {
       "id": "R03",
       "priority": "P0",
-      "status": "unverified",
-      "evidence": "F08_implementation_pending_exact_commit_ci",
+      "status": "resolved",
+      "evidence": "exact_commit_ci",
       "package_ids": [
         "A03"
       ],
       "current_review": "docs/F08_AUDIO_CONVERSION.fa.md",
-      "evidence_file": "docs/verification/foundation-through-f07-2026-10-28.json"
+      "evidence_file": "docs/verification/foundation-through-f08-2026-10-28.json"
     },
     {
       "id": "R04",
       "priority": "P1",
-      "status": "unverified",
-      "evidence": "F08_implementation_pending_exact_commit_ci",
+      "status": "resolved",
+      "evidence": "exact_commit_ci",
       "package_ids": [
         "A05"
       ],
       "current_review": "docs/F08_AUDIO_CONVERSION.fa.md",
-      "evidence_file": "docs/verification/foundation-through-f07-2026-10-28.json"
+      "evidence_file": "docs/verification/foundation-through-f08-2026-10-28.json"
     },
     {
       "id": "R05",
       "priority": "P1",
-      "status": "unverified",
-      "evidence": "F08_implementation_pending_exact_commit_ci",
+      "status": "resolved",
+      "evidence": "exact_commit_ci",
       "package_ids": [
         "A05"
       ],
       "current_review": "docs/F08_AUDIO_CONVERSION.fa.md",
-      "evidence_file": "docs/verification/foundation-through-f07-2026-10-28.json"
+      "evidence_file": "docs/verification/foundation-through-f08-2026-10-28.json"
     },
     {
       "id": "R06",
       "priority": "P1",
-      "status": "unverified",
-      "evidence": "F08_implementation_pending_exact_commit_ci",
+      "status": "resolved",
+      "evidence": "exact_commit_ci",
       "package_ids": [
         "A04"
       ],
       "current_review": "docs/F08_AUDIO_CONVERSION.fa.md",
-      "evidence_file": "docs/verification/foundation-through-f07-2026-10-28.json"
+      "evidence_file": "docs/verification/foundation-through-f08-2026-10-28.json"
     },
     {
       "id": "R07",
       "priority": "P1",
-      "status": "unverified",
-      "evidence": "F08_implementation_pending_exact_commit_ci",
+      "status": "resolved",
+      "evidence": "exact_commit_ci",
       "package_ids": [
         "A01",
         "A03",
         "A08"
       ],
       "current_review": "docs/F08_AUDIO_CONVERSION.fa.md",
-      "evidence_file": "docs/verification/foundation-through-f07-2026-10-28.json"
+      "evidence_file": "docs/verification/foundation-through-f08-2026-10-28.json"
     },
     {
       "id": "R08",
@@ -166,13 +166,14 @@
     {
       "id": "R12",
       "priority": "P1",
-      "status": "unverified",
-      "evidence": "F08_implementation_pending_exact_commit_ci",
+      "status": "resolved",
+      "evidence": "exact_commit_ci",
       "package_ids": [
         "A08",
         "A11"
       ],
-      "current_review": "docs/F08_AUDIO_CONVERSION.fa.md"
+      "current_review": "docs/F08_AUDIO_CONVERSION.fa.md",
+      "evidence_file": "docs/verification/foundation-through-f08-2026-10-28.json"
     }
   ],
   "packages": [
@@ -271,7 +272,9 @@
       "finding_ids": [
         "R07",
         "R12"
-      ]
+      ],
+      "runtime_scope": "F08 conversion acceptance verified; universal G06 and release G11 remain open in F09/F16",
+      "evidence_file": "docs/verification/foundation-through-f08-2026-10-28.json"
     },
     {
       "id": "A09",
@@ -1365,7 +1368,7 @@
     "profile": {
       "id": "mp3-cbr-320-v1",
       "version": 1,
-      "status": "runtime_implemented_pending_exact_commit_ci",
+      "status": "runtime_verified_F08",
       "input_codec": "flac",
       "output_codec": "mp3",
       "encoder": "libmp3lame",
