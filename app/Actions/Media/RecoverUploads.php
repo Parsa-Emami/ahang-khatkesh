@@ -18,7 +18,7 @@ class RecoverUploads
 
         return DB::transaction(function () use ($limit): int {
             LibrarySetting::whereKey(1)->increment('lock_version');
-            $reservations = StorageReservation::where(fn ($q) => $q->whereIn('status', ['reserved', 'writing'])->where('expires_at', '<=', now())->orWhere('status', 'cleanup_pending'))->orderBy('updated_at')->orderBy('id')->limit($limit)->lockForUpdate()->get();
+            $reservations = StorageReservation::where('purpose', '!=', 'conversion')->where(fn ($q) => $q->whereIn('status', ['reserved', 'writing'])->where('expires_at', '<=', now())->orWhere('status', 'cleanup_pending'))->orderBy('updated_at')->orderBy('id')->limit($limit)->lockForUpdate()->get();
             foreach ($reservations as $reservation) {
                 $reservation->update(['status' => 'cleanup_pending', 'lease_token' => null]);
                 CleanupUploadFiles::dispatch($reservation->id)->onConnection('database')->beforeCommit();

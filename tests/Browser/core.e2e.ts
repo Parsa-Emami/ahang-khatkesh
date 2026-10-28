@@ -61,7 +61,9 @@ test("real audio supports play next queue edits and timed stop without changing 
     const playlists = await (
         await page.request.get("/api/v1/playlists")
     ).json();
-    const id = playlists.data[0].id;
+    const id = playlists.data.find(
+        (p: { tracks_count: number }) => p.tracks_count >= 3,
+    ).id;
     await page.goto(`/playlists/${id}`);
     const original = await (
         await page.request.get(`/api/v1/playlists/${id}`)
@@ -146,7 +148,9 @@ test("dirty playlist order survives remote edits and reconnect until explicitly 
     const playlists = await (
         await page.request.get("/api/v1/playlists")
     ).json();
-    const playlist = playlists.data[0];
+    const playlist = playlists.data.find(
+        (p: { tracks_count: number }) => p.tracks_count >= 3,
+    );
     const original = (
         await (
             await page.request.get(`/api/v1/playlists/${playlist.id}`)
@@ -327,4 +331,176 @@ test("super administrator reserves storage before uploading audio through the ad
         path: `reports/storage-${info.project.name}.png`,
         fullPage: true,
     });
+});
+
+test("FLAC conversion and quality picker preserve the draft and playback position", async ({
+    page,
+}, info) => {
+    await login(page, info.project.name, true, 32);
+    await page.goto("/admin?tab=imports");
+    const title = `F08 ${info.project.name}`;
+    await page.getByLabel("نام پلی‌لیست", { exact: true }).fill(title);
+    const upload = page.waitForResponse(
+        (response) =>
+            response.url().endsWith("/admin/media") &&
+            response.request().method() === "POST",
+    );
+    await page
+        .getByLabel("بارگذاری فایل‌های صوتی", { exact: true })
+        .setInputFiles(`reports/f08-${info.project.name}.flac`);
+    const uploaded = await upload;
+    expect(uploaded.status()).toBe(201);
+    const source = (await uploaded.json()).data;
+    expect(source.codec).toBe("flac");
+    expect(source.conversion.id).toBeTruthy();
+    await expect(
+        page.getByLabel("عنوان آهنگ ۱", { exact: true }),
+    ).toBeVisible();
+    await page
+        .getByLabel("عنوان آهنگ ۱", { exact: true })
+        .fill(`Quality ${info.project.name}`);
+    await page
+        .getByLabel("هنرمند آهنگ ۱", { exact: true })
+        .fill("Synthetic artist");
+    await page.getByRole("button", { name: "تبدیل صوت", exact: false }).click();
+    await expect(
+        page
+            .getByText("بررسی فریم CBR و decode کامل موفق · اصل FLAC محفوظ")
+            .first(),
+    ).toBeVisible({ timeout: 20000 });
+    await expect
+        .poll(
+            async () =>
+                (
+                    await (
+                        await page.request.get(
+                            `/api/v1/admin/media-conversions/${source.conversion.id}`,
+                        )
+                    ).json()
+                ).data.status,
+            { timeout: 20000 },
+        )
+        .toBe("ready");
+    const conversion = await (
+        await page.request.get(
+            `/api/v1/admin/media-conversions/${source.conversion.id}`,
+        )
+    ).json();
+    expect(conversion.data.status).toBe("ready");
+    expect(conversion.data.progress_percent).toBe(100);
+    expect(conversion.data.report.bitrate_bps).toBe(320000);
+    expect(conversion.data.report.full_decode).toBe(true);
+    const ownConversion = page.getByRole("article", {
+        name: `تبدیل f08-${info.project.name}.flac`,
+        exact: true,
+    });
+    await expect(
+        ownConversion.getByText("آمادهٔ پخش", { exact: true }),
+    ).toBeVisible({ timeout: 20000 });
+    await ownConversion.scrollIntoViewIfNeeded();
+    for (const direction of ["rtl", "ltr"])
+        for (const theme of ["light", "dark"]) {
+            await page.evaluate(
+                ({ direction, theme }) => {
+                    document.documentElement.dir = direction;
+                    document.documentElement.dataset.theme = theme;
+                },
+                { direction, theme },
+            );
+            await expect(
+                page.getByRole("heading", {
+                    name: "اصل محفوظ، نسخهٔ سبک‌تر برای پخش",
+                }),
+            ).toBeVisible();
+            expect(
+                await page.evaluate(
+                    () =>
+                        document.documentElement.scrollWidth <= innerWidth + 1,
+                ),
+            ).toBe(true);
+            await page.screenshot({
+                path: `reports/conversion-${info.project.name}-${direction}-${theme}.png`,
+                fullPage: true,
+            });
+        }
+    await page.evaluate(() => {
+        document.documentElement.dir = "rtl";
+        document.documentElement.dataset.theme = "light";
+    });
+    await page
+        .getByRole("button", { name: "ورود موسیقی", exact: false })
+        .click();
+    await expect(page.getByLabel("نام پلی‌لیست", { exact: true })).toHaveValue(
+        title,
+    );
+    await expect(page.getByLabel("عنوان آهنگ ۱", { exact: true })).toHaveValue(
+        `Quality ${info.project.name}`,
+    );
+    await page
+        .getByRole("button", { name: "بررسی و پیش‌نمایش", exact: false })
+        .click();
+    const commit = page.getByRole("button", {
+        name: "تأیید و ساخت پلی‌لیست",
+        exact: true,
+    });
+    await expect(commit).toBeEnabled({ timeout: 10000 });
+    await commit.click();
+    await page
+        .getByRole("link", { name: "دیدن پلی‌لیست", exact: false })
+        .click({ timeout: 15000 });
+    await page
+        .getByRole("button", {
+            name: `پخش Quality ${info.project.name}`,
+            exact: true,
+        })
+        .click();
+    for (const control of await page.locator(".player-tools button").all()) {
+        const bounds = await control.boundingBox();
+        expect(bounds!.x).toBeGreaterThanOrEqual(0);
+        expect(bounds!.x + bounds!.width).toBeLessThanOrEqual(
+            page.viewportSize()!.width,
+        );
+    }
+    await page
+        .getByRole("button", { name: "انتخاب کیفیت پخش", exact: true })
+        .click();
+    const picker = page.getByRole("combobox", {
+        name: "کیفیت پخش",
+        exact: true,
+    });
+    await expect(picker).toBeVisible();
+    await expect(
+        page.getByLabel("موقعیت پخش", { exact: true }),
+    ).not.toHaveValue("0");
+    const position = Number(
+        await page.getByLabel("موقعیت پخش", { exact: true }).inputValue(),
+    );
+    await picker.selectOption("original");
+    await page
+        .getByRole("dialog", { name: "کیفیت پخش", exact: true })
+        .getByRole("button", { name: "بستن پنجره", exact: true })
+        .click();
+    await expect(
+        page.getByRole("button", { name: "توقف پخش", exact: true }),
+    ).toBeVisible();
+    await expect
+        .poll(async () =>
+            Number(
+                await page
+                    .getByLabel("موقعیت پخش", { exact: true })
+                    .inputValue(),
+            ),
+        )
+        .toBeGreaterThanOrEqual(position);
+    await page
+        .getByRole("button", { name: "انتخاب کیفیت پخش", exact: true })
+        .click();
+    await picker.selectOption("mp3-320");
+    await page
+        .getByRole("dialog", { name: "کیفیت پخش", exact: true })
+        .getByRole("button", { name: "بستن پنجره", exact: true })
+        .click();
+    await expect(
+        page.getByRole("button", { name: "توقف پخش", exact: true }),
+    ).toBeVisible();
 });

@@ -34,6 +34,7 @@ class StorageController extends Controller
         DB::transaction(function () use ($request, $reservation, $authorize): void {
             $actor = $authorize->handle($request->user());
             $locked = StorageReservation::whereKey($reservation->id)->where('user_id', $actor->id)->lockForUpdate()->firstOrFail();
+            abort_if($locked->purpose === 'conversion', 409, 'رزرو تبدیل فقط از مسیر لغو تبدیل آزاد می‌شود.');
             if ($locked->status === 'released') {
                 return;
             }

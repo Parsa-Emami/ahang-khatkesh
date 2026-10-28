@@ -92,6 +92,20 @@ for (const phase of roadmap.phases) {
             "F07 requires real MySQL process evidence",
         );
     }
+    if (phase.id === "F08") {
+        assert(
+            record.concurrency &&
+                record.concurrency.tests >= 9 &&
+                record.concurrency.passed === record.concurrency.tests &&
+                record.concurrency.failed === 0 &&
+                record.concurrency.skipped === 0,
+            "F08 requires real media worker process evidence",
+        );
+        assert(
+            record.browser.tests >= 12,
+            "F08 requires the conversion and quality browser journey",
+        );
+    }
     for (const gate of [
         "build",
         "format",

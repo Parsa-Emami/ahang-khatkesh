@@ -21,6 +21,8 @@ const env = {
     SESSION_SECURE_COOKIE: "false",
     CACHE_STORE: "database",
     QUEUE_CONNECTION: "database",
+    MUSIC_CONVERSIONS_ENABLED: "true",
+    MUSIC_STORAGE_HEADROOM_BYTES: "0",
     BCRYPT_ROUNDS: "4",
 };
 const php = process.env.AHANG_PHP || "php";
@@ -53,9 +55,49 @@ const child = process.env.AHANG_FRANKENPHP
           ],
           { env: { ...env, APP_ENV: "local" }, stdio: "inherit" },
       );
+const workers = [
+    spawn(
+        php,
+        ["artisan", "queue:work", "database", "--sleep=1", "--timeout=120"],
+        { env, stdio: "inherit" },
+    ),
+    spawn(
+        php,
+        [
+            "artisan",
+            "queue:work",
+            "media_database",
+            "--queue=media",
+            "--sleep=1",
+            "--timeout=800",
+        ],
+        { env, stdio: "inherit" },
+    ),
+];
 for (const signal of ["SIGTERM", "SIGINT"])
-    process.on(signal, () => child.kill(signal));
-child.on("exit", (code) => {
+    process.on(signal, () => {
+        for (const worker of workers) worker.kill(signal);
+        child.kill(signal);
+    });
+child.on("exit", async (code) => {
+    for (const worker of workers) worker.kill("SIGTERM");
+    await Promise.all(
+        workers.map(
+            (worker) =>
+                new Promise((resolve) => {
+                    if (worker.exitCode !== null || worker.signalCode !== null)
+                        return resolve();
+                    const deadline = setTimeout(() => {
+                        worker.kill("SIGKILL");
+                        resolve();
+                    }, 3000);
+                    worker.once("exit", () => {
+                        clearTimeout(deadline);
+                        resolve();
+                    });
+                }),
+        ),
+    );
     rmSync(runRoot, { recursive: true, force: true });
     process.exit(code ?? 1);
 });

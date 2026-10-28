@@ -23,6 +23,43 @@ export type User = {
     is_active: boolean;
     theme: Theme;
 };
+export type AudioQuality = "auto" | "original" | "mp3-320";
+export type AudioConversion = {
+    id: string;
+    source_asset_id: string;
+    source_name: string;
+    source_revision: number;
+    source_bytes: number;
+    duration_seconds: number;
+    profile_id: string;
+    profile_version: number;
+    status:
+        | "queued"
+        | "processing"
+        | "validating"
+        | "ready"
+        | "failed"
+        | "needs_review"
+        | "cancelled";
+    generation: number;
+    revision: number;
+    progress_seconds: number;
+    progress_percent: number;
+    reserved_bytes: number;
+    output_asset_id: string | null;
+    output_bytes: number | null;
+    error_code: string | null;
+    next_retry_at: string | null;
+    heartbeat_at: string | null;
+    lease_expires_at: string | null;
+    report: {
+        full_decode: boolean;
+        bitrate_bps: number;
+        source_retained: boolean;
+        validated_frames: number;
+        encoder_version: string;
+    } | null;
+};
 export type Track = {
     id: number;
     title: string;
@@ -33,6 +70,13 @@ export type Track = {
     artists?: { id: number; name: string; role: string }[];
     releases?: { id: number; title: string }[];
     duration_seconds: number;
+    audio_qualities?: {
+        id: "original" | "mp3-320";
+        label: string;
+        size_bytes: number;
+        mime_type: string;
+        stream_url: string;
+    }[];
     stream_url: string;
     is_liked: boolean;
     cover_url?: string | null;
@@ -83,6 +127,15 @@ export type ImportRun = {
         validated_tracks: number;
         created_tracks?: number;
         reused_tracks?: number;
+        media?: Record<
+            string,
+            {
+                source_codec: string | null;
+                playback_profile: string;
+                status: string;
+                conversion_id: string | null;
+            }
+        >;
     } | null;
     execution?: {
         generation: number;
@@ -96,6 +149,9 @@ export type ImportRun = {
     created_at: string;
 };
 export type MediaAsset = {
+    codec: string | null;
+    revision: number;
+    conversion: { id: string; status: AudioConversion["status"] } | null;
     id: string;
     original_name: string;
     duration_seconds: number;

@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Actions\Conversions\ConversionExecution;
 use App\Actions\Imports\ImportExecution;
 use App\Actions\Media\CleanupUpload;
 use App\Actions\Media\CollectMediaGarbage;
@@ -16,9 +17,9 @@ class MaintainLibrary extends Command
 
     protected $description = 'Recover expired import leases and upload reservations in bounded batches';
 
-    public function handle(ImportExecution $imports, RecoverUploads $uploads, CollectMediaGarbage $garbage, CleanupUpload $cleanup): int
+    public function handle(ImportExecution $imports, RecoverUploads $uploads, CollectMediaGarbage $garbage, CleanupUpload $cleanup, ConversionExecution $conversions): int
     {
-        $result = ['imports' => $imports->recover(), 'uploads' => $uploads->handle(), 'pruned_locks' => $cleanup->pruneLocks()];
+        $result = ['conversions' => $conversions->recover(), 'imports' => $imports->recover(), 'uploads' => $uploads->handle(), 'pruned_locks' => $cleanup->pruneLocks()];
         if (config('music.garbage_collection_enabled')) {
             $cursor = LibrarySetting::whereKey(1)->value('media_gc_cursor') ?? '';
             $result['gc'] = $garbage->scan(true, 500, $cursor);

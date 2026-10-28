@@ -68,10 +68,15 @@ jobs:
       - name: Install media probe
         timeout-minutes: 5
         run: |
-          if ! command -v ffprobe; then
+          if ! command -v ffprobe || ! command -v ffmpeg; then
             sudo apt-get -o Acquire::Retries=2 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30 update -qq
             sudo apt-get -o Acquire::Retries=2 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30 install --no-install-recommends -y ffmpeg
           fi
+      - name: Verify media process tools
+        run: |
+          command -v setsid
+          command -v prlimit
+          ffmpeg -version | head -1
       - run: composer install --prefer-dist --no-interaction
       - run: cp .env.example .env
       - run: php artisan key:generate

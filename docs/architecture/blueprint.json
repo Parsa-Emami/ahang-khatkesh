@@ -2,7 +2,7 @@
   "format_version": 1,
   "product": "ahang-khatkesh",
   "status": "design_target",
-  "runtime_version": "0.2 + verified foundation F01-F07",
+  "runtime_version": "0.2 + F01-F08 implementation pending exact-commit CI",
   "target_version": "0.3",
   "implementation_complete": false,
   "review": {
@@ -40,86 +40,88 @@
     "docs/ROADMAP.fa.md",
     "docs/PRODUCT_BENCHMARK.fa.md",
     "docs/F07_STORAGE_AND_RECOVERY.fa.md",
-    "docs/AFTER_COMMIT.fa.md"
+    "docs/AFTER_COMMIT.fa.md",
+    "docs/F08_AUDIO_CONVERSION.fa.md",
+    "docs/AFTER_F08.fa.md"
   ],
   "findings": [
     {
       "id": "R01",
       "priority": "P0",
-      "status": "resolved",
-      "evidence": "exact_commit_ci",
+      "status": "unverified",
+      "evidence": "F08_implementation_pending_exact_commit_ci",
       "package_ids": [
         "A01"
       ],
-      "current_review": "docs/CURRENT_REVIEW.fa.md",
+      "current_review": "docs/F08_AUDIO_CONVERSION.fa.md",
       "evidence_file": "docs/verification/foundation-through-f07-2026-10-28.json"
     },
     {
       "id": "R02",
       "priority": "P0",
-      "status": "resolved",
-      "evidence": "exact_commit_ci",
+      "status": "unverified",
+      "evidence": "F08_implementation_pending_exact_commit_ci",
       "package_ids": [
         "A02"
       ],
-      "current_review": "docs/CURRENT_REVIEW.fa.md",
+      "current_review": "docs/F08_AUDIO_CONVERSION.fa.md",
       "evidence_file": "docs/verification/foundation-through-f07-2026-10-28.json"
     },
     {
       "id": "R03",
       "priority": "P0",
-      "status": "resolved",
-      "evidence": "exact_commit_ci",
+      "status": "unverified",
+      "evidence": "F08_implementation_pending_exact_commit_ci",
       "package_ids": [
         "A03"
       ],
-      "current_review": "docs/CURRENT_REVIEW.fa.md",
+      "current_review": "docs/F08_AUDIO_CONVERSION.fa.md",
       "evidence_file": "docs/verification/foundation-through-f07-2026-10-28.json"
     },
     {
       "id": "R04",
       "priority": "P1",
-      "status": "resolved",
-      "evidence": "exact_commit_ci",
+      "status": "unverified",
+      "evidence": "F08_implementation_pending_exact_commit_ci",
       "package_ids": [
         "A05"
       ],
-      "current_review": "docs/CURRENT_REVIEW.fa.md",
+      "current_review": "docs/F08_AUDIO_CONVERSION.fa.md",
       "evidence_file": "docs/verification/foundation-through-f07-2026-10-28.json"
     },
     {
       "id": "R05",
       "priority": "P1",
-      "status": "resolved",
-      "evidence": "exact_commit_ci",
+      "status": "unverified",
+      "evidence": "F08_implementation_pending_exact_commit_ci",
       "package_ids": [
         "A05"
       ],
-      "current_review": "docs/CURRENT_REVIEW.fa.md",
+      "current_review": "docs/F08_AUDIO_CONVERSION.fa.md",
       "evidence_file": "docs/verification/foundation-through-f07-2026-10-28.json"
     },
     {
       "id": "R06",
       "priority": "P1",
-      "status": "resolved",
-      "evidence": "exact_commit_ci",
+      "status": "unverified",
+      "evidence": "F08_implementation_pending_exact_commit_ci",
       "package_ids": [
         "A04"
       ],
-      "current_review": "docs/F07_STORAGE_AND_RECOVERY.fa.md",
+      "current_review": "docs/F08_AUDIO_CONVERSION.fa.md",
       "evidence_file": "docs/verification/foundation-through-f07-2026-10-28.json"
     },
     {
       "id": "R07",
       "priority": "P1",
-      "status": "resolved",
-      "evidence": "exact_commit_ci",
+      "status": "unverified",
+      "evidence": "F08_implementation_pending_exact_commit_ci",
       "package_ids": [
         "A01",
         "A03",
         "A08"
       ],
-      "current_review": "docs/F07_STORAGE_AND_RECOVERY.fa.md",
+      "current_review": "docs/F08_AUDIO_CONVERSION.fa.md",
       "evidence_file": "docs/verification/foundation-through-f07-2026-10-28.json"
     },
     {
@@ -164,12 +166,13 @@
     {
       "id": "R12",
       "priority": "P1",
-      "status": "open_runtime",
-      "evidence": "code_review_and_encoder_probe",
+      "status": "unverified",
+      "evidence": "F08_implementation_pending_exact_commit_ci",
       "package_ids": [
         "A08",
         "A11"
-      ]
+      ],
+      "current_review": "docs/F08_AUDIO_CONVERSION.fa.md"
     }
   ],
   "packages": [
@@ -256,7 +259,7 @@
     {
       "id": "A08",
       "title": "Durable FLAC to MP3 conversion and admin UI",
-      "status": "planned",
+      "status": "implemented",
       "depends_on": [
         "A01",
         "A02",
@@ -1235,9 +1238,11 @@
       "id": "C59",
       "name": "MediaProfileBadge",
       "group": "media",
-      "status": "planned",
+      "status": "existing_requires_work",
       "target_path": "resources/js/features/media/MediaProfileBadge.tsx",
-      "existing_sources": [],
+      "existing_sources": [
+        "resources/js/features/admin/media/ConversionPanel.tsx"
+      ],
       "quality_gates": [
         "G06",
         "G11"
@@ -1247,9 +1252,11 @@
       "id": "C60",
       "name": "ConversionPanel",
       "group": "media",
-      "status": "planned",
+      "status": "existing_requires_work",
       "target_path": "resources/js/features/admin/media/ConversionPanel.tsx",
-      "existing_sources": [],
+      "existing_sources": [
+        "resources/js/features/admin/media/ConversionPanel.tsx"
+      ],
       "quality_gates": [
         "G06",
         "G11"
@@ -1259,9 +1266,11 @@
       "id": "C61",
       "name": "ConversionStatus",
       "group": "media",
-      "status": "planned",
+      "status": "existing_requires_work",
       "target_path": "resources/js/features/admin/media/ConversionStatus.tsx",
-      "existing_sources": [],
+      "existing_sources": [
+        "resources/js/features/admin/media/ConversionPanel.tsx"
+      ],
       "quality_gates": [
         "G06",
         "G11"
@@ -1271,9 +1280,11 @@
       "id": "C62",
       "name": "ConversionDetail",
       "group": "media",
-      "status": "planned",
+      "status": "existing_requires_work",
       "target_path": "resources/js/features/admin/media/ConversionDetail.tsx",
-      "existing_sources": [],
+      "existing_sources": [
+        "resources/js/features/admin/media/ConversionPanel.tsx"
+      ],
       "quality_gates": [
         "G06",
         "G11"
@@ -1354,7 +1365,7 @@
     "profile": {
       "id": "mp3-cbr-320-v1",
       "version": 1,
-      "status": "design_target",
+      "status": "runtime_implemented_pending_exact_commit_ci",
       "input_codec": "flac",
       "output_codec": "mp3",
       "encoder": "libmp3lame",
@@ -1439,16 +1450,16 @@
       "max_nonterminal_conversions": 20,
       "encoder_timeout_seconds": 600,
       "validation_timeout_seconds": 30,
-      "job_timeout_seconds": 660,
+      "job_timeout_seconds": 800,
       "retry_after_seconds": 900,
       "lease_seconds": 960,
-      "heartbeat_seconds": 10,
-      "supervisor_stopwait_seconds": 720,
+      "heartbeat_seconds": 5,
+      "supervisor_stopwait_seconds": 840,
       "max_attempts": 3,
       "process_group_stop_required": true
     },
     "limits": {
-      "current_upload_max_bytes": 104857600,
+      "current_upload_max_bytes": 536870912,
       "target_flac_upload_max_bytes": 536870912,
       "target_multipart_limit_bytes": 570425344,
       "max_duration_seconds": 14400,
@@ -1488,80 +1499,12 @@
       "needs_review": [
         "queued"
       ],
-      "cancelled": []
+      "cancelled": [
+        "queued"
+      ]
     }
   },
-  "planned_api": [
-    {
-      "method": "GET",
-      "path": "/api/v1/admin/media-policy",
-      "mutation": false,
-      "permissions": [
-        "media.manage"
-      ],
-      "recent_verification": false,
-      "status": "planned",
-      "implemented": false
-    },
-    {
-      "method": "PUT",
-      "path": "/api/v1/admin/media/{asset}/conversions/{profile}",
-      "mutation": true,
-      "permissions": [
-        "media.manage"
-      ],
-      "conditional_permissions": [
-        "catalog.manage"
-      ],
-      "recent_verification": true,
-      "status": "planned",
-      "implemented": false
-    },
-    {
-      "method": "GET",
-      "path": "/api/v1/admin/media-conversions",
-      "mutation": false,
-      "permissions": [
-        "media.manage"
-      ],
-      "recent_verification": false,
-      "status": "planned",
-      "implemented": false
-    },
-    {
-      "method": "GET",
-      "path": "/api/v1/admin/media-conversions/{conversion}",
-      "mutation": false,
-      "permissions": [
-        "media.manage"
-      ],
-      "recent_verification": false,
-      "status": "planned",
-      "implemented": false
-    },
-    {
-      "method": "POST",
-      "path": "/api/v1/admin/media-conversions/{conversion}/retry",
-      "mutation": true,
-      "permissions": [
-        "media.manage"
-      ],
-      "recent_verification": true,
-      "status": "planned",
-      "implemented": false
-    },
-    {
-      "method": "POST",
-      "path": "/api/v1/admin/media-conversions/{conversion}/cancel",
-      "mutation": true,
-      "permissions": [
-        "media.manage"
-      ],
-      "recent_verification": true,
-      "status": "planned",
-      "implemented": false
-    }
-  ],
+  "planned_api": [],
   "import_states": [
     "ready",
     "queued",
@@ -1592,5 +1535,76 @@
     "needs_review",
     "failed",
     "cancelled"
+  ],
+  "runtime_api": [
+    {
+      "method": "GET",
+      "path": "/api/v1/admin/media-policy",
+      "mutation": false,
+      "permissions": [
+        "media.manage"
+      ],
+      "recent_verification": false,
+      "status": "implemented",
+      "implemented": true
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/admin/media/{asset}/conversions/{profile}",
+      "mutation": true,
+      "permissions": [
+        "media.manage"
+      ],
+      "conditional_permissions": [
+        "catalog.manage"
+      ],
+      "recent_verification": true,
+      "status": "implemented",
+      "implemented": true
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/admin/media-conversions",
+      "mutation": false,
+      "permissions": [
+        "media.manage"
+      ],
+      "recent_verification": false,
+      "status": "implemented",
+      "implemented": true
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/admin/media-conversions/{conversion}",
+      "mutation": false,
+      "permissions": [
+        "media.manage"
+      ],
+      "recent_verification": false,
+      "status": "implemented",
+      "implemented": true
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/admin/media-conversions/{conversion}/retry",
+      "mutation": true,
+      "permissions": [
+        "media.manage"
+      ],
+      "recent_verification": true,
+      "status": "implemented",
+      "implemented": true
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/admin/media-conversions/{conversion}/cancel",
+      "mutation": true,
+      "permissions": [
+        "media.manage"
+      ],
+      "recent_verification": true,
+      "status": "implemented",
+      "implemented": true
+    }
   ]
 }

@@ -284,8 +284,8 @@ for (const [state, next] of Object.entries(transitions)) {
         );
 }
 requireValue(
-    transitions.ready.length === 0 && transitions.cancelled.length === 0,
-    "Terminal conversions must remain terminal",
+    transitions.ready.length === 0 && transitions.cancelled.includes("queued"),
+    "Ready outputs are immutable; restarting a cancelled conversion requires a new generation",
 );
 unique(
     blueprint.planned_api.map((item) => `${item.method} ${item.path}`),

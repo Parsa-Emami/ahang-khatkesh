@@ -20,6 +20,8 @@ import {
     sleepExpired,
     type SleepTimer,
 } from "../lib/sleep-timer";
+import { playbackUrl } from "../lib/playback-quality";
+import type { AudioQuality } from "../types";
 import { adjacent, makeOrder } from "../lib/queue";
 import type { PlaybackSnapshot, RepeatMode, Track } from "../types";
 
@@ -36,6 +38,7 @@ type State = {
     error: string | null;
     syncError: string | null;
     sleepTimer: SleepTimer;
+    quality: AudioQuality;
 };
 type Player = State & {
     current: Track | null;
@@ -54,6 +57,7 @@ type Player = State & {
     moveQueued: (id: number, offset: -1 | 1) => void;
     clearUpcoming: () => void;
     clearQueue: () => void;
+    setQuality: (quality: AudioQuality) => void;
     setSleep: (value: number | "end_of_track" | null) => void;
 };
 const Context = createContext<Player | null>(null);
@@ -70,6 +74,7 @@ const initial: State = {
     error: null,
     syncError: null,
     sleepTimer: null,
+    quality: "auto",
 };
 
 export function PlayerProvider({ children }: PropsWithChildren) {
@@ -90,6 +95,7 @@ export function PlayerProvider({ children }: PropsWithChildren) {
         interacted = useRef(false),
         pendingSeek = useRef(0);
     const current = state.queue[state.index] || null;
+    const streamUrl = playbackUrl(current, state.quality);
     const changed = () => {
         interacted.current = true;
         sequence.current++;
@@ -292,7 +298,7 @@ export function PlayerProvider({ children }: PropsWithChildren) {
                 navigator.mediaSession.metadata = null;
             return;
         }
-        audio.src = current.stream_url;
+        audio.src = streamUrl;
         audio.load();
         document.title = `${current.title} · آهنگ خط‌کش`;
         if ("mediaSession" in navigator)
@@ -301,7 +307,7 @@ export function PlayerProvider({ children }: PropsWithChildren) {
                 artist: current.artist,
                 album: current.album || "آهنگ خط‌کش",
             });
-    }, [current?.id, audio]);
+    }, [current?.id, streamUrl, audio]);
 
     useEffect(() => {
         if (!current) return;
@@ -322,7 +328,7 @@ export function PlayerProvider({ children }: PropsWithChildren) {
             navigator.mediaSession.playbackState = state.playing
                 ? "playing"
                 : "paused";
-    }, [state.playing, current?.id, audio]);
+    }, [state.playing, current?.id, streamUrl, audio]);
     useEffect(() => {
         audio.volume = state.volume;
     }, [state.volume, audio]);
@@ -587,6 +593,10 @@ export function PlayerProvider({ children }: PropsWithChildren) {
         clearUpcoming: () => editQueue(trimUpcoming),
         clearQueue: () =>
             editQueue(() => ({ queue: [], index: 0, playing: false })),
+        setQuality(quality) {
+            pendingSeek.current = audio.currentTime || latest.current.position;
+            setState((s) => ({ ...s, quality, error: null }));
+        },
         setSleep(value) {
             setState((s) => ({ ...s, sleepTimer: createSleepTimer(value) }));
         },

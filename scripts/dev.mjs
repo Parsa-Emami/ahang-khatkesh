@@ -53,6 +53,15 @@ run(php, [
     "--tries=3",
     "--timeout=120",
 ]);
+run(php, [
+    "artisan",
+    "queue:work",
+    "media_database",
+    "--queue=media",
+    "--sleep=1",
+    "--tries=1",
+    "--timeout=800",
+]);
 run(process.execPath, [
     "node_modules/vite/bin/vite.js",
     "--host",

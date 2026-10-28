@@ -6,11 +6,12 @@ use App\Models\AuditEvent;
 use App\Models\Playlist;
 use App\Models\Track;
 use App\Models\User;
+use App\Services\PlaybackMedia;
 use Illuminate\Support\Facades\DB;
 
 class UpdatePlaylist
 {
-    public function __construct(private AuthorizeLibraryWrite $authorize) {}
+    public function __construct(private AuthorizeLibraryWrite $authorize, private PlaybackMedia $playback) {}
 
     public function handle(Playlist $playlist, User $actor, array $data, ?array $tracks = null): Playlist
     {
@@ -27,6 +28,9 @@ class UpdatePlaylist
             }
             $locked->fill(collect($data)->except('revision')->all());
             abort_if($locked->status === Playlist::PUBLISHED && (isset($data['status']) || $tracks !== null) && ! $locked->tracks()->exists(), 422, 'برای انتشار، حداقل یک آهنگ لازم است.');
+            if ($locked->status === Playlist::PUBLISHED) {
+                $this->playback->assertReady($locked->tracks()->pluck('media_asset_id')->all());
+            }
             $locked->revision++;
             $locked->save();
             AuditEvent::create(['user_id' => $actor->id, 'action' => $tracks === null ? 'playlist.updated' : 'playlist.tracks_updated', 'subject_id' => (string) $locked->id, 'metadata' => ['revision' => $locked->revision, 'tracks' => $tracks === null ? $locked->tracks()->count() : count($tracks)]]);

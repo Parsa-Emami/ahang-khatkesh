@@ -28,6 +28,7 @@ import {
 } from "../../types";
 import { ErrorState, IconButton, Loading } from "../../components/UI";
 import { uploadWithReservation } from "./uploads";
+import { conversionLabels } from "./media/ConversionPanel";
 import { StorageStatus } from "./StorageStatus";
 const statusLabels: Record<ImportRun["status"], string> = {
     ready: "آمادهٔ تأیید",
@@ -39,7 +40,7 @@ const statusLabels: Record<ImportRun["status"], string> = {
     cancelled: "لغو به دلیل تغییر دسترسی",
 };
 
-export function ImportsPanel() {
+export function ImportsPanel({ active = true }: { active?: boolean }) {
     const client = useQueryClient(),
         notify = useToast();
     const [name, setName] = useState(""),
@@ -61,6 +62,7 @@ export function ImportsPanel() {
     }, [name, description, mood, rows, manifest]);
     const assets = useQuery({
         queryKey: ["media", assetPage],
+        enabled: active,
         queryFn: () =>
             api<{
                 data: MediaAsset[];
@@ -70,16 +72,20 @@ export function ImportsPanel() {
     });
     const history = useQuery({
         queryKey: ["imports", historyPage],
+        enabled: active,
         queryFn: () =>
             api<Page<ImportRun>>(`/admin/imports?page=${historyPage}`),
     });
     const run = useQuery({
         queryKey: ["import", runId],
         queryFn: () => api<{ data: ImportRun }>(`/admin/imports/${runId}`),
-        enabled: !!runId,
+        enabled: active && !!runId,
         refetchInterval: (query) =>
             ["processing", "running"].includes(
                 query.state.data?.data.status || "",
+            ) ||
+            Object.values(query.state.data?.data.report?.media ?? {}).some(
+                (m) => m.status !== "ready",
             )
                 ? 2000
                 : false,
@@ -120,8 +126,13 @@ export function ImportsPanel() {
             setUploading(
                 `${digits(index + 1)} از ${digits(batch.length)} — ${file.name}`,
             );
-            if (file.size > 100 * 1024 * 1024) {
-                errors.push(`${file.name}: حجم بیشتر از ۱۰۰ مگابایت`);
+            if (
+                file.size >
+                (/\.flac$/i.test(file.name) ? 512 : 100) * 1024 * 1024
+            ) {
+                errors.push(
+                    `${file.name}: حجم بیشتر از سقف مجاز (FLAC: ۵۱۲، سایر فایل‌ها: ۱۰۰ MiB)`,
+                );
                 continue;
             }
             try {
@@ -139,6 +150,21 @@ export function ImportsPanel() {
         void client.invalidateQueries({ queryKey: ["media"] });
         void client.invalidateQueries({ queryKey: ["admin", "storage"] });
     }
+    const requestConversion = useMutation({
+        mutationFn: (asset: MediaAsset) =>
+            api(`/admin/media/${asset.id}/conversions/mp3-cbr-320-v1`, {
+                method: "PUT",
+                body: json({
+                    source_revision: asset.revision,
+                    profile_version: 1,
+                }),
+            }),
+        onSuccess: () => {
+            void client.invalidateQueries({ queryKey: ["media"] });
+            notify("تبدیل به صف اضافه شد؛ اصل FLAC محفوظ است.");
+        },
+        onError: (error) => notify(error.message, true),
+    });
     const preview = useMutation({
         mutationFn: () => {
             const form = new FormData();
@@ -187,6 +213,9 @@ export function ImportsPanel() {
         onError: (error) => notify(error.message, true),
     });
     const current = run.data?.data;
+    const waitingForMedia = Object.values(current?.report?.media ?? {}).some(
+        (media) => media.status !== "ready",
+    );
     function exportManifest() {
         const url = URL.createObjectURL(
             new Blob(
@@ -324,7 +353,8 @@ export function ImportsPanel() {
                                 FLAC
                             </span>
                             <small>
-                                هر فایل تا ۱۰۰ مگابایت · هر نوبت تا ۲۰ فایل
+                                FLAC تا ۵۱۲ MiB · سایر فایل‌ها تا ۱۰۰ MiB · هر
+                                نوبت تا ۲۰ فایل
                             </small>
                             <input
                                 aria-label="بارگذاری فایل‌های صوتی"
@@ -380,6 +410,25 @@ export function ImportsPanel() {
                                                         MB
                                                     </small>
                                                 </span>
+                                                {(/\.flac$/i.test(
+                                                    asset.original_name,
+                                                ) ||
+                                                    asset.codec === "flac") &&
+                                                    !asset.conversion && (
+                                                        <button
+                                                            className="text-link"
+                                                            disabled={
+                                                                requestConversion.isPending
+                                                            }
+                                                            onClick={() =>
+                                                                requestConversion.mutate(
+                                                                    asset,
+                                                                )
+                                                            }
+                                                        >
+                                                            ساخت MP3 320
+                                                        </button>
+                                                    )}
                                                 <IconButton
                                                     label="کپی شناسهٔ فایل"
                                                     onClick={() =>
@@ -603,6 +652,41 @@ export function ImportsPanel() {
                                     {statusLabels[current.status]}
                                 </span>
                                 <h2>{current.name}</h2>
+                                {current.report?.media && (
+                                    <div
+                                        className="conversion-preview"
+                                        role="status"
+                                    >
+                                        <h3>آمادگی رسانه برای انتشار</h3>
+                                        {Object.entries(
+                                            current.report.media,
+                                        ).map(([id, media]) => (
+                                            <p key={id}>
+                                                <bdi lang="en">
+                                                    {media.source_codec ??
+                                                        "Audio"}{" "}
+                                                    · {media.playback_profile}
+                                                </bdi>{" "}
+                                                —{" "}
+                                                {media.status === "ready"
+                                                    ? "آمادهٔ پخش"
+                                                    : (conversionLabels[
+                                                          media.status as keyof typeof conversionLabels
+                                                      ] ?? "در انتظار تبدیل")}
+                                            </p>
+                                        ))}
+                                        {waitingForMedia && (
+                                            <p>
+                                                انتشار پس از آماده‌شدن MP3 ممکن
+                                                است. وضعیت و خطاها را در{" "}
+                                                <Link to="/admin?tab=conversions">
+                                                    تبدیل صوت
+                                                </Link>{" "}
+                                                ببین.
+                                            </p>
+                                        )}
+                                    </div>
+                                )}
                                 <p className="muted">
                                     {digits(current.rows.length)} آهنگ بررسی شده
                                     · {moodLabels[current.mood]}
@@ -706,6 +790,7 @@ export function ImportsPanel() {
                                             className="button"
                                             disabled={
                                                 commit.isPending ||
+                                                (publish && waitingForMedia) ||
                                                 [
                                                     "needs_review",
                                                     "cancelled",

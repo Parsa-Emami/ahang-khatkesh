@@ -3,6 +3,7 @@
 namespace App\Actions\Media;
 
 use App\Actions\AuthorizeLibraryWrite;
+use App\Actions\Conversions\RequestConversion;
 use App\Actions\UpdatePlaylist;
 use App\Jobs\CleanupUploadFiles;
 use App\Jobs\DeleteUnreferencedMedia;
@@ -25,7 +26,7 @@ use Throwable;
 
 class IngestMedia
 {
-    public function __construct(private AuthorizeLibraryWrite $authorize, private MediaFiles $files, private MediaProbe $probe, private UpdatePlaylist $playlists, private DatabaseQueueContract $queue, private CollectMediaGarbage $garbage) {}
+    public function __construct(private AuthorizeLibraryWrite $authorize, private MediaFiles $files, private MediaProbe $probe, private UpdatePlaylist $playlists, private DatabaseQueueContract $queue, private CollectMediaGarbage $garbage, private RequestConversion $conversions) {}
 
     public function handle(User $actor, string $reservationId, UploadedFile $file, string $purpose = 'audio', bool $reuse = true, ?Playlist $playlist = null, ?int $revision = null): array
     {
@@ -59,6 +60,7 @@ class IngestMedia
                     throw ValidationException::withMessages(['audio' => 'فایل کامل نوشته نشد.']);
                 }
                 $metadata = $purpose === 'audio' ? $this->probe->inspect(Storage::disk('media')->path($claim->staging_path)) : [];
+                abort_if($purpose === 'audio' && ($metadata['codec'] ?? null) !== 'flac' && $snapshot['size_bytes'] > config('music.max_regular_upload_bytes'), 422, 'سقف فایل غیر FLAC برابر ۱۰۰ MiB است.');
                 $this->assertLease($claim);
                 $this->files->promote($claim->staging_path, $claim->candidate_path);
 
@@ -75,9 +77,12 @@ class IngestMedia
                     }
                     $asset = null;
                     if ($purpose === 'audio') {
-                        $asset = $reuse ? MediaAsset::where('blob_id', $blob->id)->orderBy('id')->first() : null;
+                        $asset = $reuse ? MediaAsset::where('blob_id', $blob->id)->whereNull('source_asset_id')->orderBy('id')->first() : null;
                         if (! $asset) {
                             $asset = MediaAsset::create($metadata + $snapshot + ['blob_id' => $blob->id, 'path' => $blob->path, 'original_name' => mb_substr($file->getClientOriginalName(), 0, 255), 'mime_type' => $blob->mime_type, 'uploaded_by' => $actor->id]);
+                        }
+                        if (! $asset->codec) {
+                            $asset->update($metadata);
                         }
                     } else {
                         abort_unless($playlist !== null && $revision !== null, 422);
@@ -91,6 +96,9 @@ class IngestMedia
                     $reservation->update(['status' => $duplicate ? 'cleanup_pending' : 'consumed', 'result_asset_id' => $asset?->id, 'result_blob_id' => $blob->id]);
                     if ($duplicate) {
                         CleanupUploadFiles::dispatch($reservation->id)->onConnection('database')->beforeCommit();
+                    }
+                    if ($asset?->isFlac() && config('music.conversions_enabled')) {
+                        $this->conversions->fromStoredFacts($actor, $asset->load('blob'));
                     }
                     AuditEvent::create(['user_id' => $actor->id, 'action' => $purpose === 'audio' ? 'media.uploaded' : 'playlist.cover_uploaded', 'subject_id' => $asset?->id ?? (string) $playlist->id, 'metadata' => ['size_bytes' => $blob->size_bytes]]);
 

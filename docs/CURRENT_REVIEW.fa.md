@@ -1,3 +1,5 @@
+> F08 تبدیل واقعی، پنل کیفیت و اصلاح redelivery را افزوده است؛ [قرارداد F08](F08_AUDIO_CONVERSION.fa.md) و رودمپ مرجع جاری‌اند. تأیید همهٔ فازهای تغییرکرده تا CI همان SHA به implemented بازمی‌گردد. گام بعد از F08، F09 است.
+
 # وضعیت اجرایی و نقص‌های باقی‌مانده
 
 > F01 تا F07 با CI موفق همان commit تأیید شدند. F07 چرخهٔ blob، quota، رزرو، backfill، GC و lease/recovery را به runtime افزوده است. N01 تا N03 و R06/R07 در دامنهٔ قرارداد فعلی بسته‌اند؛ [قرارداد F07](F07_STORAGE_AND_RECOVERY.fa.md) و [evidence](verification/foundation-through-f07-2026-10-28.json) مرجع‌اند. جدول اصلاح‌های زیر سابقهٔ قبل از F07 را نیز نگه می‌دارد. گام بعدی F08 است.
@@ -43,7 +45,7 @@
 | N01 / R06 | بسته در دامنهٔ F07 | recovery و fencing با kill واقعی worker پاس شد | evidence F07 |
 | N02 / R07 | بسته در دامنهٔ F07 | blob مستقل، backfill و integrity checker با آزمون dedup هم‌زمان پاس شد | evidence F07 |
 | N03 / بخشی از R09 | بسته در دامنهٔ F07 | quota، reservation، cleanup و GC با retention پاس شدند؛ load/offload باقی است | F15 |
-| N04 / R12 | P1 | تبدیل خودکار FLAC→MP3 320k، صف تبدیل و انتخاب کیفیت هنوز runtime ندارند | F08 |
+| N04 / R12 | پیاده‌شده، در انتظار CI همان SHA | تبدیل واقعی، guard، سهمیه، recovery، پنل و کیفیت اضافه شده‌اند | evidence F08 |
 | N05 / R11 | P1 | فارسی/RTL هست؛ ترجمه و LTR سراسریِ همه فرم‌ها و تمام themeها کامل نیست | F09 |
 | N06 / R11 | P2 | shader 21st.dev فقط منبع pin شده دارد؛ ورود runtime، GPU budget و visual matrix باقی است | F10 |
 | N07 | P2 | تاریخچه، private session و پیشنهاد توضیح‌پذیر هنوز ساخته نشده‌اند | F11 |

@@ -13,7 +13,9 @@ class ReserveStorage
 
     public function handle(User $actor, int $bytes, string $purpose): StorageReservation
     {
-        abort_unless(in_array($purpose, ['audio', 'cover'], true) && $bytes > 0 && $bytes <= ($purpose === 'audio' ? config('music.max_upload_kilobytes') * 1024 : 5242880), 422);
+        abort_unless(in_array($purpose, ['audio', 'cover', 'conversion'], true) && $bytes > 0 && $bytes <= match ($purpose) {
+            'audio' => config('music.max_upload_kilobytes') * 1024, 'conversion' => config('music.max_conversion_bytes'), default => 5242880
+        }, 422);
 
         return DB::transaction(function () use ($actor, $bytes, $purpose): StorageReservation {
             $actor = $this->authorize->handle($actor);

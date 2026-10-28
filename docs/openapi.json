@@ -1148,6 +1148,17 @@
               "type": "string",
               "pattern": "^[1-9][0-9]*:[0-9]+$"
             }
+          },
+          {
+            "name": "quality",
+            "in": "query",
+            "schema": {
+              "enum": [
+                "auto",
+                "original",
+                "mp3-320"
+              ]
+            }
           }
         ]
       },
@@ -1227,6 +1238,17 @@
             "schema": {
               "type": "string",
               "example": "bytes=0-1023"
+            }
+          },
+          {
+            "name": "quality",
+            "in": "query",
+            "schema": {
+              "enum": [
+                "auto",
+                "original",
+                "mp3-320"
+              ]
             }
           }
         ]
@@ -2600,7 +2622,8 @@
               "pattern": "^[1-9][0-9]*:[0-9]+$"
             }
           }
-        ]
+        ],
+        "description": "FLAC max 512 MiB; other audio max 100 MiB. FLAC conversion, reservation and media admission share the SQL transaction. Source retained."
       }
     },
     "/admin/imports": {
@@ -7262,6 +7285,1079 @@
           }
         }
       }
+    },
+    "/admin/media-policy": {
+      "get": {
+        "operationId": "get_admin_media_policy",
+        "summary": "Super administrator audio conversion",
+        "tags": [
+          "Administration"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/MediaPolicy"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Request refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Request refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Request refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Request refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "419": {
+            "description": "Request refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Request refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "423": {
+            "description": "Request refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "428": {
+            "description": "Request refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Request refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Request refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "507": {
+            "description": "Request refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ]
+      }
+    },
+    "/admin/media-conversions": {
+      "get": {
+        "operationId": "get_admin_media_conversions",
+        "summary": "Super administrator audio conversion",
+        "tags": [
+          "Administration"
+        ],
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "enum": [
+                "queued",
+                "processing",
+                "validating",
+                "ready",
+                "failed",
+                "needs_review",
+                "cancelled"
+              ]
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data",
+                    "meta",
+                    "links"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Conversion"
+                      }
+                    },
+                    "meta": {
+                      "type": "object"
+                    },
+                    "links": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Request refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Request refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Request refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Request refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "419": {
+            "description": "Request refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Request refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "423": {
+            "description": "Request refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "428": {
+            "description": "Request refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Request refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Request refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "507": {
+            "description": "Request refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ]
+      }
+    },
+    "/admin/media-conversions/{conversion}": {
+      "get": {
+        "operationId": "get_admin_media_conversions_conversion",
+        "summary": "Super administrator audio conversion",
+        "tags": [
+          "Administration"
+        ],
+        "parameters": [
+          {
+            "name": "conversion",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Conversion"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Request refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Request refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Request refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Request refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "419": {
+            "description": "Request refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Request refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "423": {
+            "description": "Request refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "428": {
+            "description": "Request refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Request refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Request refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "507": {
+            "description": "Request refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ]
+      }
+    },
+    "/admin/media/{asset}/conversions/{profile}": {
+      "put": {
+        "operationId": "put_admin_media_asset_conversions_profile",
+        "summary": "Super administrator audio conversion",
+        "tags": [
+          "Administration"
+        ],
+        "parameters": [
+          {
+            "name": "asset",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "profile",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-Session-Context",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Conversion"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Request refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Request refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Request refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Request refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "419": {
+            "description": "Request refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Request refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "423": {
+            "description": "Request refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "428": {
+            "description": "Request refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Request refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Request refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "507": {
+            "description": "Request refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "202": {
+            "description": "Conversion queued atomically",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Conversion"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "sessionCookie": [],
+            "csrfToken": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "source_revision",
+                  "profile_version"
+                ],
+                "properties": {
+                  "source_revision": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "profile_version": {
+                    "const": 1
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/media-conversions/{conversion}/retry": {
+      "post": {
+        "operationId": "post_admin_media_conversions_conversion_retry",
+        "summary": "Super administrator audio conversion",
+        "tags": [
+          "Administration"
+        ],
+        "parameters": [
+          {
+            "name": "conversion",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-Session-Context",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Conversion"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Request refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Request refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Request refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Request refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "419": {
+            "description": "Request refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Request refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "423": {
+            "description": "Request refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "428": {
+            "description": "Request refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Request refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Request refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "507": {
+            "description": "Request refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "sessionCookie": [],
+            "csrfToken": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "revision",
+                  "expected_generation"
+                ],
+                "properties": {
+                  "revision": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "expected_generation": {
+                    "type": "integer",
+                    "minimum": 1
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/media-conversions/{conversion}/cancel": {
+      "post": {
+        "operationId": "post_admin_media_conversions_conversion_cancel",
+        "summary": "Super administrator audio conversion",
+        "tags": [
+          "Administration"
+        ],
+        "parameters": [
+          {
+            "name": "conversion",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-Session-Context",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Conversion"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Request refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Request refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Request refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Request refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "419": {
+            "description": "Request refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Request refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "423": {
+            "description": "Request refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "428": {
+            "description": "Request refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Request refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Request refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "507": {
+            "description": "Request refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "sessionCookie": [],
+            "csrfToken": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "revision",
+                  "expected_generation"
+                ],
+                "properties": {
+                  "revision": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "expected_generation": {
+                    "type": "integer",
+                    "minimum": 1
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -7366,7 +8462,8 @@
           "stream_url",
           "is_liked",
           "revision",
-          "primary_release_id"
+          "primary_release_id",
+          "audio_qualities"
         ],
         "properties": {
           "id": {
@@ -7450,6 +8547,41 @@
                 "id",
                 "title"
               ]
+            }
+          },
+          "audio_qualities": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "id",
+                "label",
+                "size_bytes",
+                "mime_type",
+                "stream_url"
+              ],
+              "properties": {
+                "id": {
+                  "enum": [
+                    "original",
+                    "mp3-320"
+                  ]
+                },
+                "label": {
+                  "type": "string"
+                },
+                "size_bytes": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "mime_type": {
+                  "type": "string"
+                },
+                "stream_url": {
+                  "type": "string"
+                }
+              }
             }
           }
         },
@@ -7573,34 +8705,77 @@
       },
       "MediaAsset": {
         "type": "object",
+        "additionalProperties": false,
         "required": [
           "id",
           "original_name",
           "duration_seconds",
-          "size_bytes"
+          "size_bytes",
+          "codec",
+          "sample_rate",
+          "channels",
+          "revision",
+          "conversion"
         ],
         "properties": {
           "id": {
             "type": "string",
             "format": "uuid"
           },
-          "sha256": {
-            "type": "string"
-          },
           "original_name": {
-            "type": "string"
-          },
-          "mime_type": {
             "type": "string"
           },
           "duration_seconds": {
             "type": "number"
           },
           "size_bytes": {
-            "type": "integer"
+            "type": "integer",
+            "minimum": 1
           },
-          "uploaded_by": {
-            "type": "integer"
+          "codec": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "sample_rate": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "channels": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "conversion": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "id",
+                  "status"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "status": {
+                    "type": "string"
+                  }
+                }
+              }
+            ]
           }
         }
       },
@@ -7682,11 +8857,45 @@
               "plan_version": {
                 "enum": [
                   1,
-                  2
+                  2,
+                  3
                 ]
               },
               "metadata_policy": {
                 "type": "string"
+              },
+              "media": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "source_codec",
+                    "playback_profile",
+                    "status",
+                    "conversion_id"
+                  ],
+                  "properties": {
+                    "source_codec": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "playback_profile": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string"
+                    },
+                    "conversion_id": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    }
+                  }
+                }
               }
             },
             "additionalProperties": false
@@ -8193,6 +9402,255 @@
           "disk_available_bytes": {
             "type": "integer",
             "minimum": 0
+          }
+        }
+      },
+      "Conversion": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "source_asset_id",
+          "source_name",
+          "source_revision",
+          "source_bytes",
+          "duration_seconds",
+          "profile_id",
+          "profile_version",
+          "status",
+          "generation",
+          "revision",
+          "progress_seconds",
+          "progress_percent",
+          "reserved_bytes",
+          "output_asset_id",
+          "output_bytes",
+          "error_code",
+          "next_retry_at",
+          "heartbeat_at",
+          "lease_expires_at",
+          "report",
+          "created_at"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "source_asset_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "source_name": {
+            "type": "string"
+          },
+          "source_revision": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "source_bytes": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "duration_seconds": {
+            "type": "number"
+          },
+          "profile_id": {
+            "const": "mp3-cbr-320-v1"
+          },
+          "profile_version": {
+            "const": 1
+          },
+          "status": {
+            "enum": [
+              "queued",
+              "processing",
+              "validating",
+              "ready",
+              "failed",
+              "needs_review",
+              "cancelled"
+            ]
+          },
+          "generation": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "progress_seconds": {
+            "type": "number",
+            "minimum": 0
+          },
+          "progress_percent": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "reserved_bytes": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "output_asset_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "output_bytes": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "error_code": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "next_retry_at": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "heartbeat_at": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "lease_expires_at": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "report": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "bitrate_bps",
+                  "validated_frames",
+                  "full_decode",
+                  "encoder_version",
+                  "encoder_sha256",
+                  "probe_sha256",
+                  "profile_version",
+                  "source_retained",
+                  "output_bytes",
+                  "source_bytes",
+                  "validated_source_samples",
+                  "full_source_decode"
+                ],
+                "properties": {
+                  "bitrate_bps": {
+                    "const": 320000
+                  },
+                  "validated_frames": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "full_decode": {
+                    "const": true
+                  },
+                  "encoder_version": {
+                    "type": "string"
+                  },
+                  "encoder_sha256": {
+                    "type": "string"
+                  },
+                  "probe_sha256": {
+                    "type": "string"
+                  },
+                  "profile_version": {
+                    "const": 1
+                  },
+                  "source_retained": {
+                    "const": true
+                  },
+                  "output_bytes": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "source_bytes": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "validated_source_samples": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "full_source_decode": {
+                    "const": true
+                  }
+                }
+              }
+            ]
+          },
+          "created_at": {
+            "type": "string"
+          }
+        }
+      },
+      "MediaPolicy": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "enabled",
+          "profile_id",
+          "profile_version",
+          "flac_upload_max_bytes",
+          "regular_upload_max_bytes",
+          "max_duration_seconds",
+          "max_output_bytes",
+          "max_active_conversions",
+          "bitrate_bps",
+          "retain_original"
+        ],
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "profile_id": {
+            "const": "mp3-cbr-320-v1"
+          },
+          "profile_version": {
+            "const": 1
+          },
+          "flac_upload_max_bytes": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "regular_upload_max_bytes": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "max_duration_seconds": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "max_output_bytes": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "max_active_conversions": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "bitrate_bps": {
+            "const": 320000
+          },
+          "retain_original": {
+            "const": true
           }
         }
       }

@@ -19,6 +19,7 @@ import {
     ArrowDown,
     X,
     Timer,
+    AudioLines,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { sleepPresets } from "../lib/sleep-timer";
@@ -426,11 +427,16 @@ export function NowPlaying() {
 export function PlayerBar() {
     const player = usePlayer(),
         current = player.current;
+    const [qualityOpen, setQualityOpen] = useState(false);
+    const hasQualityChoice = (current?.audio_qualities?.length ?? 0) > 1;
     const [queueOpen, setQueueOpen] = useState(false),
         [lastVolume, setLastVolume] = useState(0.8);
     return (
         <>
-            <footer className="player-bar" aria-label="کنترل پخش">
+            <footer
+                className={`player-bar ${hasQualityChoice ? "has-quality" : ""}`}
+                aria-label="کنترل پخش"
+            >
                 <div className="player-track">
                     <Artwork
                         seed={current?.artwork_seed ?? current?.id ?? 0}
@@ -524,6 +530,14 @@ export function PlayerBar() {
                     </div>
                 </div>
                 <div className="player-tools">
+                    {hasQualityChoice && (
+                        <IconButton
+                            label="انتخاب کیفیت پخش"
+                            onClick={() => setQualityOpen(true)}
+                        >
+                            <AudioLines size={20} />
+                        </IconButton>
+                    )}
                     <SleepTimerControl />
                     <IconButton
                         label="نمایش صف پخش"
@@ -561,6 +575,38 @@ export function PlayerBar() {
                     />
                 </div>
             </footer>
+            <Dialog
+                open={qualityOpen}
+                onOpenChange={setQualityOpen}
+                title="کیفیت پخش"
+                description="کیفیت دلخواه را انتخاب کن؛ موقعیت پخش حفظ می‌شود."
+            >
+                <label className="quality-picker">
+                    کیفیت پخش
+                    <select
+                        aria-label="کیفیت پخش"
+                        value={player.quality}
+                        onChange={(event) =>
+                            player.setQuality(
+                                event.target
+                                    .value as import("../types").AudioQuality,
+                            )
+                        }
+                    >
+                        <option value="auto">خودکار · MP3 320</option>
+                        {current?.audio_qualities?.map((option) => (
+                            <option key={option.id} value={option.id}>
+                                {option.label}
+                            </option>
+                        ))}
+                    </select>
+                </label>
+                <p>
+                    MP3 با کیفیت 320kbps اتلافی است. FLAC اصلِ بدون افت است و
+                    ممکن است حجم بیشتری برای پخش مصرف کند. تغییر کیفیت، موقعیت
+                    پخش را حفظ می‌کند.
+                </p>
+            </Dialog>
             {(player.error || player.syncError) && (
                 <div className="player-error" role="alert">
                     {player.error || player.syncError}

@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Contracts\Console\Kernel;
 use Illuminate\Support\Facades\Artisan;
 use Laravel\Fortify\Fortify;
+use Tests\Support\FlacFixture;
 
 $root = dirname(__DIR__, 2);
 $runId = getenv('AHANG_E2E_RUN_ID') ?: '';
@@ -44,5 +45,8 @@ if (Artisan::call('app:demo') !== 0 || Playlist::count() !== 6) {
 }
 if (Artisan::call('media:backfill', ['--apply' => true, '--limit' => 1000]) !== 0) {
     throw new RuntimeException('Synthetic browser media could not be backfilled.');
+}
+foreach (['desktop', 'mobile'] as $device) {
+    file_put_contents(base_path('reports/f08-'.$device.'.flac'), FlacFixture::bytes(2, 44100, $device === 'desktop' ? 880 : 990, 8));
 }
 echo "Isolated browser fixtures prepared.\n";

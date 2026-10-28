@@ -7,6 +7,7 @@ use App\Http\Resources\PlaylistResource;
 use App\Http\Resources\TrackResource;
 use App\Models\Playlist;
 use App\Models\Track;
+use App\Services\PlaybackMedia;
 use App\Services\PrivateMedia;
 use App\Support\TextNormalizer;
 use Illuminate\Database\Eloquent\Builder;
@@ -40,7 +41,7 @@ class CatalogController extends Controller
     {
         Gate::authorize('view', $playlist);
         $playlist->loadCount('tracks')->loadExists(['savedBy as is_saved' => fn (Builder $q) => $q->where('users.id', $request->user()->id)]);
-        $playlist->load(['tracks' => fn ($query) => $query->with('mediaAsset')->withExists(['likedBy as is_liked' => fn (Builder $q) => $q->where('users.id', $request->user()->id)])]);
+        $playlist->load(['tracks' => fn ($query) => $query->with(['mediaAsset.blob', PlaybackMedia::EAGER])->withExists(['likedBy as is_liked' => fn (Builder $q) => $q->where('users.id', $request->user()->id)])]);
 
         return new PlaylistResource($playlist);
     }
@@ -48,7 +49,7 @@ class CatalogController extends Controller
     public function tracks(Request $request): AnonymousResourceCollection
     {
         $data = $request->validate(['q' => ['nullable', 'string', 'max:120'], 'liked' => ['nullable', 'boolean']]);
-        $query = Track::visibleTo($request->user())->with('mediaAsset')->withExists(['likedBy as is_liked' => fn (Builder $q) => $q->where('users.id', $request->user()->id)]);
+        $query = Track::visibleTo($request->user())->with(['mediaAsset.blob', PlaybackMedia::EAGER])->withExists(['likedBy as is_liked' => fn (Builder $q) => $q->where('users.id', $request->user()->id)]);
         if (! empty($data['q'])) {
             $query->whereRaw("search_text LIKE ? ESCAPE '!'", [TextNormalizer::like($data['q'])]);
         }

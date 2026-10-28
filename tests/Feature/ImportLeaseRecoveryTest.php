@@ -10,6 +10,7 @@ use App\Models\PlaylistImport;
 use App\Models\User;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Queue\MaxAttemptsExceededException;
 use Illuminate\Queue\TimeoutExceededException;
 use Illuminate\Support\Facades\Queue;
 use Tests\TestCase;
@@ -128,5 +129,18 @@ class ImportLeaseRecoveryTest extends TestCase
         $this->assertSame('cancelled', $import->fresh()->status);
         $this->assertDatabaseCount('playlists', 0);
         Queue::assertPushed(PublishPlaylistImport::class, 1);
+    }
+
+    public function test_exhausted_redelivery_after_worker_death_still_uses_bounded_recovery(): void
+    {
+        $import = $this->queued();
+        app(ImportExecution::class)->claim($import->id, 1, $import->execution_token);
+        $old = new PublishPlaylistImport($import->id, 1, $import->execution_token);
+        $old->failed(new MaxAttemptsExceededException('Redelivered after worker death'));
+        $this->assertSame('running', $import->fresh()->status);
+        $this->travel(31)->seconds();
+        $this->assertSame(1, app(ImportExecution::class)->recover());
+        $this->assertSame(2, $import->fresh()->generation);
+        Queue::assertPushed(PublishPlaylistImport::class, 2);
     }
 }

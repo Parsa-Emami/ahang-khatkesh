@@ -8,14 +8,17 @@ use App\Actions\ResolveImportPlan;
 use App\Enums\UserRole;
 use App\Exceptions\ImportLeaseExpired;
 use App\Exceptions\ImportPlanChanged;
+use App\Exceptions\MediaNotReady;
 use App\Models\AuditEvent;
 use App\Models\LibrarySetting;
 use App\Models\Playlist;
 use App\Models\PlaylistImport;
 use App\Models\User;
+use App\Services\PlaybackMedia;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Queue\MaxAttemptsExceededException;
 use Illuminate\Queue\TimeoutExceededException;
 use Illuminate\Support\Facades\DB;
 use Throwable;
@@ -30,7 +33,7 @@ class PublishPlaylistImport implements ShouldQueue
 
     public function __construct(public string $importId, public int $generation = 1, public ?string $token = null) {}
 
-    public function handle(RegisterTrack $register, ResolveImportPlan $plans, ImportExecution $execution): void
+    public function handle(RegisterTrack $register, ResolveImportPlan $plans, ImportExecution $execution, PlaybackMedia $playback): void
     {
         if (! $execution->claim($this->importId, $this->generation ?? 0, $this->token ?? null)) {
             return;
@@ -39,15 +42,15 @@ class PublishPlaylistImport implements ShouldQueue
             return;
         }
         try {
-            $this->publish($register, $plans);
-        } catch (ImportPlanChanged) {
+            $this->publish($register, $plans, $playback);
+        } catch (ImportPlanChanged|MediaNotReady) {
             $execution->finish($this->importId, $this->generation, $this->token, PlaylistImport::NEEDS_REVIEW, 'اطلاعات یا مالکیت کاتالوگ تغییر کرده است؛ پیش‌نمایش تازه بسازید.');
         }
     }
 
-    private function publish(RegisterTrack $register, ResolveImportPlan $plans): void
+    private function publish(RegisterTrack $register, ResolveImportPlan $plans, PlaybackMedia $playback): void
     {
-        DB::transaction(function () use ($register, $plans): void {
+        DB::transaction(function () use ($register, $plans, $playback): void {
             LibrarySetting::whereKey(1)->increment('lock_version');
             $import = PlaylistImport::whereKey($this->importId)->lockForUpdate()->firstOrFail();
             if ($import->status !== PlaylistImport::RUNNING || $import->generation !== $this->generation || $import->execution_token !== $this->token || ! $import->lease_expires_at?->isFuture()) {
@@ -67,6 +70,9 @@ class PublishPlaylistImport implements ShouldQueue
             $plan = $plans->handle($report['source_rows']);
             if (! hash_equals($report['plan_hash'], $plan['hash'])) {
                 throw new ImportPlanChanged;
+            }
+            if ($import->publish) {
+                $playback->assertReady(array_column($plan['rows'], 'asset_id'));
             }
             $playlist = Playlist::create(['name' => $import->name, 'description' => $import->description, 'mood' => $import->mood, 'created_by' => $import->created_by, 'status' => Playlist::DRAFT, 'artwork_seed' => hexdec(substr($import->payload_hash, 0, 4))]);
             $reused = 0;
@@ -90,7 +96,7 @@ class PublishPlaylistImport implements ShouldQueue
     public function failed(?Throwable $exception): void
     {
         $transientSql = $exception instanceof QueryException && (str_starts_with((string) $exception->getCode(), '08') || $exception->getCode() === '40001' || in_array((int) ($exception->errorInfo[1] ?? 0), [1205, 1213, 2006, 2013], true));
-        if ($transientSql || $exception instanceof TimeoutExceededException || $exception instanceof ImportLeaseExpired) {
+        if ($transientSql || $exception instanceof TimeoutExceededException || $exception instanceof MaxAttemptsExceededException || $exception instanceof ImportLeaseExpired) {
             app(ImportExecution::class)->retryLater($this->importId, $this->generation ?? 0, $this->token ?? null);
 
             return;

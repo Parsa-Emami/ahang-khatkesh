@@ -3189,3 +3189,32 @@ input[type="file"]::file-selector-button {
         flex: 0 0 36px;
     }
 }
+
+.quality-picker {
+    display: grid;
+    gap: 0.7rem;
+}
+.quality-picker select {
+    inline-size: 100%;
+    background: var(--surface);
+    color: var(--text);
+    border: 1px solid var(--border);
+    padding: 0.8rem;
+    border-radius: 0.5rem;
+}
+.player-bar.has-quality {
+    grid-template-columns: minmax(160px, 1fr) minmax(280px, 1.4fr) minmax(
+            280px,
+            1fr
+        );
+}
+@media (max-width: 1000px) {
+    .player-bar.has-quality {
+        grid-template-columns: minmax(160px, 1fr) minmax(280px, 1.4fr) 176px;
+    }
+}
+@media (max-width: 700px) {
+    .player-bar.has-quality {
+        grid-template-columns: minmax(0, 1fr) 148px;
+    }
+}

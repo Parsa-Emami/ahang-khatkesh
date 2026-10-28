@@ -8,12 +8,13 @@ use App\Models\AuditEvent;
 use App\Models\PlaylistImport;
 use App\Models\User;
 use App\Services\DatabaseQueueContract;
+use App\Services\PlaybackMedia;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class QueueImport
 {
-    public function __construct(private AuthorizeLibraryWrite $authorize, private DatabaseQueueContract $queue) {}
+    public function __construct(private AuthorizeLibraryWrite $authorize, private DatabaseQueueContract $queue, private PlaybackMedia $playback) {}
 
     public function handle(User $actor, PlaylistImport $import, bool $publish): void
     {
@@ -25,6 +26,9 @@ class QueueImport
                 return;
             }
             abort_if(in_array($locked->status, [PlaylistImport::NEEDS_REVIEW, PlaylistImport::CANCELLED], true) || empty($locked->report['plan_hash']), 409, 'پیش‌نمایش تازه بسازید.');
+            if ($publish) {
+                $this->playback->assertReady(array_column($locked->report['source_rows'], 'asset_id'));
+            }
             $this->enqueue($locked, $publish, false);
             AuditEvent::create(['user_id' => $actor->id, 'action' => 'import.queued', 'subject_id' => $locked->id]);
         }, 5);

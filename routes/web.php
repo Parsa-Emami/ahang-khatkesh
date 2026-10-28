@@ -72,6 +72,12 @@ Route::prefix('api/v1')->group(function (): void {
                 Route::post('users', [Admin\UserController::class, 'store'])->middleware(['can:users.manage', 'recent-password']);
                 Route::put('users/{user}/password', [Admin\UserController::class, 'password'])->middleware(['can:users.manage', 'recent-password', 'throttle:confirm-password']);
                 Route::patch('users/{user}', [Admin\UserController::class, 'update'])->middleware(['can:users.manage', 'recent-password']);
+                Route::get('media-policy', [Admin\ConversionController::class, 'policy'])->middleware('can:media.manage');
+                Route::get('media-conversions', [Admin\ConversionController::class, 'index'])->middleware('can:media.manage');
+                Route::get('media-conversions/{conversion}', [Admin\ConversionController::class, 'show'])->middleware('can:media.manage');
+                Route::put('media/{asset}/conversions/{profile}', [Admin\ConversionController::class, 'store'])->middleware(['can:media.manage', 'recent-password', 'throttle:reservations']);
+                Route::post('media-conversions/{conversion}/retry', [Admin\ConversionController::class, 'retry'])->middleware(['can:media.manage', 'recent-password', 'throttle:reservations']);
+                Route::post('media-conversions/{conversion}/cancel', [Admin\ConversionController::class, 'cancel'])->middleware(['can:media.manage', 'recent-password']);
                 Route::get('storage', [Admin\StorageController::class, 'show'])->middleware('can:media.manage');
                 Route::post('storage-reservations', [Admin\StorageController::class, 'store'])->middleware(['can:media.manage', 'recent-password', 'throttle:reservations']);
                 Route::delete('storage-reservations/{reservation}', [Admin\StorageController::class, 'destroy'])->middleware(['can:media.manage', 'recent-password']);

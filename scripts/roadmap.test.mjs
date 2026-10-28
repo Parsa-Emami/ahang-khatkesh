@@ -150,3 +150,54 @@ test("F07 cannot be verified using unit and browser evidence without real proces
     assert.notEqual(result.status, 0);
     assert.match(result.stderr, /F07 requires real MySQL process evidence/);
 });
+
+test("F08 cannot be verified using only the earlier process and browser suites", () => {
+    const result = run((input) => {
+        for (const phase of input.data.phases.slice(0, 8)) {
+            phase.status = "verified";
+            phase.evidence = "docs/verification/test.json";
+            phase.required_tests = ["fixture"];
+            input.text = input.text.replace(
+                `- [ ] ${phase.id}`,
+                `- [x] ${phase.id}`,
+            );
+        }
+        const suite = { tests: 1, passed: 1, failed: 0, skipped: 0 };
+        writeFileSync(
+            join(input.root, "docs/verification/test.json"),
+            JSON.stringify({
+                source_fingerprint: createHash("sha256")
+                    .update("[]")
+                    .digest("hex"),
+                commit: "a".repeat(40),
+                ci: {
+                    head_sha: "a".repeat(40),
+                    run_id: 1,
+                    conclusion: "success",
+                },
+                phases: input.data.phases.slice(0, 8).map((phase) => phase.id),
+                php: { sqlite: suite, mysql: suite },
+                frontend: suite,
+                browser: suite,
+                concurrency: { tests: 4, passed: 4, failed: 0, skipped: 0 },
+                checks: Object.fromEntries(
+                    [
+                        "build",
+                        "format",
+                        "pint",
+                        "composer_validate",
+                        "composer_audit",
+                        "npm_audit",
+                        "architecture",
+                    ].map((gate) => [gate, "passed"]),
+                ),
+                test_inventory: ["fixture"],
+            }),
+        );
+    });
+    assert.notEqual(result.status, 0);
+    assert.match(
+        result.stderr,
+        /F08 requires real media worker process evidence/,
+    );
+});

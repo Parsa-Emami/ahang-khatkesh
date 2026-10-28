@@ -8,14 +8,18 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreImportRequest;
 use App\Http\Resources\ImportResource;
 use App\Models\PlaylistImport;
+use App\Services\ImportMediaReadiness;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class ImportController extends Controller
 {
-    public function index(): AnonymousResourceCollection
+    public function index(ImportMediaReadiness $readiness): AnonymousResourceCollection
     {
-        return ImportResource::collection(PlaylistImport::orderByDesc('created_at')->orderByDesc('id')->paginate(20));
+        $page = PlaylistImport::orderByDesc('created_at')->orderByDesc('id')->paginate(20);
+        $readiness->load($page->getCollection());
+
+        return ImportResource::collection($page);
     }
 
     public function store(StoreImportRequest $request, PreviewPlaylistImport $preview): ImportResource

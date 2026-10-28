@@ -12,9 +12,11 @@ import {
     Disc3,
     ArrowLeft,
     Trash2,
+    AudioLines,
 } from "lucide-react";
 import { can, type Permission } from "../../types";
 import { useSession } from "../../context/AppContext";
+import { ConversionPanel } from "./media/ConversionPanel";
 import { ImportsPanel } from "./ImportsPanel";
 import { MembersPanel } from "./MembersPanel";
 import { ManageLibraryPanel } from "./ManageLibraryPanel";
@@ -42,6 +44,13 @@ const sections: {
         description: "از فایل تا پلی‌لیست",
         permission: "imports.manage",
         icon: UploadCloud,
+    },
+    {
+        id: "conversions",
+        label: "تبدیل صوت",
+        description: "FLAC، MP3 و سلامت خروجی",
+        permission: "media.manage",
+        icon: AudioLines,
     },
     {
         id: "library",
@@ -157,11 +166,7 @@ export default function AdminPage() {
                             AHANG KHATKESH
                         </p>
                     </nav>
-                    <section
-                        className="admin-stage"
-                        aria-label={active.label}
-                        key={active.id}
-                    >
+                    <section className="admin-stage" aria-label={active.label}>
                         <div className="admin-section-title">
                             <span className="eyebrow" lang="en">
                                 LIBRARY CONTROL
@@ -169,10 +174,21 @@ export default function AdminPage() {
                             <h2>{active.label}</h2>
                             <p>{active.description}</p>
                         </div>
+                        {can(user, "imports.manage") && (
+                            <div
+                                hidden={active.id !== "imports"}
+                                key={`${user?.id}:${user?.access_version}`}
+                            >
+                                <ImportsPanel
+                                    active={active.id === "imports"}
+                                />
+                            </div>
+                        )}
                         {active.id === "overview" ? (
                             <OverviewPanel go={go} />
-                        ) : active.id === "imports" ? (
-                            <ImportsPanel />
+                        ) : active.id === "imports" ? null : active.id ===
+                          "conversions" ? (
+                            <ConversionPanel />
                         ) : active.id === "library" ? (
                             <ManageLibraryPanel />
                         ) : active.id === "catalog" ? (

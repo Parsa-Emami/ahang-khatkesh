@@ -4,12 +4,17 @@ namespace App\Actions;
 
 use App\Exceptions\ImportPlanChanged;
 use App\Models\Artist;
+use App\Models\MediaAsset;
+use App\Models\MediaConversion;
 use App\Models\Release;
 use App\Models\Track;
+use App\Services\ConversionProfile;
 use Illuminate\Support\Facades\DB;
 
 class EnsureTrackCatalog
 {
+    public function __construct(private ConversionProfile $profile) {}
+
     public function handle(Track $track, ?int $artistId = null, ?int $releaseId = null): void
     {
         if (! $track->artists()->exists()) {
@@ -34,6 +39,9 @@ class EnsureTrackCatalog
         }
         if (! $link) {
             DB::table('track_media')->insert(['track_id' => $track->id, 'media_asset_id' => $track->media_asset_id, 'purpose' => 'original', 'label' => 'original']);
+            MediaAsset::whereKey($track->media_asset_id)->increment('ownership_revision');
+            $source = MediaAsset::findOrFail($track->media_asset_id);
+            MediaConversion::where('source_asset_id', $source->id)->whereIn('status', MediaConversion::ACTIVE)->where('source_revision', $source->ownership_revision - 1)->where('ownership_hash', hash('sha256', json_encode([null, null], JSON_THROW_ON_ERROR)))->update(['source_revision' => $source->ownership_revision, 'ownership_hash' => $this->profile->ownership($source)]);
         }
     }
 }

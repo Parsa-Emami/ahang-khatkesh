@@ -40,7 +40,7 @@ class PlaylistController extends Controller
     {
         $data = $request->validate(['revision' => ['required', 'integer', 'min:0'], 'track_ids' => ['present', 'array', 'max:500'], 'track_ids.*' => ['required', 'integer', 'distinct', 'exists:tracks,id']]);
 
-        return new PlaylistResource($update->handle($playlist, $request->user(), ['revision' => $data['revision']], $data['track_ids'])->loadCount('tracks')->load('tracks.mediaAsset'));
+        return new PlaylistResource($update->handle($playlist, $request->user(), ['revision' => $data['revision']], $data['track_ids'])->loadCount('tracks')->load(['tracks.mediaAsset.blob', 'tracks.mediaAsset.conversions.output.blob']));
     }
 
     public function cover(Request $request, Playlist $playlist, IngestMedia $ingest): PlaylistResource

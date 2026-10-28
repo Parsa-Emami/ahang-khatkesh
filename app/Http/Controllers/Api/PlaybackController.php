@@ -8,6 +8,7 @@ use App\Http\Resources\TrackResource;
 use App\Models\LibrarySetting;
 use App\Models\PlaybackState;
 use App\Models\Track;
+use App\Services\PlaybackMedia;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -22,7 +23,7 @@ class PlaybackController extends Controller
         if (! $state) {
             return response()->json(['data' => ['track_id' => null, 'queue' => [], 'position_seconds' => 0, 'volume' => 0.8, 'shuffle' => false, 'repeat_mode' => 'off', 'revision' => 0]]);
         }
-        $tracks = Track::visibleTo($request->user())->with('mediaAsset')->withExists(['likedBy as is_liked' => fn (Builder $q) => $q->where('users.id', $request->user()->id)])->whereIn('id', $state->queue)->get()->keyBy('id');
+        $tracks = Track::visibleTo($request->user())->with(['mediaAsset.blob', PlaybackMedia::EAGER])->withExists(['likedBy as is_liked' => fn (Builder $q) => $q->where('users.id', $request->user()->id)])->whereIn('id', $state->queue)->get()->keyBy('id');
         $ordered = collect($state->queue)->map(fn ($id) => $tracks->get($id))->filter()->values();
         $current = $tracks->get($state->track_id);
 
@@ -32,7 +33,7 @@ class PlaybackController extends Controller
     public function update(StorePlaybackRequest $request): JsonResponse
     {
         $data = $request->validated();
-        $tracks = Track::visibleTo($request->user())->with('mediaAsset')->whereIn('id', $data['queue'])->get()->keyBy('id');
+        $tracks = Track::visibleTo($request->user())->with(['mediaAsset.blob', PlaybackMedia::EAGER])->whereIn('id', $data['queue'])->get()->keyBy('id');
         if ($tracks->count() !== count($data['queue']) || ($data['track_id'] !== null && ! in_array($data['track_id'], $data['queue'], true))) {
             throw ValidationException::withMessages(['queue' => 'صف پخش شامل آهنگ نامعتبر یا منتشرنشده است.']);
         }
