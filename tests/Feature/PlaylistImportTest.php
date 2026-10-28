@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Actions\Media\ReserveStorage;
 use App\Enums\UserRole;
 use App\Jobs\PublishPlaylistImport;
 use App\Models\MediaAsset;
@@ -76,7 +77,7 @@ class PlaylistImportTest extends TestCase
         $this->postJson('/api/v1/admin/imports/'.$id.'/commit', ['publish' => true])->assertOk()->assertJsonPath('data.status', 'processing');
         $this->postJson('/api/v1/admin/imports/'.$id.'/commit', ['publish' => true])->assertOk();
         Queue::assertPushed(PublishPlaylistImport::class, 1);
-        $job = new PublishPlaylistImport($id);
+        $job = new PublishPlaylistImport($id, 1, PlaylistImport::findOrFail($id)->execution_token);
         app()->call([$job, 'handle']);
         app()->call([$job, 'handle']);
         $this->assertDatabaseCount('playlists', 1);
@@ -91,9 +92,9 @@ class PlaylistImportTest extends TestCase
         $admin = User::factory()->create(['role' => UserRole::Owner]);
         $asset = MediaAsset::factory()->create(['uploaded_by' => $admin->id]);
         $id = $this->preview($admin, [['asset_id' => $asset->id, 'title' => 'Track', 'artist' => 'Artist']])->json('data.id');
-        PlaylistImport::whereKey($id)->update(['status' => 'processing', 'generation' => 1]);
+        PlaylistImport::whereKey($id)->update(['status' => 'processing', 'generation' => 1, 'execution_token' => '00000000-0000-4000-8000-000000000001']);
         $asset->delete();
-        app()->call([new PublishPlaylistImport($id), 'handle']);
+        app()->call([new PublishPlaylistImport($id, 1, PlaylistImport::findOrFail($id)->execution_token), 'handle']);
         $this->assertDatabaseCount('playlists', 0);
         $this->assertDatabaseCount('tracks', 0);
         $this->assertDatabaseHas('playlist_imports', ['id' => $id, 'status' => 'needs_review']);
@@ -120,9 +121,9 @@ class PlaylistImportTest extends TestCase
         $admin = User::factory()->create(['role' => UserRole::Owner]);
         $samples = str_repeat(pack('v', 0), 1600);
         $wave = 'RIFF'.pack('V', 36 + strlen($samples)).'WAVEfmt '.pack('VvvVVvv', 16, 1, 1, 16000, 32000, 2, 16).'data'.pack('V', strlen($samples)).$samples;
-        $this->mock(MediaProbe::class)->shouldReceive('inspect')->once()->andReturn(['duration_seconds' => 0.1]);
-        $first = $this->actingAs($admin)->withSession(['auth.password_confirmed_at' => now()->timestamp, 'auth.mfa_confirmed_at' => now()->timestamp, 'auth.mfa_authenticated' => true])->post('/api/v1/admin/media', ['audio' => UploadedFile::fake()->createWithContent('sample.wav', $wave)], ['Accept' => 'application/json'])->assertCreated()->assertJsonMissingPath('data.path');
-        $this->post('/api/v1/admin/media', ['audio' => UploadedFile::fake()->createWithContent('again.wav', $wave)], ['Accept' => 'application/json'])->assertOk()->assertJsonPath('duplicate', true)->assertJsonPath('data.id', $first->json('data.id'));
+        $this->mock(MediaProbe::class)->shouldReceive('inspect')->twice()->andReturn(['duration_seconds' => 0.1]);
+        $first = $this->actingAs($admin)->withSession(['auth.password_confirmed_at' => now()->timestamp, 'auth.mfa_confirmed_at' => now()->timestamp, 'auth.mfa_authenticated' => true])->post('/api/v1/admin/media', ['reservation_id' => app(ReserveStorage::class)->handle($admin, strlen($wave), 'audio')->id, 'audio' => UploadedFile::fake()->createWithContent('sample.wav', $wave)], ['Accept' => 'application/json'])->assertCreated()->assertJsonMissingPath('data.path');
+        $this->post('/api/v1/admin/media', ['reservation_id' => app(ReserveStorage::class)->handle($admin, strlen($wave), 'audio')->id, 'audio' => UploadedFile::fake()->createWithContent('again.wav', $wave)], ['Accept' => 'application/json'])->assertOk()->assertJsonPath('duplicate', true)->assertJsonPath('data.id', $first->json('data.id'));
         $this->assertDatabaseCount('media_assets', 1);
     }
 
@@ -142,7 +143,7 @@ class PlaylistImportTest extends TestCase
         $playlist = Playlist::factory()->create(['created_by' => $admin->id]);
         $png = base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+j2VkAAAAASUVORK5CYII=');
         $this->actingAs($member)->post('/api/v1/admin/playlists/'.$playlist->id.'/cover', ['revision' => $playlist->fresh()->revision, 'cover' => UploadedFile::fake()->createWithContent('cover.png', $png)], ['Accept' => 'application/json'])->assertForbidden();
-        $this->actingAs($admin)->withSession(['auth.password_confirmed_at' => now()->timestamp, 'auth.mfa_confirmed_at' => now()->timestamp, 'auth.mfa_authenticated' => true])->post('/api/v1/admin/playlists/'.$playlist->id.'/cover', ['revision' => $playlist->fresh()->revision, 'cover' => UploadedFile::fake()->createWithContent('cover.png', $png)], ['Accept' => 'application/json'])->assertOk()->assertJsonMissingPath('data.cover_path');
+        $this->actingAs($admin)->withSession(['auth.password_confirmed_at' => now()->timestamp, 'auth.mfa_confirmed_at' => now()->timestamp, 'auth.mfa_authenticated' => true])->post('/api/v1/admin/playlists/'.$playlist->id.'/cover', ['reservation_id' => app(ReserveStorage::class)->handle($admin, strlen($png), 'cover')->id, 'revision' => $playlist->fresh()->revision, 'cover' => UploadedFile::fake()->createWithContent('cover.png', $png)], ['Accept' => 'application/json'])->assertOk()->assertJsonMissingPath('data.cover_path');
         $this->actingAs($member)->get('/api/v1/playlists/'.$playlist->id.'/cover')->assertOk()->assertHeader('Content-Type', 'image/png');
         $this->actingAs($admin)->withSession(['auth.password_confirmed_at' => now()->timestamp, 'auth.mfa_confirmed_at' => now()->timestamp, 'auth.mfa_authenticated' => true])->patchJson('/api/v1/admin/playlists/'.$playlist->id, ['revision' => $playlist->fresh()->revision, 'status' => 'draft'])->assertOk();
         $this->actingAs($member)->getJson('/api/v1/playlists/'.$playlist->id.'/cover')->assertNotFound();

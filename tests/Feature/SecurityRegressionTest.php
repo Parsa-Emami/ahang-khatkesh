@@ -6,6 +6,7 @@ use App\Enums\UserRole;
 use App\Jobs\PublishPlaylistImport;
 use App\Models\Artist;
 use App\Models\MediaAsset;
+use App\Models\PlaylistImport;
 use App\Models\Release;
 use App\Models\User;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
@@ -67,7 +68,7 @@ class SecurityRegressionTest extends TestCase
         $rows = $assets->map(fn ($asset, $i) => ['asset_id' => $asset->id, 'title' => 'آهنگ '.$i, 'artist' => 'نام ورودی', 'artist_id' => $artist->id, 'release_id' => $release->id])->all();
         $id = $this->post('/api/v1/admin/imports', ['name' => 'انتخاب', 'mood' => 'calm', 'manifest' => UploadedFile::fake()->createWithContent('catalog.json', json_encode(['tracks' => $rows]))], ['Accept' => 'application/json', 'Idempotency-Key' => 'canonical-identities-test-1'])->assertCreated()->json('data.id');
         $this->postJson('/api/v1/admin/imports/'.$id.'/commit', ['publish' => true])->assertOk();
-        app()->call([new PublishPlaylistImport($id), 'handle']);
+        app()->call([new PublishPlaylistImport($id, 1, PlaylistImport::findOrFail($id)->execution_token), 'handle']);
         $this->assertDatabaseCount('artists', 1);
         $this->assertDatabaseCount('releases', 1);
         $this->assertDatabaseHas('tracks', ['artist' => 'هنرمند مشخص', 'album' => 'انتشار مشخص', 'primary_release_id' => $release->id]);
@@ -83,7 +84,7 @@ class SecurityRegressionTest extends TestCase
         $csv = "asset_id,title,artist,artist_id,release_id\n".$asset->id.",Track,Artist,,\n";
         $id = $this->post('/api/v1/admin/imports', ['name' => 'Optional identities', 'mood' => 'calm', 'manifest' => UploadedFile::fake()->createWithContent('catalog.csv', $csv)], ['Accept' => 'application/json', 'Idempotency-Key' => 'empty-csv-identities-test-1'])->assertCreated()->assertJsonMissingPath('data.rows.0.artist_id')->json('data.id');
         $this->postJson('/api/v1/admin/imports/'.$id.'/commit', ['publish' => true])->assertOk();
-        app()->call([new PublishPlaylistImport($id), 'handle']);
+        app()->call([new PublishPlaylistImport($id, 1, PlaylistImport::findOrFail($id)->execution_token), 'handle']);
         $this->assertDatabaseHas('playlist_imports', ['id' => $id, 'status' => 'completed']);
         $this->assertDatabaseCount('tracks', 1);
     }

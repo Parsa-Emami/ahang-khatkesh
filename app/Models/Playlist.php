@@ -23,7 +23,7 @@ class Playlist extends Model
 
     public const MOODS = ['focus', 'night', 'calm', 'energy', 'other'];
 
-    protected $fillable = ['name', 'description', 'mood', 'status', 'cover_path', 'artwork_seed', 'created_by', 'search_text'];
+    protected $fillable = ['name', 'description', 'mood', 'status', 'cover_path', 'cover_blob_id', 'artwork_seed', 'created_by', 'search_text'];
 
     protected $hidden = ['cover_path'];
 

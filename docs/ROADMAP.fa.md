@@ -1,17 +1,17 @@
 # رودمپ اجرایی ahang-khatkesh
 
-تاریخ مبنا: ۲۷ اکتبر ۲۰۲۶، Asia/Tehran. این برنامه ۱۶ فاز دارد. F01 تا F06 کد اجرایی دارند؛ وضعیت نهایی تأیید را از فهرست زیر و [دادهٔ ماشین‌خوان](roadmap/phases.json) بخوانید. F07 تا F16 هنوز اجرا نشده‌اند. «جهانی» هدف کیفیت است؛ گواهی بی‌نقصی یا هم‌ترازی زیرساخت با Spotify نیست.
+تاریخ مبنا: ۲۷ اکتبر ۲۰۲۶، Asia/Tehran. این برنامه ۱۶ فاز دارد. F01 تا F07 کد اجرایی دارند؛ وضعیت نهایی تأیید را از فهرست زیر و [دادهٔ ماشین‌خوان](roadmap/phases.json) بخوانید. F08 تا F16 هنوز اجرا نشده‌اند. «جهانی» هدف کیفیت است؛ گواهی بی‌نقصی یا هم‌ترازی زیرساخت با Spotify نیست.
 
 این سند ترتیب اجرای نسخهٔ جدید را تعیین می‌کند. بسته‌های A01 تا A11 و ۶۴ قرارداد کامپوننت قبلی حذف نشده‌اند؛ جدول تطبیق پایین سند ارتباطشان را حفظ می‌کند. هر فاز یک محدودهٔ محدودِ قابل آزمون دارد؛ تأیید F04 به معنی تکمیل تمام blob/quota در A03 نیست.
 
 ## وضعیت قابل تأیید
 
-- [x] F01 — مرز سوپرادمین و سطل بازیافت
-- [x] F02 — پیش‌نمایش مؤثر و انتشار اتمیک ایمپورت
-- [x] F03 — نسخهٔ امنیتی جاری و کنترل credential
-- [x] F04 — پاک‌سازی بادوام فایل‌های بدون ارجاع
-- [x] F05 — صف شخصی و تایمر خواب
-- [x] F06 — حفظ draft، نشست چندتب و قرارداد پاسخ
+- [ ] F01 — مرز سوپرادمین و سطل بازیافت
+- [ ] F02 — پیش‌نمایش مؤثر و انتشار اتمیک ایمپورت
+- [ ] F03 — نسخهٔ امنیتی جاری و کنترل credential
+- [ ] F04 — پاک‌سازی بادوام فایل‌های بدون ارجاع
+- [ ] F05 — صف شخصی و تایمر خواب
+- [ ] F06 — حفظ draft، نشست چندتب و قرارداد پاسخ
 - [ ] F07 — چرخهٔ کامل job، blob، quota و reconciliation
 - [ ] F08 — FLAC به MP3 320k و انتخاب کیفیت
 - [ ] F09 — زبان و جهت سراسری و دسترس‌پذیری پایه
@@ -119,6 +119,8 @@ API actor:epoch را از session bootstrap می‌گیرد؛ این header مح
 
 ### F07 — چرخهٔ کامل job، blob، quota و reconciliation
 
+قرارداد اجرایی و تست‌ها: [ذخیره‌سازی و بازیابی](F07_STORAGE_AND_RECOVERY.fa.md). مراحل اپراتور: [پس از کامیت](AFTER_COMMIT.fa.md). وضعیت تأیید در فهرست بالا از evidence همان SHA تعیین می‌شود.
+
 وابستگی: F02، F03، F04، F06.
 
 migrationهای expand برای media_blobs، asset reference، storage_reservations و lease فیلدهای import بنویس. blobs.sha256+size یکتا، ارجاع معنایی مستقل و مسیر immutable باشند. backfill قابل ادامه و integrity command با dry-run بساز. پیش از دریافت فایل، reservation محدود و expiry داشته باش. claim، heartbeat، lease expiry و reconcile با generation+token شرطی باشند. kill واقعی worker، callback قدیمی، duplicate dispatch، disk full، zero-byte staging و دو آپلود هم‌زمان را روی MySQL تست کن. اول GC فقط گزارش دهد؛ حذف پس از retention و recheck فعال شود.
@@ -129,7 +131,7 @@ migrationهای expand برای media_blobs، asset reference، storage_reservat
 - blob فیزیکی از asset معنایی جدا شود؛ quota پیش از آپلود رزرو شود.
 - orphan GC با retention، dry-run و recheck مرجع اجرا شود.
 
-آزمون‌های الزامی: `ImportLeaseRecoveryTest`، `MediaBlobQuotaTest`.
+آزمون‌های الزامی: `ImportLeaseRecoveryTest`، `MediaBlobQuotaTest`، چهار سناریوی واقعی `MediaAndImportProcessTest` روی MySQL و مسیر رزرو/آپلود پنل در مرورگر.
 
 ### F08 — FLAC به MP3 320k و انتخاب کیفیت
 
@@ -275,4 +277,4 @@ MySQL 8.4 واقعی با snapshot دارای کاربر، Track قدیمی، ل
 
 ## گام بعد
 
-پس از اثبات F01 تا F06، F07 پیش‌نیاز آغاز pipeline واقعی تبدیل صوت است. بدون blob، quota، fencing و چرخهٔ staging، اضافه‌کردن FFmpeg فقط بخشی از راه است. هر بار scope یک فاز عوض شد، acceptance، required_tests، OpenAPI و ارزیابی ریسک همان فاز نیز به‌روز شوند.
+F07 پیش‌نیاز pipeline واقعی تبدیل صوت است؛ پس از تأیید آن، گام بعد F08 است. بدون blob، quota، fencing و چرخهٔ staging، اضافه‌کردن FFmpeg فقط بخشی از راه است. هر بار scope یک فاز عوض شد، acceptance، required_tests، OpenAPI و ارزیابی ریسک همان فاز نیز به‌روز شوند.

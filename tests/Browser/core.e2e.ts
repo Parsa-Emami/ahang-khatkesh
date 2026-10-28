@@ -259,3 +259,72 @@ test("super administrator can trash and restore catalog from the admin panel", a
         fullPage: true,
     });
 });
+test("super administrator reserves storage before uploading audio through the admin UI", async ({
+    page,
+}, info) => {
+    await login(page, info.project.name, true, 31);
+    await page.goto("/admin?tab=imports");
+    await expect(
+        page.getByLabel("فضای کتابخانه", { exact: true }),
+    ).toBeVisible();
+    const samples = Buffer.alloc(3200),
+        wave = Buffer.alloc(44 + samples.length);
+    samples.writeInt16LE(info.project.name === "mobile" ? 1 : 2, 0);
+    wave.write("RIFF", 0);
+    wave.writeUInt32LE(36 + samples.length, 4);
+    wave.write("WAVEfmt ", 8);
+    wave.writeUInt32LE(16, 16);
+    wave.writeUInt16LE(1, 20);
+    wave.writeUInt16LE(1, 22);
+    wave.writeUInt32LE(16000, 24);
+    wave.writeUInt32LE(32000, 28);
+    wave.writeUInt16LE(2, 32);
+    wave.writeUInt16LE(16, 34);
+    wave.write("data", 36);
+    wave.writeUInt32LE(samples.length, 40);
+    samples.copy(wave, 44);
+    const writes: string[] = [];
+    page.on("request", (request) => {
+        if (
+            request.method() === "POST" &&
+            (request.url().endsWith("/admin/storage-reservations") ||
+                request.url().endsWith("/admin/media"))
+        )
+            writes.push(request.url());
+    });
+    const reservation = page.waitForResponse(
+        (response) =>
+            response.url().endsWith("/admin/storage-reservations") &&
+            response.request().method() === "POST",
+    );
+    const upload = page.waitForResponse(
+        (response) =>
+            response.url().endsWith("/admin/media") &&
+            response.request().method() === "POST",
+    );
+    await page
+        .getByLabel("بارگذاری فایل‌های صوتی", { exact: true })
+        .setInputFiles({
+            name: "phase-seven.wav",
+            mimeType: "audio/wav",
+            buffer: wave,
+        });
+    expect((await reservation).status()).toBe(201);
+    const result = await upload;
+    expect(result.status()).toBe(201);
+    expect((await result.json()).data.original_name).toBe("phase-seven.wav");
+    expect(writes).toHaveLength(2);
+    expect(writes[0]).toMatch(/storage-reservations$/);
+    expect(writes[1]).toMatch(/admin\/media$/);
+    await expect(page.getByLabel("عنوان آهنگ ۱", { exact: true })).toHaveValue(
+        "phase-seven",
+    );
+    const status = await (
+        await page.request.get("/api/v1/admin/storage")
+    ).json();
+    expect(status.data.reserved_bytes).toBe(0);
+    await page.screenshot({
+        path: `reports/storage-${info.project.name}.png`,
+        fullPage: true,
+    });
+});

@@ -51,7 +51,7 @@ jobs:
       - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962
         with:
           php-version: '8.5'
-          extensions: mbstring, xml, curl, fileinfo, pdo_sqlite, pdo_mysql
+          extensions: mbstring, xml, curl, fileinfo, pdo_sqlite, pdo_mysql, pcntl, posix
           coverage: none
           tools: composer:v2
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
@@ -85,6 +85,14 @@ jobs:
       - run: mkdir -p reports
       - run: npm test -- --reporter=default --reporter=json --outputFile=reports/vitest.json
       - run: php vendor/bin/phpunit --log-junit=reports/phpunit.xml
+      - name: MySQL process isolation and recovery
+        if: matrix.database == 'mysql'
+        run: |
+          docker exec ${{ job.services.mysql.id }} mysql -uroot -pephemeral-ci-only -e "CREATE DATABASE ahang_f07_test CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci; GRANT ALL ON ahang_f07_test.* TO 'ci'@'%';"
+          php vendor/bin/phpunit -c phpunit-concurrency.xml --log-junit=reports/concurrency.xml
+        env:
+          DB_DATABASE: ahang_f07_test
+          AHANG_CONCURRENCY: '1'
       - name: Browser journeys with real CSRF
         if: matrix.database == 'sqlite'
         run: npm run test:browser

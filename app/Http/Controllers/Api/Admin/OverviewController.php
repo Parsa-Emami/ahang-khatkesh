@@ -22,7 +22,7 @@ class OverviewController extends Controller
 
         return response()->json(['data' => [
             'tracks' => Track::count(), 'published_playlists' => (int) ($playlists['published'] ?? 0), 'draft_playlists' => (int) ($playlists['draft'] ?? 0),
-            'processing_imports' => (int) ($imports['processing'] ?? 0), 'failed_imports' => (int) ($imports['failed'] ?? 0),
+            'processing_imports' => (int) ($imports['processing'] ?? 0) + (int) ($imports['running'] ?? 0), 'failed_imports' => (int) ($imports['failed'] ?? 0),
             'media_bytes' => (int) MediaAsset::sum('size_bytes'),
             'members' => $request->user()->hasPermission(Permission::UsersManage) ? ['total' => User::count(), 'capacity' => LibrarySetting::MAX_USERS] : null,
         ]]);

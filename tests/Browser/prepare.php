@@ -12,7 +12,7 @@ $runId = getenv('AHANG_E2E_RUN_ID') ?: '';
 if (! preg_match('/^[a-f0-9-]{36}$/D', $runId)) {
     throw new RuntimeException('Isolated browser run id required.');
 }
-$runRoot = $root.'/storage/framework/testing/browser-'.$runId;
+$runRoot = str_replace('\\', '/', rtrim(sys_get_temp_dir(), '/\\')).'/ahang-e2e-'.$runId;
 $database = $runRoot.'/database.sqlite';
 $media = $runRoot.'/media';
 if (getenv('APP_ENV') !== 'testing' || getenv('AHANG_E2E') !== '1' || getenv('DB_CONNECTION') !== 'sqlite' || getenv('DB_DATABASE') !== $database || getenv('MUSIC_MEDIA_ROOT') !== $media || strlen(getenv('AHANG_E2E_PASSWORD') ?: '') < 24) {
@@ -41,5 +41,8 @@ foreach (['desktop', 'mobile'] as $device) {
 }
 if (Artisan::call('app:demo') !== 0 || Playlist::count() !== 6) {
     throw new RuntimeException('Synthetic browser library could not be prepared.');
+}
+if (Artisan::call('media:backfill', ['--apply' => true, '--limit' => 1000]) !== 0) {
+    throw new RuntimeException('Synthetic browser media could not be backfilled.');
 }
 echo "Isolated browser fixtures prepared.\n";

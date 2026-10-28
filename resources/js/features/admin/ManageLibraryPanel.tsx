@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ImagePlus, Pencil, ListMusic, Plus } from "lucide-react";
+import { uploadWithReservation } from "./uploads";
 import { TrashButton } from "./TrashPanel";
 import { PlaylistTracksEditor } from "./PlaylistTracksEditor";
 import { Link } from "react-router-dom";
@@ -75,13 +76,12 @@ export function ManageLibraryPanel() {
             playlist: Playlist;
             file: File;
         }) => {
-            const form = new FormData();
-            form.append("cover", file);
-            form.append("revision", String(playlist.revision));
-            return api(`/admin/playlists/${playlist.id}/cover`, {
-                method: "POST",
-                body: form,
-            });
+            return uploadWithReservation(
+                file,
+                "cover",
+                `/admin/playlists/${playlist.id}/cover`,
+                { revision: String(playlist.revision) },
+            );
         },
         onSuccess: () => {
             void client.invalidateQueries({ queryKey: ["playlists"] });

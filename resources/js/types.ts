@@ -73,6 +73,7 @@ export type ImportRun = {
     status:
         | "ready"
         | "processing"
+        | "running"
         | "completed"
         | "failed"
         | "needs_review"
@@ -83,6 +84,13 @@ export type ImportRun = {
         created_tracks?: number;
         reused_tracks?: number;
     } | null;
+    execution?: {
+        generation: number;
+        recovery_count: number;
+        queued_at: string | null;
+        heartbeat_at: string | null;
+        lease_expires_at: string | null;
+    };
     playlist_id: number | null;
     error: string | null;
     created_at: string;

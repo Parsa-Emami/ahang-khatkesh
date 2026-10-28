@@ -41,6 +41,12 @@ for (const phase of roadmap.phases) {
     if (phase.status !== "planned")
         for (const path of phase.implemented_paths) readFileSync(path);
     if (phase.status !== "verified") continue;
+    for (const dependency of phase.depends_on)
+        assert.equal(
+            phases.get(dependency).status,
+            "verified",
+            `Unverified dependency ${dependency} for ${phase.id}`,
+        );
     verified++;
     assert(
         phase.evidence?.startsWith("docs/verification/") &&
@@ -74,6 +80,16 @@ for (const phase of roadmap.phases) {
                 suite.failed === 0 &&
                 suite.skipped === 0,
             `Incomplete test evidence for ${phase.id}`,
+        );
+    }
+    if (phase.id === "F07") {
+        assert(
+            record.concurrency &&
+                record.concurrency.tests >= 4 &&
+                record.concurrency.passed === record.concurrency.tests &&
+                record.concurrency.failed === 0 &&
+                record.concurrency.skipped === 0,
+            "F07 requires real MySQL process evidence",
         );
     }
     for (const gate of [

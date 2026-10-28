@@ -38,7 +38,9 @@
     "docs/IMPLEMENTATION_ROADMAP.fa.md",
     "docs/CURRENT_REVIEW.fa.md",
     "docs/ROADMAP.fa.md",
-    "docs/PRODUCT_BENCHMARK.fa.md"
+    "docs/PRODUCT_BENCHMARK.fa.md",
+    "docs/F07_STORAGE_AND_RECOVERY.fa.md",
+    "docs/AFTER_COMMIT.fa.md"
   ],
   "findings": [
     {
@@ -94,22 +96,24 @@
     {
       "id": "R06",
       "priority": "P1",
-      "status": "open_runtime",
-      "evidence": "code_review",
+      "status": "unverified",
+      "evidence": "F07_runtime_implemented_pending_exact_commit_ci",
       "package_ids": [
         "A04"
-      ]
+      ],
+      "current_review": "docs/F07_STORAGE_AND_RECOVERY.fa.md"
     },
     {
       "id": "R07",
       "priority": "P1",
-      "status": "open_runtime",
-      "evidence": "code_review",
+      "status": "unverified",
+      "evidence": "F07_runtime_implemented_pending_exact_commit_ci",
       "package_ids": [
         "A01",
         "A03",
         "A08"
-      ]
+      ],
+      "current_review": "docs/F07_STORAGE_AND_RECOVERY.fa.md"
     },
     {
       "id": "R08",
@@ -165,7 +169,7 @@
     {
       "id": "A01",
       "title": "Recording ownership and effective import plan",
-      "status": "planned",
+      "status": "implemented",
       "depends_on": [],
       "finding_ids": [
         "R01",
@@ -175,7 +179,7 @@
     {
       "id": "A02",
       "title": "Fresh security epoch and credential mutations",
-      "status": "planned",
+      "status": "implemented",
       "depends_on": [],
       "finding_ids": [
         "R02"
@@ -184,7 +188,7 @@
     {
       "id": "A03",
       "title": "Immutable file lifecycle, blobs and quota",
-      "status": "planned",
+      "status": "implemented",
       "depends_on": [
         "A01"
       ],
@@ -196,7 +200,7 @@
     {
       "id": "A04",
       "title": "Import generations, leases and reconciliation",
-      "status": "planned",
+      "status": "implemented",
       "depends_on": [
         "A01",
         "A02"
@@ -1272,13 +1276,16 @@
       "id": "C63",
       "name": "StorageBudget",
       "group": "media",
-      "status": "planned",
+      "status": "existing_requires_work",
       "target_path": "resources/js/features/admin/media/StorageBudget.tsx",
-      "existing_sources": [],
+      "existing_sources": [
+        "resources/js/features/admin/StorageStatus.tsx"
+      ],
       "quality_gates": [
         "G06",
         "G11"
-      ]
+      ],
+      "runtime_scope": "F07 storage metrics; full fa/en and visual matrix remain F09/F10"
     },
     {
       "id": "C64",
@@ -1569,5 +1576,14 @@
     "rto_hours": 4,
     "security_target": "ASVS 5 L2",
     "accessibility_target": "WCAG 2.2 AA"
-  }
+  },
+  "runtime_import_states": [
+    "ready",
+    "processing",
+    "running",
+    "completed",
+    "needs_review",
+    "failed",
+    "cancelled"
+  ]
 }

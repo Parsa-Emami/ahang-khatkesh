@@ -15,6 +15,26 @@ assert(
         frontend.numFailedTests === 0 &&
         frontend.numPendingTests === 0,
 );
+let concurrency = null,
+    concurrencyTests = [];
+if (process.env.AHANG_DATABASE === "mysql") {
+    const report = readFileSync("reports/concurrency.xml", "utf8");
+    const tests = [
+        ...report.matchAll(
+            /<testcase\b([^>]*)(?:\/>|>([\s\S]*?)<\/testcase>)/g,
+        ),
+    ];
+    assert(tests.length > 0 && !/<(failure|error|skipped)\b/.test(report));
+    concurrency = {
+        tests: tests.length,
+        passed: tests.length,
+        failed: 0,
+        skipped: 0,
+    };
+    concurrencyTests = tests.map(
+        (test) => `${attr(test[1], "classname")}::${attr(test[1], "name")}`,
+    );
+}
 let browser = null,
     browserTests = [];
 if (process.env.AHANG_DATABASE === "sqlite") {
@@ -63,6 +83,7 @@ console.log(
                 skipped: 0,
             },
             browser,
+            concurrency,
             test_inventory: [
                 ...cases.map(
                     (c) => `${attr(c[1], "classname")}::${attr(c[1], "name")}`,
@@ -71,6 +92,7 @@ console.log(
                     file.assertionResults.map((test) => test.fullName),
                 ),
                 ...browserTests,
+                ...concurrencyTests,
             ],
         }),
 );

@@ -2570,10 +2570,20 @@
                   "audio": {
                     "type": "string",
                     "format": "binary"
+                  },
+                  "reservation_id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "reuse_existing": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "False creates an independent semantic asset while sharing verified physical bytes."
                   }
                 },
                 "required": [
-                  "audio"
+                  "audio",
+                  "reservation_id"
                 ]
               }
             }
@@ -3395,11 +3405,16 @@
                   "revision": {
                     "type": "integer",
                     "minimum": 0
+                  },
+                  "reservation_id": {
+                    "type": "string",
+                    "format": "uuid"
                   }
                 },
                 "required": [
                   "cover",
-                  "revision"
+                  "revision",
+                  "reservation_id"
                 ]
               }
             }
@@ -6766,6 +6781,487 @@
           }
         }
       }
+    },
+    "/admin/storage": {
+      "get": {
+        "operationId": "get_admin_storage",
+        "summary": "Super administrator private storage budget and reservations",
+        "tags": [
+          "Administration"
+        ],
+        "parameters": [
+          {
+            "name": "X-Session-Context",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[1-9][0-9]*:[0-9]+$"
+            }
+          }
+        ],
+        "security": [
+          {
+            "sessionCookie": [],
+            "csrfToken": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/StorageBudget"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Request refused without a catalog write",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Request refused without a catalog write",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Request refused without a catalog write",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "419": {
+            "description": "Request refused without a catalog write",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Request refused without a catalog write",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "423": {
+            "description": "Request refused without a catalog write",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "428": {
+            "description": "Request refused without a catalog write",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Request refused without a catalog write",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Request refused without a catalog write",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "507": {
+            "description": "Request refused without a catalog write",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/storage-reservations": {
+      "post": {
+        "operationId": "post_admin_storage_reservations",
+        "summary": "Super administrator private storage budget and reservations",
+        "tags": [
+          "Administration"
+        ],
+        "parameters": [
+          {
+            "name": "X-Session-Context",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[1-9][0-9]*:[0-9]+$"
+            }
+          }
+        ],
+        "security": [
+          {
+            "sessionCookie": [],
+            "csrfToken": []
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/StorageReservation"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Request refused without a catalog write",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Request refused without a catalog write",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Request refused without a catalog write",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "419": {
+            "description": "Request refused without a catalog write",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Request refused without a catalog write",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "423": {
+            "description": "Request refused without a catalog write",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "428": {
+            "description": "Request refused without a catalog write",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Request refused without a catalog write",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Request refused without a catalog write",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "507": {
+            "description": "Request refused without a catalog write",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "purpose",
+                  "size_bytes"
+                ],
+                "properties": {
+                  "purpose": {
+                    "enum": [
+                      "audio",
+                      "cover"
+                    ]
+                  },
+                  "size_bytes": {
+                    "type": "integer",
+                    "minimum": 1
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/storage-reservations/{reservation}": {
+      "delete": {
+        "operationId": "delete_admin_storage_reservation",
+        "summary": "Super administrator private storage budget and reservations",
+        "tags": [
+          "Administration"
+        ],
+        "parameters": [
+          {
+            "name": "X-Session-Context",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[1-9][0-9]*:[0-9]+$"
+            }
+          },
+          {
+            "name": "reservation",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "security": [
+          {
+            "sessionCookie": [],
+            "csrfToken": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "required": [
+                        "released"
+                      ],
+                      "properties": {
+                        "released": {
+                          "const": true
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Request refused without a catalog write",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Request refused without a catalog write",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Request refused without a catalog write",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "419": {
+            "description": "Request refused without a catalog write",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Request refused without a catalog write",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "423": {
+            "description": "Request refused without a catalog write",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "428": {
+            "description": "Request refused without a catalog write",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Request refused without a catalog write",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Request refused without a catalog write",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "507": {
+            "description": "Request refused without a catalog write",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -7148,7 +7644,8 @@
               "completed",
               "failed",
               "needs_review",
-              "cancelled"
+              "cancelled",
+              "running"
             ]
           },
           "rows": {
@@ -7183,7 +7680,10 @@
                 "pattern": "^[0-9a-f]{64}$"
               },
               "plan_version": {
-                "const": 1
+                "enum": [
+                  1,
+                  2
+                ]
               },
               "metadata_policy": {
                 "type": "string"
@@ -7200,6 +7700,48 @@
           "created_at": {
             "type": "string",
             "format": "date-time"
+          },
+          "execution": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "generation",
+              "recovery_count",
+              "queued_at",
+              "heartbeat_at",
+              "lease_expires_at"
+            ],
+            "properties": {
+              "generation": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "recovery_count": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "queued_at": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "format": "date-time"
+              },
+              "heartbeat_at": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "format": "date-time"
+              },
+              "lease_expires_at": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "format": "date-time"
+              }
+            }
           }
         }
       },
@@ -7564,6 +8106,93 @@
           "deleted_at": {
             "type": "string",
             "format": "date-time"
+          }
+        }
+      },
+      "StorageReservation": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "purpose",
+          "size_bytes",
+          "expires_at"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "purpose": {
+            "enum": [
+              "audio",
+              "cover"
+            ]
+          },
+          "size_bytes": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "StorageBudget": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "used_bytes",
+          "reserved_bytes",
+          "quota_bytes",
+          "available_bytes",
+          "orphan_bytes",
+          "inventory_ready",
+          "legacy_assets",
+          "pending_cleanup",
+          "quota_available_bytes",
+          "disk_available_bytes"
+        ],
+        "properties": {
+          "used_bytes": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "reserved_bytes": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "quota_bytes": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "available_bytes": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "orphan_bytes": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "legacy_assets": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "pending_cleanup": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "inventory_ready": {
+            "type": "boolean"
+          },
+          "quota_available_bytes": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "disk_available_bytes": {
+            "type": "integer",
+            "minimum": 0
           }
         }
       }

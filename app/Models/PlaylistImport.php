@@ -13,6 +13,8 @@ class PlaylistImport extends Model
 
     public const PROCESSING = 'processing';
 
+    public const RUNNING = 'running';
+
     public const COMPLETED = 'completed';
 
     public const FAILED = 'failed';
@@ -21,10 +23,10 @@ class PlaylistImport extends Model
 
     public const CANCELLED = 'cancelled';
 
-    protected $fillable = ['created_by', 'idempotency_key', 'payload_hash', 'name', 'description', 'mood', 'rows', 'status', 'report', 'playlist_id', 'publish', 'error', 'generation'];
+    protected $fillable = ['created_by', 'idempotency_key', 'payload_hash', 'name', 'description', 'mood', 'rows', 'status', 'report', 'playlist_id', 'publish', 'error', 'generation', 'execution_token', 'queued_at', 'heartbeat_at', 'lease_expires_at', 'recovery_count'];
 
     protected function casts(): array
     {
-        return ['generation' => 'integer', 'rows' => 'array', 'report' => 'array', 'publish' => 'boolean'];
+        return ['queued_at' => 'immutable_datetime', 'heartbeat_at' => 'immutable_datetime', 'lease_expires_at' => 'immutable_datetime', 'recovery_count' => 'integer', 'generation' => 'integer', 'rows' => 'array', 'report' => 'array', 'publish' => 'boolean'];
     }
 }

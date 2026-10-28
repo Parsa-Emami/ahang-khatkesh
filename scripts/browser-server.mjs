@@ -1,12 +1,13 @@
 import { spawn, spawnSync } from "node:child_process";
 import { rmSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { resolve } from "node:path";
 if (process.env.AHANG_E2E !== "1")
     throw new Error("Start browser tests through npm run test:browser.");
 const runId = process.env.AHANG_E2E_RUN_ID;
 if (!runId || !/^[a-f0-9-]{36}$/.test(runId))
     throw new Error("Isolated browser run id required.");
-const runRoot = resolve(`storage/framework/testing/browser-${runId}`);
+const runRoot = resolve(tmpdir(), `ahang-e2e-${runId}`).replaceAll("\\", "/");
 const env = {
     ...process.env,
     APP_ENV: "testing",

@@ -7,6 +7,7 @@ use App\Models\Playlist;
 use App\Models\Track;
 use App\Models\User;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Testing\TestResponse;
 use Opis\JsonSchema\CompliantValidator;
 use Opis\JsonSchema\Errors\ErrorFormatter;
@@ -37,6 +38,16 @@ class ApiResponseSchemaTest extends TestCase
         $this->assertResponseSchema($this->deleteJson('/api/v1/admin/tracks/'.$track->id, ['revision' => 0])->assertOk(), '/admin/tracks/{track}', 'delete', '200');
         $this->assertResponseSchema($this->getJson('/api/v1/admin/trash?type=track')->assertOk(), '/admin/trash', 'get', '200');
         $this->assertResponseSchema($this->postJson('/api/v1/admin/tracks/'.$track->id.'/restore', ['revision' => 1])->assertOk(), '/admin/tracks/{track}/restore', 'post', '200');
+    }
+
+    public function test_storage_reservation_and_budget_responses_are_allowlisted(): void
+    {
+        Storage::fake('media');
+        $owner = User::factory()->create(['role' => UserRole::Owner]);
+        $this->actingAs($owner)->withSession(['auth.password_confirmed_at' => now()->timestamp, 'auth.mfa_confirmed_at' => now()->timestamp, 'auth.mfa_authenticated' => true]);
+        $response = $this->postJson('/api/v1/admin/storage-reservations', ['size_bytes' => 1024, 'purpose' => 'audio'])->assertCreated()->assertJsonMissingPath('data.lease_token')->assertJsonMissingPath('data.candidate_path');
+        $this->assertResponseSchema($response, '/admin/storage-reservations', 'post', '201');
+        $this->assertResponseSchema($this->getJson('/api/v1/admin/storage')->assertOk(), '/admin/storage', 'get', '200');
     }
 
     public function test_wrong_or_missing_actor_context_cannot_change_a_playlist(): void

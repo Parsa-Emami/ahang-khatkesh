@@ -27,9 +27,12 @@ import {
     type Page,
 } from "../../types";
 import { ErrorState, IconButton, Loading } from "../../components/UI";
+import { uploadWithReservation } from "./uploads";
+import { StorageStatus } from "./StorageStatus";
 const statusLabels: Record<ImportRun["status"], string> = {
     ready: "آمادهٔ تأیید",
-    processing: "در حال ساخت",
+    processing: "در صف پردازش",
+    running: "در حال ساخت",
     completed: "انجام‌شده",
     failed: "خطای پردازش؛ قابل تلاش دوباره",
     needs_review: "نیاز به پیش‌نمایش تازه",
@@ -75,7 +78,11 @@ export function ImportsPanel() {
         queryFn: () => api<{ data: ImportRun }>(`/admin/imports/${runId}`),
         enabled: !!runId,
         refetchInterval: (query) =>
-            query.state.data?.data.status === "processing" ? 2000 : false,
+            ["processing", "running"].includes(
+                query.state.data?.data.status || "",
+            )
+                ? 2000
+                : false,
     });
     useEffect(() => {
         if (run.data?.data.status === "completed") {
@@ -117,13 +124,11 @@ export function ImportsPanel() {
                 errors.push(`${file.name}: حجم بیشتر از ۱۰۰ مگابایت`);
                 continue;
             }
-            const form = new FormData();
-            form.append("audio", file);
             try {
-                const result = await api<{
+                const result = await uploadWithReservation<{
                     data: MediaAsset;
                     duplicate: boolean;
-                }>("/admin/media", { method: "POST", body: form });
+                }>(file, "audio", "/admin/media");
                 addAsset(result.data);
             } catch (error) {
                 errors.push(`${file.name}: ${(error as Error).message}`);
@@ -132,6 +137,7 @@ export function ImportsPanel() {
         setUploading("");
         setUploadErrors(errors);
         void client.invalidateQueries({ queryKey: ["media"] });
+        void client.invalidateQueries({ queryKey: ["admin", "storage"] });
     }
     const preview = useMutation({
         mutationFn: () => {
@@ -207,6 +213,7 @@ export function ImportsPanel() {
     }
     return (
         <>
+            <StorageStatus />
             <div className="import-steps">
                 <span className={!runId ? "active" : ""}>
                     <b>۱</b>آماده‌سازی
@@ -221,6 +228,7 @@ export function ImportsPanel() {
                         current &&
                         [
                             "processing",
+                            "running",
                             "completed",
                             "needs_review",
                             "cancelled",
@@ -599,8 +607,35 @@ export function ImportsPanel() {
                                     {digits(current.rows.length)} آهنگ بررسی شده
                                     · {moodLabels[current.mood]}
                                 </p>
-                                {current.status === "processing" ? (
-                                    <Loading label="پلی‌لیست در صف پردازش است؛ وضعیت به‌صورت خودکار به‌روزرسانی می‌شود." />
+                                {["processing", "running"].includes(
+                                    current.status,
+                                ) ? (
+                                    <div>
+                                        <Loading
+                                            label={
+                                                current.status === "running"
+                                                    ? "در حال ساخت پلی‌لیست…"
+                                                    : "پلی‌لیست در صف پردازش است؛ وضعیت به‌صورت خودکار به‌روزرسانی می‌شود."
+                                            }
+                                        />
+                                        {current.execution && (
+                                            <p className="muted">
+                                                نسل اجرا:{" "}
+                                                {digits(
+                                                    current.execution
+                                                        .generation,
+                                                )}{" "}
+                                                · بازیابی خودکار:{" "}
+                                                {digits(
+                                                    current.execution
+                                                        .recovery_count,
+                                                )}
+                                                {current.execution
+                                                    .heartbeat_at &&
+                                                    ` · آخرین heartbeat: ${new Intl.DateTimeFormat("fa-IR", { hour: "2-digit", minute: "2-digit" }).format(new Date(current.execution.heartbeat_at))}`}
+                                            </p>
+                                        )}
+                                    </div>
                                 ) : current.status === "completed" ? (
                                     <div className="import-success">
                                         <CheckCircle2 size={46} />

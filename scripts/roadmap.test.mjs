@@ -94,3 +94,59 @@ test("failed tests prevent verification even with a matching source fingerprint"
     assert.notEqual(result.status, 0);
     assert.match(result.stderr, /Incomplete test evidence/);
 });
+test("verified phases cannot bypass an unverified dependency", () => {
+    const result = run((input) => {
+        const phase = input.data.phases[6];
+        phase.status = "verified";
+        phase.evidence = "docs/verification/absent.json";
+        input.text = input.text.replace("- [ ] F07", "- [x] F07");
+    });
+    assert.notEqual(result.status, 0);
+    assert.match(result.stderr, /Unverified dependency/);
+});
+test("F07 cannot be verified using unit and browser evidence without real process tests", () => {
+    const result = run((input) => {
+        for (const phase of input.data.phases.slice(0, 7)) {
+            phase.status = "verified";
+            phase.evidence = "docs/verification/test.json";
+            phase.required_tests = ["fixture"];
+            input.text = input.text.replace(
+                `- [ ] ${phase.id}`,
+                `- [x] ${phase.id}`,
+            );
+        }
+        const suite = { tests: 1, passed: 1, failed: 0, skipped: 0 };
+        writeFileSync(
+            join(input.root, "docs/verification/test.json"),
+            JSON.stringify({
+                source_fingerprint: createHash("sha256")
+                    .update("[]")
+                    .digest("hex"),
+                commit: "a".repeat(40),
+                ci: {
+                    head_sha: "a".repeat(40),
+                    run_id: 1,
+                    conclusion: "success",
+                },
+                phases: input.data.phases.slice(0, 7).map((phase) => phase.id),
+                php: { sqlite: suite, mysql: suite },
+                frontend: suite,
+                browser: suite,
+                checks: Object.fromEntries(
+                    [
+                        "build",
+                        "format",
+                        "pint",
+                        "composer_validate",
+                        "composer_audit",
+                        "npm_audit",
+                        "architecture",
+                    ].map((gate) => [gate, "passed"]),
+                ),
+                test_inventory: ["fixture"],
+            }),
+        );
+    });
+    assert.notEqual(result.status, 0);
+    assert.match(result.stderr, /F07 requires real MySQL process evidence/);
+});

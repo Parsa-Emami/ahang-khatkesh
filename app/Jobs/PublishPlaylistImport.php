@@ -2,9 +2,11 @@
 
 namespace App\Jobs;
 
+use App\Actions\Imports\ImportExecution;
 use App\Actions\RegisterTrack;
 use App\Actions\ResolveImportPlan;
 use App\Enums\UserRole;
+use App\Exceptions\ImportLeaseExpired;
 use App\Exceptions\ImportPlanChanged;
 use App\Models\AuditEvent;
 use App\Models\LibrarySetting;
@@ -12,7 +14,9 @@ use App\Models\Playlist;
 use App\Models\PlaylistImport;
 use App\Models\User;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Queue\TimeoutExceededException;
 use Illuminate\Support\Facades\DB;
 use Throwable;
 
@@ -20,27 +24,24 @@ class PublishPlaylistImport implements ShouldQueue
 {
     use Queueable;
 
-    public int $tries = 3;
+    public int $tries = 1;
 
     public int $timeout = 120;
 
-    public array $backoff = [5, 30, 120];
+    public function __construct(public string $importId, public int $generation = 1, public ?string $token = null) {}
 
-    public function __construct(public string $importId, public int $generation = 1) {}
-
-    public function handle(RegisterTrack $register, ResolveImportPlan $plans): void
+    public function handle(RegisterTrack $register, ResolveImportPlan $plans, ImportExecution $execution): void
     {
+        if (! $execution->claim($this->importId, $this->generation ?? 0, $this->token ?? null)) {
+            return;
+        }
+        if (! $execution->renew($this->importId, $this->generation, $this->token)) {
+            return;
+        }
         try {
             $this->publish($register, $plans);
         } catch (ImportPlanChanged) {
-            DB::transaction(function (): void {
-                LibrarySetting::whereKey(1)->increment('lock_version');
-                $import = PlaylistImport::whereKey($this->importId)->lockForUpdate()->firstOrFail();
-                if ($import->status === PlaylistImport::PROCESSING && $import->generation === $this->generation) {
-                    $import->update(['status' => PlaylistImport::NEEDS_REVIEW, 'error' => 'اطلاعات یا مالکیت کاتالوگ تغییر کرده است؛ پیش‌نمایش تازه بسازید.']);
-                    AuditEvent::create(['user_id' => $import->created_by, 'action' => 'import.needs_review', 'subject_id' => $import->id]);
-                }
-            }, 5);
+            $execution->finish($this->importId, $this->generation, $this->token, PlaylistImport::NEEDS_REVIEW, 'اطلاعات یا مالکیت کاتالوگ تغییر کرده است؛ پیش‌نمایش تازه بسازید.');
         }
     }
 
@@ -49,7 +50,7 @@ class PublishPlaylistImport implements ShouldQueue
         DB::transaction(function () use ($register, $plans): void {
             LibrarySetting::whereKey(1)->increment('lock_version');
             $import = PlaylistImport::whereKey($this->importId)->lockForUpdate()->firstOrFail();
-            if ($import->status !== PlaylistImport::PROCESSING || $import->generation !== $this->generation) {
+            if ($import->status !== PlaylistImport::RUNNING || $import->generation !== $this->generation || $import->execution_token !== $this->token || ! $import->lease_expires_at?->isFuture()) {
                 return;
             }
             $creator = User::whereKey($import->created_by)->lockForUpdate()->first();
@@ -70,18 +71,30 @@ class PublishPlaylistImport implements ShouldQueue
             $playlist = Playlist::create(['name' => $import->name, 'description' => $import->description, 'mood' => $import->mood, 'created_by' => $import->created_by, 'status' => Playlist::DRAFT, 'artwork_seed' => hexdec(substr($import->payload_hash, 0, 4))]);
             $reused = 0;
             foreach ($plan['rows'] as $index => $row) {
+                if (! $import->lease_expires_at->isFuture()) {
+                    throw new ImportLeaseExpired('Import publication lease expired.');
+                }
                 $track = $register->handle($row);
                 $reused += $track->wasRecentlyCreated ? 0 : 1;
                 $playlist->tracks()->attach($track->id, ['position' => $index + 1]);
             }
+            if (! $import->lease_expires_at->isFuture()) {
+                throw new ImportLeaseExpired('Import publication lease expired.');
+            }
             $playlist->update(['status' => $import->publish ? Playlist::PUBLISHED : Playlist::DRAFT]);
-            $import->update(['status' => PlaylistImport::COMPLETED, 'playlist_id' => $playlist->id, 'error' => null, 'report' => array_replace($report, ['validated_tracks' => count($plan['rows']), 'created_tracks' => count($plan['rows']) - $reused, 'reused_tracks' => $reused, 'metadata_policy' => 'Existing shared track metadata is preserved.'])]);
+            $import->update(['status' => PlaylistImport::COMPLETED, 'lease_expires_at' => null, 'playlist_id' => $playlist->id, 'error' => null, 'report' => array_replace($report, ['validated_tracks' => count($plan['rows']), 'created_tracks' => count($plan['rows']) - $reused, 'reused_tracks' => $reused, 'metadata_policy' => 'Existing shared track metadata is preserved.'])]);
             AuditEvent::create(['user_id' => $import->created_by, 'action' => 'import.completed', 'subject_id' => $import->id, 'metadata' => ['playlist_id' => $playlist->id, 'tracks' => count($plan['rows']), 'generation' => $this->generation]]);
         }, 5);
     }
 
     public function failed(?Throwable $exception): void
     {
-        PlaylistImport::whereKey($this->importId)->where('generation', $this->generation)->where('status', PlaylistImport::PROCESSING)->update(['status' => PlaylistImport::FAILED, 'error' => 'ساخت پلی‌لیست انجام نشد. پس از بررسی، دوباره تلاش کنید.']);
+        $transientSql = $exception instanceof QueryException && (str_starts_with((string) $exception->getCode(), '08') || $exception->getCode() === '40001' || in_array((int) ($exception->errorInfo[1] ?? 0), [1205, 1213, 2006, 2013], true));
+        if ($transientSql || $exception instanceof TimeoutExceededException || $exception instanceof ImportLeaseExpired) {
+            app(ImportExecution::class)->retryLater($this->importId, $this->generation ?? 0, $this->token ?? null);
+
+            return;
+        }
+        app(ImportExecution::class)->finish($this->importId, $this->generation ?? 0, $this->token ?? null, PlaylistImport::FAILED, 'ساخت پلی‌لیست انجام نشد؛ وضعیت worker را بررسی و دوباره تلاش کنید.');
     }
 }

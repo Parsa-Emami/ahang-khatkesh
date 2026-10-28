@@ -13,8 +13,9 @@ class StreamController extends Controller
     public function __invoke(Track $track, PrivateMedia $media): BinaryFileResponse
     {
         Gate::authorize('view', $track);
-        $track->load('mediaAsset');
+        $track->load('mediaAsset.blob');
+        abort_if($track->mediaAsset->blob_id && $track->mediaAsset->blob->state !== 'ready', 404);
 
-        return response()->file($media->path($track->mediaAsset->path), ['Content-Type' => $track->mediaAsset->mime_type, 'Accept-Ranges' => 'bytes', 'Content-Disposition' => 'inline']);
+        return response()->file($media->path($track->mediaAsset->storagePath()), ['Content-Type' => $track->mediaAsset->mime_type, 'Accept-Ranges' => 'bytes', 'Content-Disposition' => 'inline']);
     }
 }

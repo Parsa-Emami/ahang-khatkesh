@@ -6,7 +6,7 @@
     {
       "id": "F01",
       "title": "مرز سوپرادمین و سطل بازیافت",
-      "status": "verified",
+      "status": "implemented",
       "depends_on": [],
       "implemented_paths": [
         "app/Actions/AuthorizeLibraryWrite.php",
@@ -21,12 +21,13 @@
         "حذف و بازیابی revision دارند؛ فایل، شناسه، لایک و عضویت حفظ می‌شوند.",
         "API، Action و مرورگر مستقل از پنهان‌کردن دکمه بررسی می‌شوند."
       ],
-      "evidence": "docs/verification/foundation-2026-10-28.json"
+      "evidence": null,
+      "previous_evidence": "docs/verification/foundation-2026-10-28.json"
     },
     {
       "id": "F02",
       "title": "پیش‌نمایش مؤثر و انتشار اتمیک ایمپورت",
-      "status": "verified",
+      "status": "implemented",
       "depends_on": [
         "F01"
       ],
@@ -44,12 +45,13 @@
         "تغییر مالکیت، revision یا دسترسی سازنده، انتشار جزئی ایجاد نمی‌کند.",
         "اجرای job و failed قدیمی نمی‌توانند نسل تازه را تغییر دهند."
       ],
-      "evidence": "docs/verification/foundation-2026-10-28.json"
+      "evidence": null,
+      "previous_evidence": "docs/verification/foundation-2026-10-28.json"
     },
     {
       "id": "F03",
       "title": "نسخهٔ امنیتی جاری و کنترل credential",
-      "status": "verified",
+      "status": "implemented",
       "depends_on": [
         "F01"
       ],
@@ -68,12 +70,13 @@
         "epoch از مقدار تازه DB افزایش می‌یابد؛ hash پرهزینه بیرون قفل است.",
         "MFA، recovery، تغییر نقش و reset از کنترل حساب جاری استفاده می‌کنند."
       ],
-      "evidence": "docs/verification/foundation-2026-10-28.json"
+      "evidence": null,
+      "previous_evidence": "docs/verification/foundation-2026-10-28.json"
     },
     {
       "id": "F04",
       "title": "پاک‌سازی بادوام فایل‌های بدون ارجاع",
-      "status": "verified",
+      "status": "implemented",
       "depends_on": [
         "F01",
         "F03"
@@ -90,12 +93,13 @@
         "شکست حذف قبلی، فایل جدید را حذف نمی‌کند.",
         "cleanup تکرارپذیر است و ارجاع سطل بازیافت را حفظ می‌کند."
       ],
-      "evidence": "docs/verification/foundation-2026-10-28.json"
+      "evidence": null,
+      "previous_evidence": "docs/verification/foundation-2026-10-28.json"
     },
     {
       "id": "F05",
       "title": "صف شخصی و تایمر خواب",
-      "status": "verified",
+      "status": "implemented",
       "depends_on": [
         "F01",
         "F03"
@@ -114,12 +118,13 @@
         "ترتیب واقعی صف ذخیره و بازیابی می‌شود؛ shuffle مجاورت هنرمند را متعادل می‌کند.",
         "تایمر زمان‌دار و پایان آهنگ قبل از repeat اعمال می‌شوند."
       ],
-      "evidence": "docs/verification/foundation-2026-10-28.json"
+      "evidence": null,
+      "previous_evidence": "docs/verification/foundation-2026-10-28.json"
     },
     {
       "id": "F06",
       "title": "حفظ draft، نشست چندتب و قرارداد پاسخ",
-      "status": "verified",
+      "status": "implemented",
       "depends_on": [
         "F02",
         "F03",
@@ -143,22 +148,35 @@
         "همه mutationهای authenticated زمینهٔ نشست دارند؛ لغو و پاسخ دیررس حفظ می‌شوند.",
         "reconnect ترتیب محلی را پاک نمی‌کند؛ کنارگذاشتن صریح و schema validation اجرا می‌شوند."
       ],
-      "evidence": "docs/verification/foundation-2026-10-28.json"
+      "evidence": null,
+      "previous_evidence": "docs/verification/foundation-2026-10-28.json"
     },
     {
       "id": "F07",
       "title": "چرخهٔ کامل job، blob، quota و reconciliation",
-      "status": "planned",
+      "status": "implemented",
       "depends_on": [
         "F02",
         "F03",
         "F04",
         "F06"
       ],
-      "implemented_paths": [],
+      "implemented_paths": [
+        "database/migrations/2026_10_28_072416_add_durable_media_storage_and_import_leases.php",
+        "app/Actions/Media/IngestMedia.php",
+        "app/Actions/Media/CollectMediaGarbage.php",
+        "app/Actions/Imports/ImportExecution.php",
+        "tests/Feature/MediaBlobQuotaTest.php",
+        "tests/Feature/ImportLeaseRecoveryTest.php",
+        "tests/Concurrency/MediaAndImportProcessTest.php"
+      ],
       "required_tests": [
         "ImportLeaseRecoveryTest",
-        "MediaBlobQuotaTest"
+        "MediaBlobQuotaTest",
+        "test_two_real_processes_cannot_overbook_the_last_available_quota",
+        "test_two_real_upload_processes_deduplicate_bytes_without_merging_assets",
+        "test_killed_real_queue_worker_is_recovered_once_and_duplicate_delivery_is_fenced",
+        "super administrator reserves storage before uploading audio through the admin UI"
       ],
       "acceptance": [
         "lease، heartbeat و recovery چندپردازه واقعی MySQL پاس شوند.",

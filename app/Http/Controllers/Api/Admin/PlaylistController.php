@@ -3,10 +3,10 @@
 namespace App\Http\Controllers\Api\Admin;
 
 use App\Actions\AuthorizeLibraryWrite;
+use App\Actions\Media\IngestMedia;
 use App\Actions\UpdatePlaylist;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\PlaylistResource;
-use App\Jobs\DeleteUnreferencedMedia;
 use App\Models\AuditEvent;
 use App\Models\Playlist;
 use Illuminate\Http\Request;
@@ -43,21 +43,11 @@ class PlaylistController extends Controller
         return new PlaylistResource($update->handle($playlist, $request->user(), ['revision' => $data['revision']], $data['track_ids'])->loadCount('tracks')->load('tracks.mediaAsset'));
     }
 
-    public function cover(Request $request, Playlist $playlist, UpdatePlaylist $update, AuthorizeLibraryWrite $authorize): PlaylistResource
+    public function cover(Request $request, Playlist $playlist, IngestMedia $ingest): PlaylistResource
     {
-        $data = $request->validate(['revision' => ['required', 'integer', 'min:0'], 'cover' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120', 'dimensions:max_width=4096,max_height=4096']]);
-        $path = $request->file('cover')->store('covers', 'media');
-        $updated = DB::transaction(function () use ($request, $playlist, $update, $path, $data, $authorize): Playlist {
-            $authorize->handle($request->user());
-            $old = Playlist::whereKey($playlist->id)->lockForUpdate()->value('cover_path');
-            $updated = $update->handle($playlist, $request->user(), ['revision' => $data['revision'], 'cover_path' => $path]);
-            if ($old) {
-                DeleteUnreferencedMedia::dispatch($old)->onConnection('database')->beforeCommit();
-            }
+        $data = $request->validate(['reservation_id' => ['required', 'uuid'], 'revision' => ['required', 'integer', 'min:0'], 'cover' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120', 'dimensions:max_width=4096,max_height=4096']]);
+        $ingest->handle($request->user(), $data['reservation_id'], $request->file('cover'), 'cover', true, $playlist, $data['revision']);
 
-            return $updated;
-        }, 5);
-
-        return new PlaylistResource($updated->loadCount('tracks'));
+        return new PlaylistResource($playlist->refresh()->loadCount('tracks'));
     }
 }

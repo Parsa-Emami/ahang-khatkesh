@@ -35,7 +35,7 @@ class PreviewPlaylistImport
                 $import = PlaylistImport::where($key)->first();
                 if (! $import) {
                     $plan = $this->plans->handle($payload['rows'], true);
-                    $import = PlaylistImport::create($key + array_replace($payload, ['rows' => $plan['rows']]) + ['payload_hash' => $hash, 'status' => PlaylistImport::READY, 'report' => ['validated_tracks' => count($plan['rows']), 'source_rows' => $payload['rows'], 'plan_hash' => $plan['hash'], 'plan_version' => 1, 'actor_epoch' => $user->access_version]]);
+                    $import = PlaylistImport::create($key + array_replace($payload, ['rows' => $plan['rows']]) + ['payload_hash' => $hash, 'status' => PlaylistImport::READY, 'report' => ['validated_tracks' => count($plan['rows']), 'source_rows' => $payload['rows'], 'plan_hash' => $plan['hash'], 'plan_version' => 2, 'actor_epoch' => $user->access_version]]);
                 }
                 if ($import->wasRecentlyCreated) {
                     AuditEvent::create(['user_id' => $user->id, 'action' => 'import.previewed', 'subject_id' => $import->id]);

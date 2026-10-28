@@ -3,14 +3,16 @@
 namespace App\Console\Commands;
 
 use App\Actions\AuthorizeLibraryWrite;
+use App\Actions\Media\IngestMedia;
+use App\Actions\Media\ReserveStorage;
 use App\Actions\RegisterTrack;
 use App\Enums\UserRole;
 use App\Models\MediaAsset;
 use App\Models\Playlist;
 use App\Models\User;
 use Illuminate\Console\Command;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 
 class CreateDemoLibrary extends Command
 {
@@ -18,7 +20,7 @@ class CreateDemoLibrary extends Command
 
     protected $description = 'Create original synthetic audio and playlists in local/testing only';
 
-    public function handle(RegisterTrack $register, AuthorizeLibraryWrite $authorize): int
+    public function handle(RegisterTrack $register, ReserveStorage $reserve, IngestMedia $ingest, AuthorizeLibraryWrite $authorize): int
     {
         if (! app()->environment(['local', 'testing'])) {
             $this->error('Demo data is allowed only in local/testing.');
@@ -36,9 +38,20 @@ class CreateDemoLibrary extends Command
         foreach ($titles as $index => $title) {
             $wave = $this->wave(130.81 * (2 ** ($index / 12)));
             $hash = hash('sha256', $wave);
-            $path = 'audio/demo-'.$index.'.wav';
-            Storage::disk('media')->put($path, $wave);
-            $asset = MediaAsset::firstOrCreate(['sha256' => $hash], ['path' => $path, 'original_name' => 'demo-'.$index.'.wav', 'mime_type' => 'audio/wav', 'size_bytes' => strlen($wave), 'duration_seconds' => 24, 'uploaded_by' => $admin->id]);
+            $asset = MediaAsset::where('sha256', $hash)->first();
+            if (! $asset) {
+                $reservation = $reserve->handle($admin, strlen($wave), 'audio');
+                $temporary = tempnam(sys_get_temp_dir(), 'ahang-demo-');
+                try {
+                    file_put_contents($temporary, $wave);
+                    $file = new UploadedFile($temporary, 'demo-'.$index.'.wav', 'audio/wav', null, true);
+                    $asset = $ingest->handle($admin, $reservation->id, $file)['asset'];
+                } finally {
+                    if (is_file($temporary)) {
+                        unlink($temporary);
+                    }
+                }
+            }
             $tracks[] = $register->handle(['asset_id' => $asset->id, 'title' => $title, 'artist' => 'آزمایشگاه خط‌کش', 'album' => 'صداهای نمونهٔ تولیدشده']);
         }
         $lists = [['ساعتِ آبی', 'night', 'برای وقتی که شهر آرام می‌گیرد.', 0], ['تمرکز، بدون مرز', 'focus', 'چند دقیقه فاصله از شلوغی روز.', 1], ['کمی آفتاب', 'energy', 'برای قدم‌های بعدی، کمی روشن‌تر.', 2], ['خطِ آرامش', 'calm', 'صداهایی برای نفس کشیدن.', 3], ['بعد از باران', 'calm', 'یک حال تازه، یک شروع کوچک.', 4], ['مسیرِ خانه', 'other', 'آهنگ‌هایی برای خودت.', 5]];

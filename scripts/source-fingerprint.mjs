@@ -5,7 +5,7 @@ const included = (path) =>
     /^(app|bootstrap|config|database|deploy|resources|routes|lang|public|tests|scripts|\.github)\//.test(
         path,
     ) ||
-    /^(composer\.(json|lock)|package(-lock)?\.json|phpunit\.xml|tsconfig\.json|vite\.config\.ts|vitest\.config\.ts|playwright\.config\.ts|index\.html|docs\/openapi\.json)$/.test(
+    /^(composer\.(json|lock)|package(-lock)?\.json|phpunit(?:-concurrency)?\.xml|tsconfig\.json|vite\.config\.ts|vitest\.config\.ts|playwright\.config\.ts|index\.html|docs\/openapi\.json)$/.test(
         path,
     );
 export function sourceFingerprint(ref) {
