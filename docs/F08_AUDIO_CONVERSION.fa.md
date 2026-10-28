@@ -26,6 +26,7 @@ FLAC اصلی در فضای خصوصی محفوظ می‌ماند. MP3 مشتق 
 | F08-B06 | رفتن از فرم import به پنل تبدیل، draft درون پنل را از بین می‌برد | عمر ImportsPanel در جابه‌جایی بخش‌های همان admin حفظ و با تغییر actor/epoch پاک می‌شود؛ Dialog فقط در بخش فعال باز است |
 | F08-B07 | صفِ منتظر پشت encoder سالم نباید به‌عنوان worker مرده بازیابی شود | queued stall در حضور heartbeat تازهٔ encoder فعال، rotate نمی‌شود |
 | F08-B08 | رزرو conversion نباید از endpoint لغو upload آزاد شود | لغو فقط از ConversionExecution؛ claim و finalize وضعیت و token رزرو را بررسی می‌کنند |
+| F08-B10 | انتخاب چندفایلی به context آغازین مقید نبود و میان فایل‌ها می‌توانست هویت تازه بگیرد | context ثابت برای کل batch و بررسی دوباره پس از reservation؛ تغییر نشست پیش از ارسال بعدی رد می‌شود |
 | F08-B09 | بازاستفاده از FLAC قدیمی با codec=null می‌توانست admission تبدیل را رد کند | probe facts معتبر در همان admission backfill می‌شوند؛ آماده‌سازی batch فایل قدیمی نیز command دارد |
 
 وجود تست‌های شکستِ این دور نشان‌دهندهٔ شکست نسخهٔ نهایی نیست؛ نتیجهٔ نهایی در evidence همان commit ثبت می‌شود.

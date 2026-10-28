@@ -2,7 +2,7 @@
   "format_version": 1,
   "product": "ahang-khatkesh",
   "status": "design_target",
-  "runtime_version": "0.2 + verified foundation F01-F08",
+  "runtime_version": "0.2 + F01-F08 batch correction pending exact CI",
   "target_version": "0.3",
   "implementation_complete": false,
   "review": {
@@ -92,8 +92,8 @@
     {
       "id": "R05",
       "priority": "P1",
-      "status": "resolved",
-      "evidence": "exact_commit_ci",
+      "status": "unverified",
+      "evidence": "batch_context_fix_pending_exact_commit_ci",
       "package_ids": [
         "A05"
       ],

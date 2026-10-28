@@ -27,7 +27,7 @@ import {
     type Page,
 } from "../../types";
 import { ErrorState, IconButton, Loading } from "../../components/UI";
-import { uploadWithReservation } from "./uploads";
+import { createUploadBatch } from "./uploads";
 import { conversionLabels } from "./media/ConversionPanel";
 import { StorageStatus } from "./StorageStatus";
 const statusLabels: Record<ImportRun["status"], string> = {
@@ -119,6 +119,7 @@ export function ImportsPanel({ active = true }: { active?: boolean }) {
             notify("در هر نوبت حداکثر ۲۰ فایل انتخاب کن.", true);
             return;
         }
+        const uploadSelected = createUploadBatch();
         const errors: string[] = [];
         setUploadErrors([]);
         for (let index = 0; index < batch.length; index++) {
@@ -136,7 +137,7 @@ export function ImportsPanel({ active = true }: { active?: boolean }) {
                 continue;
             }
             try {
-                const result = await uploadWithReservation<{
+                const result = await uploadSelected<{
                     data: MediaAsset;
                     duplicate: boolean;
                 }>(file, "audio", "/admin/media");

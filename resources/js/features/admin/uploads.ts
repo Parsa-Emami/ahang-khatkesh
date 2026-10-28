@@ -4,13 +4,21 @@ export async function uploadWithReservation<T>(
     purpose: "audio" | "cover",
     path: string,
     fields: Record<string, string> = {},
+    expectedContext: string | null = sessionHeaders()["X-Session-Context"] ??
+        null,
 ): Promise<T> {
-    const context = sessionHeaders()["X-Session-Context"];
+    const context = expectedContext;
+    const assertContext = () => {
+        if (!context || context !== sessionHeaders()["X-Session-Context"])
+            throw new Error("نشست تغییر کرد؛ آپلود این انتخاب متوقف شد.");
+    };
+    assertContext();
     const reserved = await api<{ data: { id: string } }>(
         "/admin/storage-reservations",
         { method: "POST", body: json({ size_bytes: file.size, purpose }) },
     );
     try {
+        assertContext();
         const form = new FormData();
         form.append("reservation_id", reserved.data.id);
         form.append(purpose === "audio" ? "audio" : "cover", file);
@@ -30,4 +38,16 @@ export async function uploadWithReservation<T>(
         }
         throw error;
     }
+}
+
+export function createUploadBatch() {
+    const context = sessionHeaders()["X-Session-Context"] ?? null;
+    return function upload<T>(
+        file: File,
+        purpose: "audio" | "cover",
+        path: string,
+        fields: Record<string, string> = {},
+    ) {
+        return uploadWithReservation<T>(file, purpose, path, fields, context);
+    };
 }
