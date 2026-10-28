@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use PHPUnit\Framework\Attributes\TestWith;
+use Symfony\Component\Process\Exception\ProcessSignaledException;
 use Symfony\Component\Process\Process;
 use Tests\Support\FlacFixture;
 use Tests\TestCase;
@@ -127,7 +128,11 @@ class ConversionProcessTest extends TestCase
             }
             if ($point === 'group') {
                 posix_kill(-$worker->getPid(), SIGKILL);
-                $worker->wait();
+                try {
+                    $worker->wait();
+                } catch (ProcessSignaledException $error) {
+                    $this->assertSame(SIGKILL, $error->getSignal());
+                }
             } else {
                 $worker->stop(0, SIGKILL);
             }
