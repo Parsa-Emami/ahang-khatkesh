@@ -1,5 +1,23 @@
+import type { User } from "../types";
+
 let csrfToken = "";
 let confirmSession: (() => Promise<boolean>) | null = null;
+let identity: Pick<User, "id" | "access_version"> | null = null;
+let generation = 0;
+const identityKey = (user: typeof identity) =>
+    user ? `${user.id}:${user.access_version}` : null;
+export function setSessionIdentity(user: typeof identity) {
+    if (identityKey(user) !== identityKey(identity)) generation++;
+    identity = user;
+}
+export function invalidateSessionIdentity() {
+    generation++;
+    identity = null;
+}
+export function sessionHeaders(): Record<string, string> {
+    const key = identityKey(identity);
+    return key ? { "X-Session-Context": key } : {};
+}
 export function setSessionConfirmation(
     handler: (() => Promise<boolean>) | null,
 ) {
@@ -10,6 +28,8 @@ export class ApiError extends Error {
         public status: number,
         message: string,
         public fields: Record<string, string[]> = {},
+        public code?: string,
+        public requestId?: string,
     ) {
         super(message);
     }
@@ -18,16 +38,35 @@ export const getCsrfToken = () => csrfToken;
 export function setCsrfToken(token: string) {
     csrfToken = token;
 }
+function announce(user: User | null, broadcast: boolean) {
+    setSessionIdentity(user);
+    window.dispatchEvent(new CustomEvent("session-identity", { detail: user }));
+    if (broadcast) window.dispatchEvent(new Event("session-auth-change"));
+}
+function contextError() {
+    return new ApiError(
+        409,
+        "هویت یا دسترسی نشست تغییر کرده است؛ عملیات را دوباره از صفحهٔ تازه آغاز کنید.",
+        {},
+        "session_context_changed",
+    );
+}
 export async function api<T>(
     path: string,
     options: RequestInit = {},
     retryCsrf = true,
     retryConfirmation = true,
 ): Promise<T> {
+    const captured = generation;
+    const capturedKey = identityKey(identity);
+    const identityRequest =
+        path === "/session" || path === "/login" || path === "/login/challenge";
     const headers = new Headers(options.headers);
     headers.set("Accept", "application/json");
     headers.set("X-Requested-With", "XMLHttpRequest");
     if (csrfToken) headers.set("X-CSRF-TOKEN", csrfToken);
+    if (!identityRequest && capturedKey)
+        headers.set("X-Session-Context", capturedKey);
     if (options.body && !(options.body instanceof FormData))
         headers.set("Content-Type", "application/json");
     let response: Response;
@@ -37,22 +76,26 @@ export async function api<T>(
             headers,
             credentials: "same-origin",
         });
-    } catch {
+    } catch (error) {
+        if (error instanceof Error && error.name === "AbortError") throw error;
         throw new ApiError(
             0,
             "ارتباط برقرار نشد. اتصال اینترنت و سرور را بررسی کنید.",
         );
     }
-    const payload = await response
-        .json()
-        .catch(() => ({ message: "پاسخ سرور قابل خواندن نیست." }));
-    if (response.status === 419 && retryCsrf) {
-        const session = await api<{ data: { csrf_token: string } }>(
-            "/session",
-            {},
-            false,
-        );
-        setCsrfToken(session.data.csrf_token);
+    let payload;
+    try {
+        payload = await response.json();
+    } catch (error) {
+        if (error instanceof Error && error.name === "AbortError") throw error;
+        payload = { message: "پاسخ سرور قابل خواندن نیست." };
+    }
+    if (captured !== generation) throw contextError();
+    const unchanged = () =>
+        captured === generation && capturedKey === identityKey(identity);
+    if (response.status === 419 && retryCsrf && !identityRequest) {
+        await api("/session", {}, false, false);
+        if (!unchanged()) throw contextError();
         return api<T>(path, options, false, retryConfirmation);
     }
     if (
@@ -61,13 +104,26 @@ export async function api<T>(
         retryConfirmation &&
         confirmSession
     ) {
-        if (await confirmSession())
-            return api<T>(path, options, retryCsrf, false);
-        throw new ApiError(423, "تأیید هویت لغو شد؛ تغییری ثبت نشد.");
+        if (!(await confirmSession()))
+            throw new ApiError(423, "تأیید هویت لغو شد؛ تغییری ثبت نشد.");
+        if (!unchanged()) throw contextError();
+        return api<T>(path, options, retryCsrf, false);
     }
     if (!response.ok) {
-        if (response.status === 401)
-            window.dispatchEvent(new Event("session-expired"));
+        if (
+            response.status === 401 ||
+            payload.code === "session_context_changed" ||
+            payload.code === "session_context_required"
+        ) {
+            invalidateSessionIdentity();
+            window.dispatchEvent(
+                new Event(
+                    response.status === 401
+                        ? "session-expired"
+                        : "session-context-changed",
+                ),
+            );
+        }
         throw new ApiError(
             response.status,
             Object.values(payload.errors || {})
@@ -76,9 +132,18 @@ export async function api<T>(
                 payload.message ||
                 "عملیات انجام نشد.",
             payload.errors,
+            payload.code,
+            response.headers.get("X-Request-ID") || undefined,
         );
     }
     if (payload.data?.csrf_token) setCsrfToken(payload.data.csrf_token);
+    if (payload.data && Object.hasOwn(payload.data, "user")) {
+        announce(payload.data.user, path !== "/session");
+    }
+    if (path === "/logout") {
+        invalidateSessionIdentity();
+        announce(null, true);
+    }
     return payload as T;
 }
 export const json = (value: unknown) => JSON.stringify(value);

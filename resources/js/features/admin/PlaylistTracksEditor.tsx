@@ -5,6 +5,7 @@ import { Dialog, ErrorState, Loading, IconButton } from "../../components/UI";
 import { api, ApiError, json } from "../../lib/api";
 import { useToast } from "../../context/AppContext";
 import { digits, type Playlist, type Track } from "../../types";
+import { freshDraft, receiveDraft, editDraft } from "../../lib/versioned-draft";
 import { TrackPicker } from "./Pickers";
 export function PlaylistTracksEditor({
     playlist,
@@ -15,21 +16,51 @@ export function PlaylistTracksEditor({
 }) {
     const client = useQueryClient(),
         notify = useToast();
-    const [tracks, setTracks] = useState<Track[]>([]),
-        [revision, setRevision] = useState(playlist.revision),
-        [conflict, setConflict] = useState(false);
+    const [draft, setDraft] = useState(() =>
+        freshDraft<Track>([], playlist.revision),
+    );
+    const [conflict, setConflict] = useState(false);
+    const [confirmClose, setConfirmClose] = useState(false);
+    const tracks = draft.items,
+        revision = draft.revision;
+    const setTracks = (change: (items: Track[]) => Track[]) =>
+        setDraft((old) => editDraft(old, change(old.items)));
     const query = useQuery({
         queryKey: ["playlist", "admin-edit", playlist.id],
         queryFn: () => api<{ data: Playlist }>(`/playlists/${playlist.id}`),
         staleTime: 0,
     });
     useEffect(() => {
-        if (query.data) {
-            setTracks(query.data.data.tracks || []);
-            setRevision(query.data.data.revision);
+        if (query.data)
+            setDraft((old) =>
+                receiveDraft(
+                    old,
+                    query.data.data.tracks || [],
+                    query.data.data.revision,
+                ),
+            );
+    }, [query.data]);
+    useEffect(() => {
+        if (!draft.dirty) return;
+        const guard = (event: BeforeUnloadEvent) => {
+            event.preventDefault();
+            event.returnValue = "";
+        };
+        window.addEventListener("beforeunload", guard);
+        return () => window.removeEventListener("beforeunload", guard);
+    }, [draft.dirty]);
+    async function discardAndReload() {
+        const result = await query.refetch();
+        if (result.data && !result.isError) {
+            setDraft(
+                freshDraft(
+                    result.data.data.tracks || [],
+                    result.data.data.revision,
+                ),
+            );
             setConflict(false);
         }
-    }, [query.data]);
+    }
     const save = useMutation({
         mutationFn: () =>
             api<{ data: Playlist }>(`/admin/playlists/${playlist.id}/tracks`, {
@@ -59,92 +90,116 @@ export function PlaylistTracksEditor({
         });
     }
     return (
-        <Dialog
-            open
-            onOpenChange={(v) => {
-                if (!v && !save.isPending) close();
-            }}
-            title={`آهنگ‌های ${playlist.name}`}
-            description="با فلش‌ها ترتیب را تغییر بده. حذف از این فهرست، فایل یا علاقه‌مندی‌ها را حذف نمی‌کند."
-        >
-            {query.isPending ? (
-                <Loading />
-            ) : query.error ? (
-                <ErrorState
-                    error={query.error}
-                    retry={() => void query.refetch()}
-                />
-            ) : (
-                <div className="stack-form">
-                    <TrackPicker
-                        choose={(track) =>
-                            setTracks((old) =>
-                                old.some((t) => t.id === track.id) ||
-                                old.length >= 500
-                                    ? old
-                                    : [...old, track],
-                            )
-                        }
+        <>
+            <Dialog
+                open
+                onOpenChange={(v) => {
+                    if (!v && !save.isPending) {
+                        if (draft.dirty) setConfirmClose(true);
+                        else close();
+                    }
+                }}
+                title={`آهنگ‌های ${playlist.name}`}
+                description="با فلش‌ها ترتیب را تغییر بده. حذف از این فهرست، فایل یا علاقه‌مندی‌ها را حذف نمی‌کند."
+            >
+                {query.isPending ? (
+                    <Loading />
+                ) : query.error && !draft.dirty ? (
+                    <ErrorState
+                        error={query.error}
+                        retry={() => void query.refetch()}
                     />
-                    <p className="muted">
-                        {digits(tracks.length)} آهنگ · سقف ۵۰۰ آهنگ بدون تکرار
-                    </p>
-                    <ol className="arrange-list">
-                        {tracks.map((track, i) => (
-                            <li key={track.id}>
-                                <span>
-                                    <strong>{track.title}</strong>
-                                    <small>{track.artist}</small>
-                                </span>
-                                <IconButton
-                                    label={`بالا بردن ${track.title}`}
-                                    disabled={i === 0}
-                                    onClick={() => move(i, -1)}
+                ) : (
+                    <div className="stack-form">
+                        <TrackPicker
+                            choose={(track) =>
+                                setTracks((old) =>
+                                    old.some((t) => t.id === track.id) ||
+                                    old.length >= 500
+                                        ? old
+                                        : [...old, track],
+                                )
+                            }
+                        />
+                        <p className="muted">
+                            {digits(tracks.length)} آهنگ · سقف ۵۰۰ آهنگ بدون
+                            تکرار
+                        </p>
+                        <ol className="arrange-list">
+                            {tracks.map((track, i) => (
+                                <li key={track.id}>
+                                    <span>
+                                        <strong>{track.title}</strong>
+                                        <small>{track.artist}</small>
+                                    </span>
+                                    <IconButton
+                                        label={`بالا بردن ${track.title}`}
+                                        disabled={i === 0}
+                                        onClick={() => move(i, -1)}
+                                    >
+                                        <ArrowUp size={16} />
+                                    </IconButton>
+                                    <IconButton
+                                        label={`پایین بردن ${track.title}`}
+                                        disabled={i === tracks.length - 1}
+                                        onClick={() => move(i, 1)}
+                                    >
+                                        <ArrowDown size={16} />
+                                    </IconButton>
+                                    <IconButton
+                                        label={`برداشتن ${track.title} از پلی‌لیست`}
+                                        onClick={() =>
+                                            setTracks((old) =>
+                                                old.filter(
+                                                    (t) => t.id !== track.id,
+                                                ),
+                                            )
+                                        }
+                                    >
+                                        <X size={16} />
+                                    </IconButton>
+                                </li>
+                            ))}
+                        </ol>
+                        {(conflict || draft.remoteUpdate) && (
+                            <div className="form-error" role="alert">
+                                نسخهٔ تازه‌ای در سرور وجود دارد.{" "}
+                                <button
+                                    className="text-link"
+                                    onClick={() => void discardAndReload()}
                                 >
-                                    <ArrowUp size={16} />
-                                </IconButton>
-                                <IconButton
-                                    label={`پایین بردن ${track.title}`}
-                                    disabled={i === tracks.length - 1}
-                                    onClick={() => move(i, 1)}
-                                >
-                                    <ArrowDown size={16} />
-                                </IconButton>
-                                <IconButton
-                                    label={`برداشتن ${track.title} از پلی‌لیست`}
-                                    onClick={() =>
-                                        setTracks((old) =>
-                                            old.filter(
-                                                (t) => t.id !== track.id,
-                                            ),
-                                        )
-                                    }
-                                >
-                                    <X size={16} />
-                                </IconButton>
-                            </li>
-                        ))}
-                    </ol>
-                    {conflict && (
-                        <div className="form-error" role="alert">
-                            نسخهٔ تازه‌ای در سرور وجود دارد.{" "}
-                            <button
-                                className="text-link"
-                                onClick={() => void query.refetch()}
-                            >
-                                کنار گذاشتن این ترتیب و بارگذاری نسخهٔ تازه
-                            </button>
-                        </div>
-                    )}
-                    <button
-                        className="button"
-                        disabled={save.isPending || conflict}
-                        onClick={() => save.mutate()}
-                    >
-                        ذخیرهٔ ترتیب و آهنگ‌ها
-                    </button>
-                </div>
-            )}
-        </Dialog>
+                                    کنار گذاشتن این ترتیب و بارگذاری نسخهٔ تازه
+                                </button>
+                            </div>
+                        )}
+                        <button
+                            className="button"
+                            disabled={
+                                save.isPending || conflict || draft.remoteUpdate
+                            }
+                            onClick={() => save.mutate()}
+                        >
+                            ذخیرهٔ ترتیب و آهنگ‌ها
+                        </button>
+                    </div>
+                )}
+            </Dialog>
+            <Dialog
+                open={confirmClose}
+                onOpenChange={setConfirmClose}
+                title="تغییرهای ذخیره‌نشده"
+                description="ترتیب محلی هنوز ذخیره نشده است."
+            >
+                <button
+                    className="button"
+                    onClick={() => setConfirmClose(false)}
+                >
+                    ادامهٔ ویرایش
+                </button>
+                <button className="button secondary" onClick={close}>
+                    کنار گذاشتن تغییرها و بستن
+                </button>
+            </Dialog>
+        </>
     );
 }

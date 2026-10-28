@@ -12,13 +12,15 @@ use Illuminate\Validation\ValidationException;
 
 class CreateUser
 {
+    public function __construct(private LockCurrentAccount $accounts) {}
+
     public function handle(array $data, ?User $actor = null): User
     {
         return DB::transaction(function () use ($data, $actor): User {
             LibrarySetting::whereKey(1)->increment('lock_version');
             $role = isset($data['role']) ? UserRole::from($data['role']) : (($data['is_admin'] ?? false) ? UserRole::Administrator : UserRole::Listener);
             if ($actor !== null) {
-                $actor = User::whereKey($actor->id)->lockForUpdate()->firstOrFail();
+                $actor = $this->accounts->handle($actor);
                 abort_unless($actor->hasPermission(Permission::UsersManage), 403);
                 abort_if($role->isPrivileged() && ! $actor->hasPermission(Permission::RolesManage), 403);
             } elseif ($role === UserRole::Administrator && ! User::where('role', UserRole::Owner)->where('is_active', true)->exists()) {

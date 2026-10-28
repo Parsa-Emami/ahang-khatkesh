@@ -12,6 +12,7 @@ export type Permission =
     | "operations.read";
 export type User = {
     id: number;
+    access_version: number;
     name: string;
     email: string;
     is_admin: boolean;
@@ -69,7 +70,13 @@ export type ImportRun = {
     name: string;
     description: string | null;
     mood: Mood;
-    status: "ready" | "processing" | "completed" | "failed";
+    status:
+        | "ready"
+        | "processing"
+        | "completed"
+        | "failed"
+        | "needs_review"
+        | "cancelled";
     rows: ManifestRow[];
     report: {
         validated_tracks: number;

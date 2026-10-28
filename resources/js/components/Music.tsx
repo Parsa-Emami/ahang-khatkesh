@@ -14,8 +14,14 @@ import {
     SkipForward,
     Volume2,
     VolumeX,
+    ListPlus,
+    ArrowUp,
+    ArrowDown,
+    X,
+    Timer,
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { sleepPresets } from "../lib/sleep-timer";
 import { useState } from "react";
 import { usePlayer } from "../context/PlayerContext";
 import { useToast } from "../context/AppContext";
@@ -159,7 +165,7 @@ export function TrackList({
                     آلبوم
                 </span>
                 <span role="columnheader" className="visually-hidden">
-                    پسندیدن
+                    عملیات آهنگ
                 </span>
                 <span role="columnheader" aria-label="مدت">
                     <Clock3 size={15} />
@@ -216,7 +222,17 @@ export function TrackList({
                         <span className="track-album" role="cell" dir="auto">
                             {track.album || "تک‌آهنگ"}
                         </span>
-                        <div role="cell">
+                        <div role="cell" className="track-actions">
+                            <IconButton
+                                label={`پخش بعدی ${track.title}`}
+                                disabled={
+                                    player.queue.length >= 500 &&
+                                    !player.queue.some((t) => t.id === track.id)
+                                }
+                                onClick={() => player.enqueueNext(track)}
+                            >
+                                <ListPlus size={17} />
+                            </IconButton>
                             <LikeButton track={track} />
                         </div>
                         <span role="cell" className="time" dir="ltr">
@@ -232,33 +248,67 @@ export function QueueContent() {
     const player = usePlayer();
     return (
         <div className="queue-list">
+            {player.queue.length > 0 && (
+                <div className="queue-actions">
+                    <button
+                        className="text-link"
+                        onClick={player.clearUpcoming}
+                    >
+                        پاک کردن ادامهٔ صف
+                    </button>
+                    <button className="text-link" onClick={player.clearQueue}>
+                        خالی کردن صف
+                    </button>
+                </div>
+            )}
             {player.order.map((index, orderIndex) => {
                 const track = player.queue[index];
                 return (
-                    <button
+                    <div
                         key={track.id}
                         className={`queue-row ${index === player.index ? "active" : ""}`}
-                        onClick={() => player.select(index)}
                     >
-                        <span className="queue-index">
-                            {index === player.index && player.playing ? (
-                                <span className="equalizer">
-                                    <i />
-                                    <i />
-                                    <i />
-                                </span>
-                            ) : (
-                                digits(orderIndex + 1)
-                            )}
-                        </span>
-                        <span>
-                            <strong dir="auto">{track.title}</strong>
-                            <small dir="auto">{track.artist}</small>
-                        </span>
-                        <span className="time" dir="ltr">
-                            {duration(track.duration_seconds)}
-                        </span>
-                    </button>
+                        <button
+                            className="queue-track"
+                            aria-label={`پخش ${track.title} از صف`}
+                            onClick={() => player.select(index)}
+                        >
+                            <span className="queue-index">
+                                {digits(orderIndex + 1)}
+                            </span>
+                            <span>
+                                <strong dir="auto">{track.title}</strong>
+                                <small dir="auto">{track.artist}</small>
+                            </span>
+                            <span className="time" dir="ltr">
+                                {duration(track.duration_seconds)}
+                            </span>
+                        </button>
+                        <div className="queue-edit-actions">
+                            <IconButton
+                                label={`بالا بردن ${track.title} در صف`}
+                                disabled={orderIndex === 0}
+                                onClick={() => player.moveQueued(track.id, -1)}
+                            >
+                                <ArrowUp size={15} />
+                            </IconButton>
+                            <IconButton
+                                label={`پایین بردن ${track.title} در صف`}
+                                disabled={
+                                    orderIndex === player.order.length - 1
+                                }
+                                onClick={() => player.moveQueued(track.id, 1)}
+                            >
+                                <ArrowDown size={15} />
+                            </IconButton>
+                            <IconButton
+                                label={`برداشتن ${track.title} از صف`}
+                                onClick={() => player.removeQueued(track.id)}
+                            >
+                                <X size={15} />
+                            </IconButton>
+                        </div>
+                    </div>
                 );
             })}
             {!player.queue.length && (
@@ -267,6 +317,70 @@ export function QueueContent() {
                 </p>
             )}
         </div>
+    );
+}
+export function SleepTimerControl() {
+    const player = usePlayer(),
+        [open, setOpen] = useState(false);
+    const timer = player.sleepTimer;
+    return (
+        <>
+            <IconButton
+                label="تایمر خواب"
+                aria-pressed={!!timer}
+                onClick={() => setOpen(true)}
+            >
+                <Timer size={20} />
+            </IconButton>
+            <Dialog
+                open={open}
+                onOpenChange={setOpen}
+                title="تایمر خواب"
+                description="پخش در زمان انتخابی یا پس از پایان آهنگ جاری متوقف می‌شود."
+            >
+                <p role="status">
+                    {timer?.kind === "end_of_track"
+                        ? "فعال تا پایان آهنگ"
+                        : timer?.kind === "deadline"
+                          ? `فعال تا ${new Intl.DateTimeFormat("fa-IR", { hour: "2-digit", minute: "2-digit" }).format(timer.deadline)}`
+                          : "تایمر خاموش است."}
+                </p>
+                <div className="sleep-options">
+                    {sleepPresets.map((minutes) => (
+                        <button
+                            className="button secondary"
+                            key={minutes}
+                            onClick={() => {
+                                player.setSleep(minutes);
+                                setOpen(false);
+                            }}
+                        >
+                            {digits(minutes)} دقیقه
+                        </button>
+                    ))}
+                </div>
+                <button
+                    className="button"
+                    onClick={() => {
+                        player.setSleep("end_of_track");
+                        setOpen(false);
+                    }}
+                >
+                    پایان آهنگ جاری
+                </button>
+                {timer && (
+                    <button
+                        className="text-link"
+                        onClick={() => {
+                            player.setSleep(null);
+                            setOpen(false);
+                        }}
+                    >
+                        لغو تایمر
+                    </button>
+                )}
+            </Dialog>
+        </>
     );
 }
 export function NowPlaying() {
@@ -335,7 +449,7 @@ export function PlayerBar() {
                 <div className="playback-controls">
                     <div className="transport" dir="ltr">
                         <IconButton
-                            label="پخش تصادفی"
+                            label="پخش تصادفی متعادل"
                             aria-pressed={player.shuffle}
                             className={player.shuffle ? "enabled" : ""}
                             disabled={!current}
@@ -410,6 +524,7 @@ export function PlayerBar() {
                     </div>
                 </div>
                 <div className="player-tools">
+                    <SleepTimerControl />
                     <IconButton
                         label="نمایش صف پخش"
                         onClick={() => setQueueOpen(true)}

@@ -2,7 +2,7 @@
   "format_version": 1,
   "product": "ahang-khatkesh",
   "status": "design_target",
-  "runtime_version": "0.2",
+  "runtime_version": "0.2 + security foundation",
   "target_version": "0.3",
   "implementation_complete": false,
   "review": {
@@ -35,53 +35,61 @@
     "docs/UNIVERSAL_UI.fa.md",
     "docs/COMPONENT_CATALOG.fa.md",
     "docs/MEDIA_PIPELINE.fa.md",
-    "docs/IMPLEMENTATION_ROADMAP.fa.md"
+    "docs/IMPLEMENTATION_ROADMAP.fa.md",
+    "docs/CURRENT_REVIEW.fa.md",
+    "docs/ROADMAP.fa.md",
+    "docs/PRODUCT_BENCHMARK.fa.md"
   ],
   "findings": [
     {
       "id": "R01",
       "priority": "P0",
-      "status": "open_runtime",
-      "evidence": "diagnostic_reproduced",
+      "status": "unverified",
+      "evidence": "runtime_implemented_pending_exact_commit_ci",
       "package_ids": [
         "A01"
-      ]
+      ],
+      "current_review": "docs/CURRENT_REVIEW.fa.md"
     },
     {
       "id": "R02",
       "priority": "P0",
-      "status": "open_runtime",
-      "evidence": "diagnostic_reproduced",
+      "status": "unverified",
+      "evidence": "runtime_implemented_pending_exact_commit_ci",
       "package_ids": [
         "A02"
-      ]
+      ],
+      "current_review": "docs/CURRENT_REVIEW.fa.md"
     },
     {
       "id": "R03",
       "priority": "P0",
-      "status": "open_runtime",
-      "evidence": "diagnostic_reproduced",
+      "status": "unverified",
+      "evidence": "runtime_implemented_pending_exact_commit_ci",
       "package_ids": [
         "A03"
-      ]
+      ],
+      "current_review": "docs/CURRENT_REVIEW.fa.md"
     },
     {
       "id": "R04",
       "priority": "P1",
-      "status": "open_runtime",
-      "evidence": "code_review",
+      "status": "unverified",
+      "evidence": "runtime_implemented_pending_exact_commit_ci",
       "package_ids": [
         "A05"
-      ]
+      ],
+      "current_review": "docs/CURRENT_REVIEW.fa.md"
     },
     {
       "id": "R05",
       "priority": "P1",
-      "status": "open_runtime",
-      "evidence": "code_review",
+      "status": "unverified",
+      "evidence": "runtime_implemented_pending_exact_commit_ci",
       "package_ids": [
         "A05"
-      ]
+      ],
+      "current_review": "docs/CURRENT_REVIEW.fa.md"
     },
     {
       "id": "R06",

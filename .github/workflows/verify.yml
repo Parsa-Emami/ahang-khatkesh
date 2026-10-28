@@ -5,13 +5,14 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
+  actions: read
 concurrency:
   group: verify-${{ github.ref }}
   cancel-in-progress: true
 jobs:
   verify:
     runs-on: ubuntu-24.04
-    timeout-minutes: 15
+    timeout-minutes: 20
     strategy:
       fail-fast: false
       matrix:
@@ -45,6 +46,8 @@ jobs:
       QUEUE_CONNECTION: sync
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
       - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962
         with:
           php-version: '8.5'
@@ -56,7 +59,12 @@ jobs:
           node-version: '24'
           cache: npm
       - name: Verify architecture structure
-        run: node scripts/check-architecture.mjs
+        run: |
+          node --test scripts/roadmap.test.mjs
+          node scripts/check-architecture.mjs
+          node scripts/check-roadmap.mjs
+        env:
+          GH_TOKEN: ${{ github.token }}
       - name: Install media probe
         timeout-minutes: 5
         run: |
@@ -74,5 +82,15 @@ jobs:
       - run: php vendor/bin/pint --test
       - run: npm run format:check
       - run: npm run build
-      - run: npm test
-      - run: php vendor/bin/phpunit
+      - run: mkdir -p reports
+      - run: npm test -- --reporter=default --reporter=json --outputFile=reports/vitest.json
+      - run: php vendor/bin/phpunit --log-junit=reports/phpunit.xml
+      - name: Browser journeys with real CSRF
+        if: matrix.database == 'sqlite'
+        run: npm run test:browser
+        env:
+          AHANG_BROWSER_CHANNEL: chrome
+      - name: Record tested source and suites
+        run: node scripts/collect-verification.mjs
+        env:
+          AHANG_DATABASE: ${{ matrix.database }}

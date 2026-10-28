@@ -3114,3 +3114,78 @@ input[type="file"]::file-selector-button {
 .dialog-content.dialog-priority {
     z-index: 130;
 }
+
+.track-actions {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+}
+.track-row {
+    grid-template-columns: 40px minmax(0, 1fr) minmax(80px, 0.65fr) 78px 48px;
+}
+.queue-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px;
+}
+.queue-track {
+    flex: 1 1 180px;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: transparent;
+    border: 0;
+    padding: 10px 0;
+    color: inherit;
+    text-align: start;
+    cursor: pointer;
+}
+.queue-track > span:nth-child(2) {
+    flex: 1;
+    min-width: 0;
+}
+.queue-track strong,
+.queue-track small {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.queue-edit-actions,
+.queue-actions {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+}
+.queue-actions {
+    justify-content: space-between;
+    padding-block: 12px;
+}
+.sleep-options {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+    margin-block: 16px;
+}
+@media (max-width: 700px) {
+    .track-row {
+        grid-template-columns: 28px minmax(0, 1fr) 74px 40px;
+    }
+    .track-album {
+        display: none;
+    }
+    .queue-edit-actions {
+        margin-inline-start: auto;
+    }
+}
+
+@media (max-width: 700px) {
+    .player-bar {
+        grid-template-columns: minmax(0, 1fr) 112px;
+    }
+    .player-tools .icon-button {
+        flex: 0 0 36px;
+    }
+}

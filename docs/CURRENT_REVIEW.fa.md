@@ -1,0 +1,69 @@
+# وضعیت اجرایی و نقص‌های باقی‌مانده
+
+مبنای این دور، commit `9f58be08fe4c915b35535c6f944f2d7455bcb063` است. این سند وضعیت تازه را توصیف می‌کند؛ گزارش `ARCHITECTURE_REVIEW.fa.md` سند تاریخی رفتار نسخهٔ 0.2 باقی می‌ماند. وضعیت تأیید نهایی و SHA آزمون‌شده از [رودمپ](ROADMAP.fa.md) و evidence مرتبط خوانده شود.
+
+## اصلاح‌های اجرایی
+
+| موضوع | رفتار تازه | شاهد الزامی |
+| --- | --- | --- |
+| مرز کاتالوگ | فقط owner فعال با عنوان سوپرادمین؛ همه roleهای دیگر بدون نوشتن song/playlist/media/import | SuperAdministratorTest و مرورگر |
+| R01 | effective plan و snapshot؛ recheck پیش از انتشار؛ تضاد به needs_review و rollback کامل می‌رسد | ImportPublicationIntegrityTest |
+| R02 | کنترل حساب/hash/epoch جاری در تراکنش؛ snapshot قدیمی reset تازه را بازنویسی نمی‌کند | CredentialEpochTest، MfaFlowTest |
+| R03 | pointer و cleanup job اتمیک؛ شکست حذف فایل قبلی فایل جدید را حذف نمی‌کند | MediaLifecycleTest با commit واقعی و failure تزریقی |
+| R04 | draft محلی dirty با refetch/reconnect حفظ می‌شود؛ discard صریح | versioned-draft و مرورگر |
+| R05 | replay فقط برای actor و epoch همان intent؛ context header اجباری برای mutation | api.test، ApiResponseSchemaTest |
+| بخشی از R06 | generation برای handle و failed، لغو با تغییر دسترسی سازنده | تست تلاش قدیمی و جدید import |
+| بخشی از R07 | hook نوشتن پنهان Track حذف و RegisterTrack مسیر مرجع شده؛ تضاد insert پنهان نمی‌شود | تست ثبت و بازاستفاده و تضاد رسانه |
+| بخشی از R10 | schema واقعی پاسخ با Opis و مسیرهای مرورگر اضافه شده | ApiResponseSchemaTest و Playwright |
+| قابلیت پخش | صف شخصی قابل ویرایش، play-next، shuffle متعادل، تایمر خواب | Vitest و پخش WAV مصنوعی در مرورگر |
+| خطای تازه در restore | تغییر نام هنرمند هنگام trash در بازیابی از رابطهٔ canonical تازه می‌شود | تست restore در SuperAdministratorTest |
+
+این جدول به معنی بسته‌شدن کامل R06/R07/R10 نیست. تست deterministic، interleaving کنترل‌شده و CI دیتابیس با بارسنجی یا تست چندپردازه یکی نیستند.
+
+## مرز مجوزهای فعلی
+
+| نقش | کاتالوگ، رسانه، ایمپورت، حذف و بازیابی | مدیریت حساب‌ها | پنل | پخش و کتابخانهٔ شخصی |
+| --- | --- | --- | --- | --- |
+| سوپرادمین / owner | کامل، با MFA و step-up در نوشتن | کامل، با حفظ آخرین owner فعال | کامل | کامل |
+| administrator / مدیر اعضا | ممنوع | listener/curator؛ بدون اعطای نقش privileged یا تغییر owner | اعضا، overview، audit و operations طبق capability | فقط محتوای منتشرشده |
+| curator / ناظر محتوا | ممنوع | ممنوع | overview و امنیت حساب | فقط محتوای منتشرشده |
+| listener | ممنوع | ممنوع | بدون پنل مدیریت | فقط محتوای منتشرشده |
+
+حذف از صف یا برداشتن لایک، حذف آهنگ از کاتالوگ نیست. ذخیرهٔ پلی‌لیست شخصی فقط bookmark است. همکاری آینده نیز مسیر «پیشنهاد ← تأیید سوپرادمین» دارد و مجوز ایجاد/حذف عمومی به عضو نمی‌دهد.
+
+کنترل backend در route و Action هر دو وجود دارد. قفل global سپس حساب تازه و entity، نوشتن‌های حساس را serialize می‌کند. سرور session، CSRF، MFA، capability و access_version را مستقل از UI بررسی می‌کند. `X-Session-Context` دادهٔ عمومی actor:epoch است و جای این کنترل‌ها را نمی‌گیرد. mutation احرازشده بدون آن 428 و با هویت ناهماهنگ 409 است.
+
+## کارهای باز پیش از انتشار
+
+| شناسه | اولویت | نقص یا عدم اثبات | اقدام بعدی |
+| --- | --- | --- | --- |
+| N01 / R06 | P1 | generation هست؛ lease، heartbeat، reconciliation و recovery پس از kill کامل نیست | F07 |
+| N02 / R07 | P1 | هویت blob فیزیکی هنوز از asset معنایی جدا نشده؛ integrity command عمومی وجود ندارد | F07 |
+| N03 / R09 | P1 | quota کل، reservation پیش از آپلود و GC با retention وجود ندارند؛ خطای مبهم می‌تواند orphan بسازد | F07 |
+| N04 / R12 | P1 | تبدیل خودکار FLAC→MP3 320k، صف تبدیل و انتخاب کیفیت هنوز runtime ندارند | F08 |
+| N05 / R11 | P1 | فارسی/RTL هست؛ ترجمه و LTR سراسریِ همه فرم‌ها و تمام themeها کامل نیست | F09 |
+| N06 / R11 | P2 | shader 21st.dev فقط منبع pin شده دارد؛ ورود runtime، GPU budget و visual matrix باقی است | F10 |
+| N07 | P2 | تاریخچه، private session و پیشنهاد توضیح‌پذیر هنوز ساخته نشده‌اند | F11 |
+| N08 | P2 | bulk operations، repair/merge و پیشنهاد اعضا workflow کامل ندارند | F12 |
+| N09 | P2 | متن همگام، crossfade، gapless و loudness analysis نیستند | F13 |
+| N10 | P2 | کنترل دستگاه فعال و آفلاین اختیاری وجود ندارند؛ تعارض playback فقط revision دارد | F14 |
+| N11 / R08 | P1 | ارتقای نمونهٔ واقعی نسخهٔ قبلی در MySQL و restore هماهنگ DB و رسانه اثبات نشده | F15 |
+| N12 / R09 | P1 | X-Accel مجاز و ده stream هم‌زمان با import/conversion بارسنجی نشده‌اند | F15 |
+| N13 / R10 | P1 | schema response برای مسیرهای منتخب است؛ تمام APIها و type generation کامل نشده‌اند | F09، F16 |
+| N14 | P1 | guard ناوبری و حفظ draft همه فرم‌ها نیست؛ فعلاً PlaylistTracksEditor پوشش دارد | F09 |
+| N15 | P1 | ASVS mapping کامل، pentest مستقل، Safari/Firefox، دستگاه فیزیکی و صفحه‌خوان آزمون نشده‌اند | F16 |
+| N16 | P2 | تایمر خواب فقط در تب فعلی است؛ زمان دقیق در suspend سیستم تضمین ندارد | F14، F16 |
+
+P1 یعنی پیش از production یا فعال‌کردن قابلیت وابسته حل شود؛ به معنی وقوع قطعی حمله نیست. این فهرست، نقص‌های شناخته‌شده و شواهدِ موجود را پوشش می‌دهد و تضمین کشف تمام نقص‌های ممکن نیست.
+
+## قواعد داده و عملیات
+
+MySQL 8.4/InnoDB/utf8mb4، migration افزایشی، کلید خارجی، revision و فایل خصوصی حفظ می‌شوند. phpMyAdmin برای اپراتور، بررسی ساختار و بکاپ است. ویرایش مستقیم جدول‌های محصول، Actionها، audit و invariantها را دور می‌زند؛ مدیریت روزمره آهنگ و playlist باید از پنل برنامه انجام شود. حساب runtime دیتابیس با حساب migration/اپراتور جدا باشد و phpMyAdmin از اینترنت عمومی در دسترس نباشد.
+
+این نسخه به ارتقای کنترل‌شده نیاز دارد: backup، توقف worker، maintenance، اجرای migration تازه، ساخت bundle تازه، راه‌اندازی worker و smoke test. importهای آماده/failed قدیمی که plan_hash ندارند باید دوباره preview شوند. processingهای نسخهٔ قبلی بدون نسل معتبر نباید با payload قدیمی دوباره queue شوند. مقدار role=owner به‌خاطر سازگاری داده عوض نشده است؛ مجوز کاتالوگ administrator/curator عمداً کاهش یافته است. bundle قدیمی به دلیل context header برای نوشتن پذیرفته نمی‌شود؛ تازه‌سازی کامل رابط لازم است.
+
+حذف فعلی قابل بازیابی است. حذف فیزیکی فایل یا دادهٔ حساب، purge خودکار، وعدهٔ پاک‌شدن آفلاین از راه دور و نگهداری نامحدود تاریخچه ارائه نشده‌اند.
+
+## ارزیابی کیفیت
+
+انتخاب modular monolith برای ده حساب، Laravel و React و MySQL و private storage قابل دفاع است. افزایش تعداد service یا نصب Kubernetes معیار کیفیت نیست. معیار این پروژه: مجوز قابل آزمون، صحت داده زیر failure، رابط قابل استفاده، دسترس‌پذیری، بازیابی و عملیات قابل اندازه‌گیری است. رسیدن به کیفیت محصول جدی ممکن است؛ هم‌ترازی فعلی با Apple Music/Spotify یا ادعای امن‌ترین/بی‌نقص‌ترین نرم‌افزار قابل تأیید نیست. حتی پس از این اصلاحات، F07 تا F16 و بازبینی مستقل باقی‌اند.

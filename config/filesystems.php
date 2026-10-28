@@ -5,7 +5,7 @@ return [
     'default' => env('FILESYSTEM_DISK', 'local'),
 
     'disks' => [
-        'media' => ['driver' => 'local', 'root' => storage_path('app/private/media'), 'throw' => true],
+        'media' => ['driver' => 'local', 'root' => env('MUSIC_MEDIA_ROOT', storage_path('app/private/media')), 'throw' => true],
 
         'local' => [
             'driver' => 'local',

@@ -2,23 +2,24 @@
 
 namespace App\Actions;
 
-use App\Enums\Permission;
 use App\Models\AuditEvent;
-use App\Models\LibrarySetting;
 use App\Models\Playlist;
+use App\Models\Track;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
 class UpdatePlaylist
 {
+    public function __construct(private AuthorizeLibraryWrite $authorize) {}
+
     public function handle(Playlist $playlist, User $actor, array $data, ?array $tracks = null): Playlist
     {
         return DB::transaction(function () use ($playlist, $actor, $data, $tracks): Playlist {
-            LibrarySetting::whereKey(1)->increment('lock_version');
-            abort_unless(User::whereKey($actor->id)->firstOrFail()->hasPermission(Permission::CatalogManage), 403);
+            $actor = $this->authorize->handle($actor);
             $locked = Playlist::whereKey($playlist->id)->lockForUpdate()->firstOrFail();
             abort_unless((int) $locked->revision === (int) $data['revision'], 409, 'این پلی‌لیست هم‌زمان تغییر کرده است؛ اطلاعات تازه را بارگذاری کنید.');
             if ($tracks !== null) {
+                abort_unless(Track::whereIn('id', $tracks)->count() === count($tracks), 422, 'بعضی آهنگ‌ها در دسترس نیستند.');
                 $locked->tracks()->detach();
                 foreach ($tracks as $i => $id) {
                     $locked->tracks()->attach($id, ['position' => $i + 1]);

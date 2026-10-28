@@ -4,7 +4,7 @@
 
 این مخزن شامل نسخهٔ 0.2 و پایهٔ اجرایی برای ادامهٔ توسعه است: Laravel 13، PHP 8.5، React 19، TypeScript و Vite؛ رابط فارسی، RTL و تم روشن/تیره؛ مدیریت اعضا و ورود پلی‌لیست از پنل ادمین؛ پخش فایل خصوصی، جستجو، علاقه‌مندی، ذخیرهٔ پلی‌لیست و بازگرداندن صف پخش. اتصال‌های زمان اجرای برنامه از API همان Laravel عبور می‌کنند. فایل صوت در فضای خصوصی فایل ذخیره می‌شود و متادیتا و رابطهٔ پلی‌لیست‌ها در دیتابیس قرار می‌گیرد.
 
-**وضعیت پس از بازبینی:** سه نقص runtime در مالکیت ایمپورت، epoch تغییر رمز و cleanup کاور بازتولید شده و هنوز بازند. این پروژه بی‌نقص یا آمادهٔ production تأیید نشده است. طرح هدف 0.3، شامل RTL/LTR سراسری، ۶۴ قرارداد کامپوننت، منبع pin شدهٔ 21st.dev و pipeline تبدیل FLAC به MP3 320kbps، در اسناد زیر مشخص شده است؛ این قابلیت‌های هدف هنوز به runtime اضافه نشده‌اند. ادامهٔ پیاده‌سازی از A01 تا A03 در [نقشهٔ اجرا](docs/IMPLEMENTATION_ROADMAP.fa.md) آغاز شود.
+**وضعیت فعلی:** اصلاح runtime مالکیت ایمپورت، epoch رمز و cleanup کاور، دسترسی انحصاری سوپرادمین، سطل بازیافت، حفظ draft، retry وابسته به نشست، صف قابل ویرایش و تایمر خواب اضافه شده‌اند. [رودمپ ۱۶ فازی](docs/ROADMAP.fa.md) وضعیت implementation و verification را جدا نگه می‌دارد؛ شش فاز اول کد دارند و ده فاز بعد هنوز اجرا نشده‌اند. نتیجهٔ تأیید از evidence همان commit خوانده شود. این پروژه هنوز production یا هم‌تراز Spotify/Apple Music تأیید نشده است. [نقص‌های باقی‌مانده](docs/CURRENT_REVIEW.fa.md) و [مقایسهٔ محصول](docs/PRODUCT_BENCHMARK.fa.md) مرجع ادامه‌اند.
 
 ## شروع توسعه
 
@@ -35,7 +35,7 @@ php artisan app:demo
 
 ## ورود یک پلی‌لیست
 
-1. با حساب مدیر وارد «مدیریت کتابخانه» شوید.
+1. با حساب سوپرادمین وارد «مدیریت کتابخانه» شوید.
 2. نام، توضیح و حال‌وهوا را انتخاب کنید و فایل‌های صوتی را آپلود کنید؛ هر نوبت تا ۲۰ فایل و هر فایل تا ۱۰۰ MiB.
 3. عنوان و هنرمند را تنظیم کنید، یا JSON/CSV دارای شناسهٔ فایل‌های همین کتابخانه را انتخاب کنید.
 4. پیش‌نمایش را بررسی و ساخت به‌صورت منتشرشده یا پیش‌نویس را تأیید کنید.
@@ -44,6 +44,10 @@ php artisan app:demo
 هر manifest حداکثر ۵۰۰ آهنگ و ۲ MiB دارد. ترتیب ردیف‌ها همان ترتیب پلی‌لیست است. نمونه‌های ساختار در [examples](examples) قرار دارند؛ شناسه‌های مثال باید با شناسهٔ واقعی حاصل از آپلود جایگزین شوند. URL موسیقی یک سرویس دیگر، فایل صوتی این برنامه محسوب نمی‌شود.
 
 ## سندهای توسعه
+
+- [رودمپ ۱۶ فازی و معیار تأیید](docs/ROADMAP.fa.md)
+- [بازبینی تازه و نقص‌های باقی‌مانده](docs/CURRENT_REVIEW.fa.md)
+- [معیار Spotify و Apple Music](docs/PRODUCT_BENCHMARK.fa.md)
 
 - [بازبینی معماری، نقص‌های باز و شواهد](docs/ARCHITECTURE_REVIEW.fa.md)
 - [معماری هدف 0.3 و invariantهای اصلاحی](docs/ARCHITECTURE_TARGET.fa.md)
@@ -71,6 +75,7 @@ php artisan app:demo
 
 ```bash
 node scripts/check-architecture.mjs
+node scripts/check-roadmap.mjs
 php vendor/bin/phpunit
 npm test
 npm run build
@@ -83,6 +88,8 @@ php artisan optimize
 php artisan optimize:clear
 ```
 
+آزمون مرورگر: ابتدا `npm run build` و نصب Chromium با `npx playwright install chromium` یا Chrome نصب‌شده با `AHANG_BROWSER_CHANNEL=chrome`؛ سپس `npm run test:browser`. این runner رمز تصادفی و SQLite/رسانهٔ مصنوعی مجزا در storage/framework/testing می‌سازد؛ trace و storageState ذخیره نمی‌کند. مرورگر HTTP با APP_ENV=local کار می‌کند تا CSRF واقعی فعال بماند. تنظیم MUSIC_MEDIA_ROOT مسیر فضای خصوصی را تعیین می‌کند. خروجی reports و test-results در git ذخیره نمی‌شوند.
+
 تست‌ها در دیتابیس تست اجرا می‌شوند. دادهٔ محیط توسعه را به تست متصل نکنید. CI برای PHP 8.5 و Node 24، SQLite و MySQL تنظیم شده است؛ اجرای محلی MySQL و اجرای GitHub Actions باید در وضعیت بررسی جداگانه ثبت شود.
 
 ## قواعد مخزن
@@ -90,3 +97,7 @@ php artisan optimize:clear
 `.env`، دیتابیس محلی، صوت‌ها، آپلودها، خروجی build، وابستگی‌ها و دادهٔ مرورگر نباید کامیت شوند. `composer.lock` و `package-lock.json` باید کامیت شوند. تغییرات ساختار دیتابیس با migration جدید انجام می‌گیرد. API و UI یک مبدأ دارند و احراز هویت با session و CSRF انجام می‌شود.
 
 این مخزن به یک سرور PHP نیاز دارد؛ GitHub Pages میزبان مناسبی برای اجرای backend آن نیست. پیکربندی نمونهٔ Nginx و Supervisor در `deploy` موجود است.
+
+## ارتقای این تغییر
+
+پیش از اجرا، [قرارداد ارتقا و محدودیت‌ها](docs/CURRENT_REVIEW.fa.md) را بخوانید: backup، maintenance و توقف worker؛ migration جدید و build تازه، سپس worker و smoke test. role=owner همان سوپرادمین است. administrator/curator دیگر آهنگ یا پلی‌لیست اضافه، ویرایش یا حذف نمی‌کنند. import قدیمی بدون plan_hash باید دوباره preview شود. API نوشتن authenticated به X-Session-Context با actor:access_version نیاز دارد؛ فرانت قدیمی باید تازه‌سازی شود. هیچ‌یک از این مراحل روی سرور کاربر خودکار اجرا نشده است.

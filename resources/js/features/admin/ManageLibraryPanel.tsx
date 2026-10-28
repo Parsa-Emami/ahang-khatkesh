@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ImagePlus, Pencil, ListMusic, Plus } from "lucide-react";
+import { TrashButton } from "./TrashPanel";
 import { PlaylistTracksEditor } from "./PlaylistTracksEditor";
 import { Link } from "react-router-dom";
 import { api, json } from "../../lib/api";
@@ -109,8 +110,8 @@ export function ManageLibraryPanel() {
                 </button>
             </div>
             <p className="muted">
-                پیش‌نویس‌ها فقط برای نقش‌های مدیریت محتوا دیده می‌شوند. با
-                انتشار، همهٔ اعضا به مجموعه دسترسی دارند.
+                پیش‌نویس‌ها فقط برای سوپرادمین دیده می‌شوند. با انتشار، همهٔ
+                اعضا به مجموعه دسترسی دارند.
             </p>
             <div className="manage-list">
                 {query.data.data.map((playlist) => (
@@ -166,6 +167,12 @@ export function ManageLibraryPanel() {
                         >
                             <Pencil size={18} />
                         </IconButton>
+                        <TrashButton
+                            kind="playlist"
+                            id={playlist.id}
+                            title={playlist.name}
+                            revision={playlist.revision}
+                        />
                     </div>
                 ))}
                 {!query.data.data.length && (

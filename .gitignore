@@ -30,3 +30,7 @@ Thumbs.db
 /coverage
 
 /.local-runtime/
+
+/reports/
+/test-results/
+/playwright-report/

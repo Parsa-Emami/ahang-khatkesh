@@ -1,0 +1,360 @@
+{
+  "format_version": 1,
+  "product": "ahang-khatkesh",
+  "production_approved": false,
+  "phases": [
+    {
+      "id": "F01",
+      "title": "مرز سوپرادمین و سطل بازیافت",
+      "status": "implemented",
+      "depends_on": [],
+      "implemented_paths": [
+        "app/Actions/AuthorizeLibraryWrite.php",
+        "app/Actions/TrashCatalogItem.php",
+        "resources/js/features/admin/TrashPanel.tsx"
+      ],
+      "required_tests": [
+        "SuperAdministratorTest"
+      ],
+      "acceptance": [
+        "تمام ورودی‌های نوشتن کاتالوگ فقط برای owner فعال مجازند.",
+        "حذف و بازیابی revision دارند؛ فایل، شناسه، لایک و عضویت حفظ می‌شوند.",
+        "API، Action و مرورگر مستقل از پنهان‌کردن دکمه بررسی می‌شوند."
+      ],
+      "evidence": null
+    },
+    {
+      "id": "F02",
+      "title": "پیش‌نمایش مؤثر و انتشار اتمیک ایمپورت",
+      "status": "implemented",
+      "depends_on": [
+        "F01"
+      ],
+      "implemented_paths": [
+        "app/Actions/ResolveImportPlan.php",
+        "app/Jobs/PublishPlaylistImport.php",
+        "tests/Feature/ImportPublicationIntegrityTest.php"
+      ],
+      "required_tests": [
+        "ImportPublicationIntegrityTest",
+        "PlaylistImportTest"
+      ],
+      "acceptance": [
+        "پیش‌نمایش، متادیتای نهایی canonical و هش برنامه را نشان می‌دهد.",
+        "تغییر مالکیت، revision یا دسترسی سازنده، انتشار جزئی ایجاد نمی‌کند.",
+        "اجرای job و failed قدیمی نمی‌توانند نسل تازه را تغییر دهند."
+      ],
+      "evidence": null
+    },
+    {
+      "id": "F03",
+      "title": "نسخهٔ امنیتی جاری و کنترل credential",
+      "status": "implemented",
+      "depends_on": [
+        "F01"
+      ],
+      "implemented_paths": [
+        "app/Actions/LockCurrentAccount.php",
+        "app/Actions/ChangeOwnPassword.php",
+        "tests/Feature/CredentialEpochTest.php"
+      ],
+      "required_tests": [
+        "CredentialEpochTest",
+        "MfaFlowTest",
+        "AccountAccessTest"
+      ],
+      "acceptance": [
+        "snapshot منقضی نمی‌تواند reset جدید را بازنویسی کند.",
+        "epoch از مقدار تازه DB افزایش می‌یابد؛ hash پرهزینه بیرون قفل است.",
+        "MFA، recovery، تغییر نقش و reset از کنترل حساب جاری استفاده می‌کنند."
+      ],
+      "evidence": null
+    },
+    {
+      "id": "F04",
+      "title": "پاک‌سازی بادوام فایل‌های بدون ارجاع",
+      "status": "implemented",
+      "depends_on": [
+        "F01",
+        "F03"
+      ],
+      "implemented_paths": [
+        "app/Jobs/DeleteUnreferencedMedia.php",
+        "tests/Feature/MediaLifecycleTest.php"
+      ],
+      "required_tests": [
+        "MediaLifecycleTest"
+      ],
+      "acceptance": [
+        "اشاره‌گر جدید و cleanup job در یک تراکنش ثبت می‌شوند.",
+        "شکست حذف قبلی، فایل جدید را حذف نمی‌کند.",
+        "cleanup تکرارپذیر است و ارجاع سطل بازیافت را حفظ می‌کند."
+      ],
+      "evidence": null
+    },
+    {
+      "id": "F05",
+      "title": "صف شخصی و تایمر خواب",
+      "status": "implemented",
+      "depends_on": [
+        "F01",
+        "F03"
+      ],
+      "implemented_paths": [
+        "resources/js/lib/playback-tools.ts",
+        "resources/js/lib/sleep-timer.ts",
+        "resources/js/components/Music.tsx"
+      ],
+      "required_tests": [
+        "personal queue editing",
+        "real audio supports play next queue edits and timed stop without changing the playlist"
+      ],
+      "acceptance": [
+        "پخش بعدی، انتقال، حذف و پاک‌کردن صف، کاتالوگ را تغییر نمی‌دهند.",
+        "ترتیب واقعی صف ذخیره و بازیابی می‌شود؛ shuffle مجاورت هنرمند را متعادل می‌کند.",
+        "تایمر زمان‌دار و پایان آهنگ قبل از repeat اعمال می‌شوند."
+      ],
+      "evidence": null
+    },
+    {
+      "id": "F06",
+      "title": "حفظ draft، نشست چندتب و قرارداد پاسخ",
+      "status": "implemented",
+      "depends_on": [
+        "F02",
+        "F03",
+        "F04",
+        "F05"
+      ],
+      "implemented_paths": [
+        "resources/js/lib/api.ts",
+        "resources/js/lib/versioned-draft.ts",
+        "tests/Feature/ApiResponseSchemaTest.php",
+        "tests/Browser/core.e2e.ts"
+      ],
+      "required_tests": [
+        "session-bound transport",
+        "versioned playlist draft",
+        "ApiResponseSchemaTest",
+        "dirty playlist order survives remote edits and reconnect until explicitly discarded"
+      ],
+      "acceptance": [
+        "retry پس از 419 یا 423 فقط برای همان actor و epoch انجام می‌شود.",
+        "همه mutationهای authenticated زمینهٔ نشست دارند؛ لغو و پاسخ دیررس حفظ می‌شوند.",
+        "reconnect ترتیب محلی را پاک نمی‌کند؛ کنارگذاشتن صریح و schema validation اجرا می‌شوند."
+      ],
+      "evidence": null
+    },
+    {
+      "id": "F07",
+      "title": "چرخهٔ کامل job، blob، quota و reconciliation",
+      "status": "planned",
+      "depends_on": [
+        "F02",
+        "F03",
+        "F04",
+        "F06"
+      ],
+      "implemented_paths": [],
+      "required_tests": [
+        "ImportLeaseRecoveryTest",
+        "MediaBlobQuotaTest"
+      ],
+      "acceptance": [
+        "lease، heartbeat و recovery چندپردازه واقعی MySQL پاس شوند.",
+        "blob فیزیکی از asset معنایی جدا شود؛ quota پیش از آپلود رزرو شود.",
+        "orphan GC با retention، dry-run و recheck مرجع اجرا شود."
+      ],
+      "evidence": null
+    },
+    {
+      "id": "F08",
+      "title": "FLAC به MP3 320k و انتخاب کیفیت",
+      "status": "planned",
+      "depends_on": [
+        "F07"
+      ],
+      "implemented_paths": [],
+      "required_tests": [
+        "AudioConversionTest",
+        "ConversionRecoveryTest",
+        "quality picker"
+      ],
+      "acceptance": [
+        "اصل FLAC حفظ و MP3 با libmp3lame، CBR 320000 و decode کامل اعتبارسنجی شود.",
+        "خطای codec، disk full، timeout، kill و تکرار job فایل نیمه‌آماده منتشر نکنند.",
+        "پنل پیشرفت، retry مجاز، اندازهٔ واقعی و پروفایل خروجی داشته باشد."
+      ],
+      "evidence": null
+    },
+    {
+      "id": "F09",
+      "title": "زبان و جهت سراسری و دسترس‌پذیری پایه",
+      "status": "planned",
+      "depends_on": [
+        "F06"
+      ],
+      "implemented_paths": [],
+      "required_tests": [
+        "locale direction theme matrix",
+        "DraftNavigationTest"
+      ],
+      "acceptance": [
+        "همه ۶۴ قرارداد کامپوننت در fa/en و RTL/LTR و light/dark/system پوشش داشته باشند.",
+        "تغییر locale/theme پلیر را remount نکند؛ متن ترکیبی و logical CSS بررسی شوند.",
+        "صفحه‌خوان، کیبورد، خروج امن از فرم و خطاهای ترجمه آزمون شوند."
+      ],
+      "evidence": null
+    },
+    {
+      "id": "F10",
+      "title": "هویت بصری و shader محلی 21st.dev",
+      "status": "planned",
+      "depends_on": [
+        "F09"
+      ],
+      "implemented_paths": [],
+      "required_tests": [
+        "visual matrix",
+        "shader fallback and reduced motion"
+      ],
+      "acceptance": [
+        "منبع و مجوز pin شده در مخزن وارد شود؛ هیچ کد یا asset دوردستی در runtime بار نشود.",
+        "رنگ، contrast، focus، density و حالت‌های empty/error/loading یکپارچه شوند.",
+        "shader تزئینی با context loss، reduced motion، hidden tab و بودجه GPU افت امن داشته باشد."
+      ],
+      "evidence": null
+    },
+    {
+      "id": "F11",
+      "title": "تاریخچه، حالت خصوصی و پیشنهاد قابل توضیح",
+      "status": "planned",
+      "depends_on": [
+        "F05",
+        "F08",
+        "F09"
+      ],
+      "implemented_paths": [],
+      "required_tests": [
+        "ListeningPrivacyTest",
+        "ExplainableMixTest"
+      ],
+      "acceptance": [
+        "history با consent، retention و پاک‌کردن واقعی ساخته شود؛ private session ذخیره نشود.",
+        "پیشنهاد فقط از کاتالوگ مجاز و با توضیح علت، diversity و کنترل کاربر ساخته شود.",
+        "پیشنهاد یا mix به پلی‌لیست عمومی تبدیل نشود مگر با تأیید سوپرادمین."
+      ],
+      "evidence": null
+    },
+    {
+      "id": "F12",
+      "title": "پنل کامل مدیریت کاتالوگ و درخواست اعضا",
+      "status": "planned",
+      "depends_on": [
+        "F07",
+        "F08",
+        "F09",
+        "F10"
+      ],
+      "implemented_paths": [],
+      "required_tests": [
+        "CatalogBulkChangeTest",
+        "MemberProposalTest"
+      ],
+      "acceptance": [
+        "bulk edit با preview، revision، rollback و audit باشد.",
+        "تشخیص تکراری، هویت هم‌نام، فایل گمشده و مسیر ترمیم کنترل‌شده داشته باشد.",
+        "عضو فقط پیشنهاد می‌دهد؛ ایجاد، حذف و انتشار نهایی فقط سوپرادمین است."
+      ],
+      "evidence": null
+    },
+    {
+      "id": "F13",
+      "title": "متن همگام، crossfade و جزئیات صوت",
+      "status": "planned",
+      "depends_on": [
+        "F08",
+        "F09",
+        "F11"
+      ],
+      "implemented_paths": [],
+      "required_tests": [
+        "LyricsTimelineTest",
+        "CrossfadeDeviceMatrix"
+      ],
+      "acceptance": [
+        "متن دستی دارای مجوز، LRC parser محدود و sync با seek آزمون شود.",
+        "crossfade خاموش‌شدنی با دو audio و cleanup کامل و بدون دوپخش ناخواسته ساخته شود.",
+        "gapless، loudness metadata و محدودیت واقعی Safari/iOS و قالب‌ها ثبت شوند."
+      ],
+      "evidence": null
+    },
+    {
+      "id": "F14",
+      "title": "کنترل چند دستگاه و آفلاین اختیاری",
+      "status": "planned",
+      "depends_on": [
+        "F06",
+        "F08",
+        "F09",
+        "F11"
+      ],
+      "implemented_paths": [],
+      "required_tests": [
+        "PlaybackDeviceLeaseTest",
+        "OfflineRevocationTest"
+      ],
+      "acceptance": [
+        "انتخاب دستگاه فعال، fencing، revoke و تعارض دو دستگاه قابل مشاهده باشد.",
+        "آفلاین فقط با انتخاب صریح، سهمیه، خروج امن و محدودیت ابطال توضیح‌داده‌شده باشد.",
+        "چندتب، reconnect، sleep سیستم و نسخهٔ cache در مرورگرهای هدف آزمون شوند."
+      ],
+      "evidence": null
+    },
+    {
+      "id": "F15",
+      "title": "عملیات، ارتقای MySQL و ظرفیت واقعی",
+      "status": "planned",
+      "depends_on": [
+        "F07",
+        "F08",
+        "F12"
+      ],
+      "implemented_paths": [],
+      "required_tests": [
+        "MySqlUpgradeRestoreTest",
+        "TenConcurrentStreams"
+      ],
+      "acceptance": [
+        "ارتقای دادهٔ نسخهٔ قبلی در MySQL 8.4 و بازیابی هماهنگ DB و فایل اثبات شود.",
+        "X-Accel داخلی بعد از مجوز Laravel، Range، HEAD و revoke درست کار کنند.",
+        "ده stream همراه import و سقف دیسک، صف، تأخیر و هشدارها اندازه‌گیری شوند."
+      ],
+      "evidence": null
+    },
+    {
+      "id": "F16",
+      "title": "شواهد انتشار و بازبینی مستقل امنیت",
+      "status": "planned",
+      "depends_on": [
+        "F10",
+        "F11",
+        "F12",
+        "F13",
+        "F14",
+        "F15"
+      ],
+      "implemented_paths": [],
+      "required_tests": [
+        "ReleaseSecurityReview",
+        "UniversalReleaseMatrix"
+      ],
+      "acceptance": [
+        "همه یافته‌های باز و نیازمندی‌های قابل اعمال ASVS با شاهد بسته شوند.",
+        "SAST/DAST، dependency audit، تست نفوذ مجاز و keyboard/screen-reader مستقل پاس شوند.",
+        "راهنمای استقرار، restore drill، rollback و مالک پذیرش، release candidate را تأیید کنند."
+      ],
+      "evidence": null
+    }
+  ]
+}

@@ -25,6 +25,14 @@ class EnsureAccountActive
             abort(401, 'دسترسی حساب تغییر کرده است؛ دوباره وارد شوید.');
         }
 
+        $context = $request->header('X-Session-Context');
+        if (! $request->isMethodSafe() && ($context === null || $context === '')) {
+            return response()->json(['message' => 'صفحه را تازه کنید؛ زمینهٔ نشست لازم است.', 'code' => 'session_context_required'], 428);
+        }
+        if ($context !== null && ! hash_equals($request->user()->id.':'.$request->user()->access_version, $context)) {
+            return response()->json(['message' => 'هویت یا دسترسی نشست تغییر کرده است.', 'code' => 'session_context_changed'], 409);
+        }
+
         return $next($request);
     }
 }

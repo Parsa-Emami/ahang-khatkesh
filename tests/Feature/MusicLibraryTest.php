@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Enums\UserRole;
 use App\Models\MediaAsset;
 use App\Models\Playlist;
 use App\Models\Track;
@@ -28,7 +29,7 @@ class MusicLibraryTest extends TestCase
 
     public function test_unpublished_playlist_and_audio_are_hidden_from_member(): void
     {
-        $admin = User::factory()->create(['is_admin' => true]);
+        $admin = User::factory()->create(['role' => UserRole::Owner]);
         $member = User::factory()->create();
         [$playlist, $track] = $this->catalog($admin, false);
         $this->actingAs($member)->getJson('/api/v1/playlists')->assertOk()->assertJsonCount(0, 'data');
@@ -39,7 +40,7 @@ class MusicLibraryTest extends TestCase
 
     public function test_policies_allow_active_members_only_for_published_content(): void
     {
-        $admin = User::factory()->create(['is_admin' => true]);
+        $admin = User::factory()->create(['role' => UserRole::Owner]);
         $member = User::factory()->create();
         $disabled = User::factory()->create(['is_active' => false]);
         [$playlist, $track] = $this->catalog($admin, false);

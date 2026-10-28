@@ -17,10 +17,14 @@ class PlaylistImport extends Model
 
     public const FAILED = 'failed';
 
-    protected $fillable = ['created_by', 'idempotency_key', 'payload_hash', 'name', 'description', 'mood', 'rows', 'status', 'report', 'playlist_id', 'publish', 'error'];
+    public const NEEDS_REVIEW = 'needs_review';
+
+    public const CANCELLED = 'cancelled';
+
+    protected $fillable = ['created_by', 'idempotency_key', 'payload_hash', 'name', 'description', 'mood', 'rows', 'status', 'report', 'playlist_id', 'publish', 'error', 'generation'];
 
     protected function casts(): array
     {
-        return ['rows' => 'array', 'report' => 'array', 'publish' => 'boolean'];
+        return ['generation' => 'integer', 'rows' => 'array', 'report' => 'array', 'publish' => 'boolean'];
     }
 }

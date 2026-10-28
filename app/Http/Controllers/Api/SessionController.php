@@ -2,14 +2,13 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Actions\ChangeOwnPassword;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\UserResource;
 use App\Models\AuditEvent;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 
@@ -46,20 +45,18 @@ class SessionController extends Controller
         return new UserResource($request->user());
     }
 
-    public function password(Request $request): JsonResponse
+    public function password(Request $request, ChangeOwnPassword $change): JsonResponse
     {
         $data = $request->validate([
-            'current_password' => ['required', 'current_password:web'],
+            'current_password' => ['required', 'string', 'max:128'],
             'password' => ['required', 'string', 'confirmed', 'different:current_password', Password::min(12)->letters()->numbers(), 'max:128'],
         ]);
-        $request->user()->forceFill(['password' => $data['password'], 'remember_token' => Str::random(60), 'access_version' => $request->user()->access_version + 1])->save();
-        if (config('session.driver') === 'database') {
-            DB::table('sessions')->where('user_id', $request->user()->id)->where('id', '!=', $request->session()->getId())->delete();
-        }
+        $user = $change->handle($request->user(), (int) $request->session()->get('auth.access_version', -1), $data['current_password'], $data['password'], $request->session()->getId());
+        Auth::guard('web')->setUser($user);
         $request->session()->regenerate(true);
-        $request->session()->put('auth.access_version', $request->user()->access_version);
+        $request->session()->put('auth.access_version', $user->access_version);
         $request->session()->passwordConfirmed();
 
-        return response()->json(['data' => ['csrf_token' => csrf_token(), 'message' => 'رمز عبور تغییر کرد.']]);
+        return response()->json(['data' => ['csrf_token' => csrf_token(), 'message' => 'رمز عبور تغییر کرد.', 'user' => new UserResource($user)]]);
     }
 }

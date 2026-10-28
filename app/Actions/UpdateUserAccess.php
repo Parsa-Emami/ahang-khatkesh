@@ -12,11 +12,13 @@ use Illuminate\Validation\ValidationException;
 
 class UpdateUserAccess
 {
+    public function __construct(private LockCurrentAccount $accounts) {}
+
     public function handle(User $subject, User $actor, array $data): User
     {
         return DB::transaction(function () use ($subject, $actor, $data): User {
             LibrarySetting::whereKey(1)->increment('lock_version');
-            $actor = User::whereKey($actor->id)->lockForUpdate()->firstOrFail();
+            $actor = $this->accounts->handle($actor);
             $subject = User::whereKey($subject->id)->lockForUpdate()->firstOrFail();
             abort_unless($actor->hasPermission(Permission::UsersManage), 403);
             $role = isset($data['role']) ? UserRole::from($data['role']) : $subject->role;

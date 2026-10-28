@@ -2,9 +2,11 @@
 
 namespace App\Console\Commands;
 
+use App\Actions\AuthorizeLibraryWrite;
+use App\Actions\RegisterTrack;
+use App\Enums\UserRole;
 use App\Models\MediaAsset;
 use App\Models\Playlist;
-use App\Models\Track;
 use App\Models\User;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
@@ -16,14 +18,14 @@ class CreateDemoLibrary extends Command
 
     protected $description = 'Create original synthetic audio and playlists in local/testing only';
 
-    public function handle(): int
+    public function handle(RegisterTrack $register, AuthorizeLibraryWrite $authorize): int
     {
         if (! app()->environment(['local', 'testing'])) {
             $this->error('Demo data is allowed only in local/testing.');
 
             return self::FAILURE;
         }
-        $admin = User::where('is_admin', true)->where('is_active', true)->first();
+        $admin = User::where('role', UserRole::Owner)->where('is_active', true)->first();
         if (! $admin) {
             $this->error('Run app:create-admin first.');
 
@@ -37,10 +39,11 @@ class CreateDemoLibrary extends Command
             $path = 'audio/demo-'.$index.'.wav';
             Storage::disk('media')->put($path, $wave);
             $asset = MediaAsset::firstOrCreate(['sha256' => $hash], ['path' => $path, 'original_name' => 'demo-'.$index.'.wav', 'mime_type' => 'audio/wav', 'size_bytes' => strlen($wave), 'duration_seconds' => 24, 'uploaded_by' => $admin->id]);
-            $tracks[] = Track::firstOrCreate(['media_asset_id' => $asset->id], ['title' => $title, 'artist' => 'آزمایشگاه خط‌کش', 'album' => 'صداهای نمونهٔ تولیدشده']);
+            $tracks[] = $register->handle(['asset_id' => $asset->id, 'title' => $title, 'artist' => 'آزمایشگاه خط‌کش', 'album' => 'صداهای نمونهٔ تولیدشده']);
         }
         $lists = [['ساعتِ آبی', 'night', 'برای وقتی که شهر آرام می‌گیرد.', 0], ['تمرکز، بدون مرز', 'focus', 'چند دقیقه فاصله از شلوغی روز.', 1], ['کمی آفتاب', 'energy', 'برای قدم‌های بعدی، کمی روشن‌تر.', 2], ['خطِ آرامش', 'calm', 'صداهایی برای نفس کشیدن.', 3], ['بعد از باران', 'calm', 'یک حال تازه، یک شروع کوچک.', 4], ['مسیرِ خانه', 'other', 'آهنگ‌هایی برای خودت.', 5]];
-        DB::transaction(function () use ($lists, $tracks, $admin): void {
+        DB::transaction(function () use ($lists, $tracks, $admin, $authorize): void {
+            $authorize->handle($admin);
             foreach ($lists as [$name, $mood, $description, $seed]) {
                 $playlist = Playlist::firstOrCreate(['name' => $name, 'created_by' => $admin->id], ['description' => $description.' این مجموعه فقط شامل صدای نمونهٔ تولیدشده است.', 'mood' => $mood, 'status' => Playlist::PUBLISHED, 'artwork_seed' => $seed]);
                 if ($playlist->wasRecentlyCreated) {

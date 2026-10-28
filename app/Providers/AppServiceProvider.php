@@ -52,14 +52,19 @@ class AppServiceProvider extends ServiceProvider
                     return null;
                 }
                 if (Hash::needsRehash($user->password)) {
-                    $user->forceFill(['password' => Hash::make($request->string('password')->toString())])->save();
+                    $encoded = Hash::make($request->string('password')->toString());
+                    $updated = User::whereKey($user->id)->where('password', $user->password)->where('access_version', $user->access_version)->where('is_active', true)->update(['password' => $encoded]);
+                    if ($updated !== 1) {
+                        return null;
+                    }
+                    $user->password = $encoded;
                 }
 
                 return $user;
             }, 200000);
         });
         RateLimiter::for('two-factor', fn (Request $request) => [Limit::perMinute(5)->by('account:'.(string) $request->session()->get('login.id')), Limit::perMinute(20)->by('ip:'.$request->ip())]);
-        RateLimiter::for('confirm-password', fn (Request $request) => Limit::perMinute(5)->by($request->user()->id.'|'.$request->ip()));
+        RateLimiter::for('confirm-password', fn (Request $request) => [Limit::perMinute(5)->by('account:'.$request->user()->id), Limit::perMinute(20)->by('ip:'.$request->ip())]);
         RateLimiter::for('login', fn (Request $request) => [Limit::perMinute(5)->by(hash('sha256', mb_strtolower($request->string('email')->toString()).'|'.$request->ip())), Limit::perMinute(10)->by('account:'.hash('sha256', mb_strtolower($request->string('email')->toString()))), Limit::perMinute(30)->by('ip:'.$request->ip())]);
         RateLimiter::for('catalog', fn (Request $request) => Limit::perMinute(180)->by($request->user()->id));
         RateLimiter::for('upload', fn (Request $request) => Limit::perMinute(30)->by($request->user()->id));

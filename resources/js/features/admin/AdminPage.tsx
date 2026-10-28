@@ -11,6 +11,7 @@ import {
     ShieldCheck,
     Disc3,
     ArrowLeft,
+    Trash2,
 } from "lucide-react";
 import { can, type Permission } from "../../types";
 import { useSession } from "../../context/AppContext";
@@ -18,6 +19,7 @@ import { ImportsPanel } from "./ImportsPanel";
 import { MembersPanel } from "./MembersPanel";
 import { ManageLibraryPanel } from "./ManageLibraryPanel";
 import { OverviewPanel, OperationsPanel, AuditPanel } from "./ReadPanels";
+import { TrashPanel } from "./TrashPanel";
 import { CatalogPanel } from "./CatalogPanel";
 import { MfaPanel } from "../security/MfaPanel";
 const sections: {
@@ -54,6 +56,13 @@ const sections: {
         description: "هنرمند، انتشار و آهنگ",
         permission: "catalog.manage",
         icon: Disc3,
+    },
+    {
+        id: "trash",
+        label: "سطل بازیافت",
+        description: "بازیابی انتخاب‌های حذف‌شده",
+        permission: "catalog.manage",
+        icon: Trash2,
     },
     {
         id: "users",
@@ -168,6 +177,8 @@ export default function AdminPage() {
                             <ManageLibraryPanel />
                         ) : active.id === "catalog" ? (
                             <CatalogPanel />
+                        ) : active.id === "trash" ? (
+                            <TrashPanel />
                         ) : active.id === "users" ? (
                             <MembersPanel />
                         ) : active.id === "audit" ? (

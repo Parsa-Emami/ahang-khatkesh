@@ -1,5 +1,6 @@
 <?php
 
+use App\Exceptions\ImportPlanChanged;
 use App\Http\Middleware\EnsureAccountActive;
 use App\Http\Middleware\RequireGuestSession;
 use App\Http\Middleware\RequireMfa;
@@ -20,6 +21,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias(['guest-session' => RequireGuestSession::class, 'active' => EnsureAccountActive::class, 'recent-password' => RequireRecentPassword::class, 'mfa' => RequireMfa::class, 'serialized-mfa' => SerializeMfaChallenge::class]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
+        $exceptions->render(fn (ImportPlanChanged $error) => response()->json(['message' => $error->getMessage(), 'code' => 'import_plan_changed'], 409));
         $exceptions->shouldRenderJsonWhen(fn (Request $request) => $request->is('api/*') || $request->expectsJson());
         $exceptions->respond(function (Response $response): Response {
             $response->headers->set('X-Request-ID', (string) Context::get('request_id'));

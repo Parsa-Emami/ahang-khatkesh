@@ -13,8 +13,8 @@ enum UserRole: string
     {
         return match ($this) {
             self::Owner => Permission::cases(),
-            self::Administrator => [Permission::AdminAccess, Permission::DashboardRead, Permission::CatalogManage, Permission::MediaManage, Permission::ImportsManage, Permission::UsersManage, Permission::AuditRead, Permission::OperationsRead],
-            self::Curator => [Permission::AdminAccess, Permission::DashboardRead, Permission::CatalogManage, Permission::MediaManage, Permission::ImportsManage],
+            self::Administrator => [Permission::AdminAccess, Permission::DashboardRead, Permission::UsersManage, Permission::AuditRead, Permission::OperationsRead],
+            self::Curator => [Permission::AdminAccess, Permission::DashboardRead],
             self::Listener => [],
         };
     }
@@ -32,7 +32,7 @@ enum UserRole: string
     public function label(): string
     {
         return match ($this) {
-            self::Owner => 'مالک', self::Administrator => 'مدیر', self::Curator => 'مدیر محتوا', self::Listener => 'شنونده'
+            self::Owner => 'سوپرادمین', self::Administrator => 'مدیر اعضا', self::Curator => 'ناظر محتوا', self::Listener => 'شنونده'
         };
     }
 }

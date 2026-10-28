@@ -60,6 +60,11 @@ Route::prefix('api/v1')->group(function (): void {
                         Route::post('tracks/{track}/renditions', [Admin\CatalogManagementController::class, 'attachRendition'])->middleware('can:media.manage');
                     });
                 });
+                Route::get('trash', [Admin\TrashController::class, 'index'])->middleware('can:catalog.manage');
+                Route::delete('tracks/{track}', [Admin\TrashController::class, 'track'])->withTrashed()->middleware(['can:catalog.manage', 'recent-password']);
+                Route::post('tracks/{track}/restore', [Admin\TrashController::class, 'track'])->withTrashed()->middleware(['can:catalog.manage', 'recent-password']);
+                Route::delete('playlists/{playlist}', [Admin\TrashController::class, 'playlist'])->withTrashed()->middleware(['can:catalog.manage', 'recent-password']);
+                Route::post('playlists/{playlist}/restore', [Admin\TrashController::class, 'playlist'])->withTrashed()->middleware(['can:catalog.manage', 'recent-password']);
                 Route::get('overview', OverviewController::class)->middleware('can:dashboard.read');
                 Route::get('operations', OperationsController::class)->middleware('can:operations.read');
                 Route::get('audit-events', [AuditEventController::class, 'index'])->middleware('can:audit.read');

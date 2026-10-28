@@ -31,7 +31,9 @@ const statusLabels: Record<ImportRun["status"], string> = {
     ready: "آمادهٔ تأیید",
     processing: "در حال ساخت",
     completed: "انجام‌شده",
-    failed: "نیاز به بررسی",
+    failed: "خطای پردازش؛ قابل تلاش دوباره",
+    needs_review: "نیاز به پیش‌نمایش تازه",
+    cancelled: "لغو به دلیل تغییر دسترسی",
 };
 
 export function ImportsPanel() {
@@ -217,7 +219,12 @@ export function ImportsPanel() {
                 <span
                     className={
                         current &&
-                        ["processing", "completed"].includes(current.status)
+                        [
+                            "processing",
+                            "completed",
+                            "needs_review",
+                            "cancelled",
+                        ].includes(current.status)
                             ? "active"
                             : ""
                     }
@@ -662,7 +669,13 @@ export function ImportsPanel() {
                                         </label>
                                         <button
                                             className="button"
-                                            disabled={commit.isPending}
+                                            disabled={
+                                                commit.isPending ||
+                                                [
+                                                    "needs_review",
+                                                    "cancelled",
+                                                ].includes(current.status)
+                                            }
                                             onClick={() => commit.mutate()}
                                         >
                                             {commit.isPending
@@ -677,6 +690,7 @@ export function ImportsPanel() {
                                     className="text-link reset-import"
                                     onClick={() => {
                                         setRunId(null);
+                                        key.current = crypto.randomUUID();
                                         if (current.status === "completed") {
                                             setRows([]);
                                             setManifest(null);

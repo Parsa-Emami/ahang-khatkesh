@@ -1,0 +1,261 @@
+import { expect, test, type Page } from "@playwright/test";
+async function login(page: Page, device: string, owner = false, recovery = 1) {
+    await page.goto("/");
+    await page
+        .getByLabel("ایمیل", { exact: true })
+        .fill(`${owner ? "owner" : "listener"}-${device}@example.test`);
+    await page
+        .getByLabel("رمز عبور", { exact: true })
+        .fill(process.env.AHANG_E2E_PASSWORD!);
+    await page.getByRole("button", { name: "ورود به خط‌کش" }).click();
+    if (owner) {
+        await page
+            .getByRole("button", { name: "استفاده از کد بازیابی", exact: true })
+            .click();
+        await page
+            .getByLabel("کد بازیابی", { exact: true })
+            .fill(`browser-recovery-${recovery}`);
+        const challenge = page.waitForResponse(
+            (response) =>
+                response.url().endsWith("/api/v1/login/challenge") &&
+                response.request().method() === "POST",
+        );
+        await page.getByRole("button", { name: "ورود به خط‌کش" }).click();
+        expect((await challenge).status()).toBe(200);
+    }
+    await expect(
+        page.getByRole("button", { name: "نمایش صف پخش", exact: true }),
+    ).toBeVisible({ timeout: 15000 });
+}
+async function sessionHeaders(page: Page) {
+    const { data } = await (await page.request.get("/api/v1/session")).json();
+    return {
+        "X-CSRF-TOKEN": data.csrf_token,
+        "X-Session-Context": `${data.user.id}:${data.user.access_version}`,
+        Accept: "application/json",
+    };
+}
+test("listener cannot mutate catalog with valid CSRF and real middleware rejects missing CSRF", async ({
+    page,
+}, info) => {
+    await login(page, info.project.name);
+    const missing = await page.request.post("/api/v1/admin/playlists", {
+        data: { name: "Blocked", mood: "calm" },
+        headers: { Accept: "application/json" },
+    });
+    expect(missing.status()).toBe(419);
+    const forbidden = await page.request.post("/api/v1/admin/playlists", {
+        data: { name: "Blocked", mood: "calm" },
+        headers: await sessionHeaders(page),
+    });
+    expect(forbidden.status()).toBe(403);
+    await expect(
+        page.getByRole("heading", { name: "پشت صحنهٔ خط‌کش" }),
+    ).toHaveCount(0);
+});
+test("real audio supports play next queue edits and timed stop without changing the playlist", async ({
+    page,
+}, info) => {
+    await page.clock.install();
+    await login(page, info.project.name);
+    const playlists = await (
+        await page.request.get("/api/v1/playlists")
+    ).json();
+    const id = playlists.data[0].id;
+    await page.goto(`/playlists/${id}`);
+    const original = await (
+        await page.request.get(`/api/v1/playlists/${id}`)
+    ).json();
+    await page.getByRole("button", { name: "پخش همه", exact: true }).click();
+    await expect(
+        page
+            .locator(".player-bar")
+            .getByRole("button", { name: "توقف پخش", exact: true }),
+    ).toBeVisible();
+    await expect
+        .poll(async () =>
+            Number(
+                await page
+                    .locator('input[aria-label="موقعیت پخش"]')
+                    .inputValue(),
+            ),
+        )
+        .toBeGreaterThan(0);
+    const target = original.data.tracks[2];
+    await page
+        .getByRole("button", { name: `پخش بعدی ${target.title}`, exact: true })
+        .click();
+    await page
+        .getByRole("button", { name: "نمایش صف پخش", exact: true })
+        .click();
+    const dialog = page.getByRole("dialog", { name: "صف پخش شما" });
+    await expect(dialog.locator(".queue-row").nth(1)).toContainText(
+        target.title,
+    );
+    await dialog
+        .getByRole("button", {
+            name: `برداشتن ${target.title} از صف`,
+            exact: true,
+        })
+        .click();
+    await expect(dialog.locator(".queue-row")).toHaveCount(
+        original.data.tracks.length - 1,
+    );
+    await dialog
+        .getByRole("button", { name: "بستن پنجره", exact: true })
+        .click();
+    await page.getByRole("button", { name: "تایمر خواب", exact: true }).click();
+    await page.getByRole("button", { name: "۵ دقیقه", exact: true }).click();
+    for (const control of await page.locator(".player-tools button").all()) {
+        const bounds = await control.boundingBox();
+        expect(bounds).not.toBeNull();
+        expect(bounds!.x).toBeGreaterThanOrEqual(0);
+        expect(bounds!.x + bounds!.width).toBeLessThanOrEqual(
+            page.viewportSize()!.width,
+        );
+    }
+    await page.clock.fastForward(300001);
+    await expect(
+        page
+            .locator(".player-bar")
+            .getByRole("button", { name: "پخش موسیقی", exact: true }),
+    ).toBeVisible();
+    await expect(
+        page.getByRole("button", { name: "تایمر خواب", exact: true }),
+    ).toHaveAttribute("aria-pressed", "false");
+    const after = await (
+        await page.request.get(`/api/v1/playlists/${id}`)
+    ).json();
+    expect(after.data.tracks.map((track: { id: number }) => track.id)).toEqual(
+        original.data.tracks.map((track: { id: number }) => track.id),
+    );
+    await page.screenshot({
+        path: `reports/player-${info.project.name}.png`,
+        fullPage: true,
+    });
+});
+test("dirty playlist order survives remote edits and reconnect until explicitly discarded", async ({
+    page,
+}, info) => {
+    await login(
+        page,
+        info.project.name,
+        true,
+        info.title.startsWith("dirty") ? 11 : 21,
+    );
+    const playlists = await (
+        await page.request.get("/api/v1/playlists")
+    ).json();
+    const playlist = playlists.data[0];
+    const original = (
+        await (
+            await page.request.get(`/api/v1/playlists/${playlist.id}`)
+        ).json()
+    ).data;
+    await page.goto("/admin?tab=library");
+    await page
+        .getByRole("button", {
+            name: `ترتیب آهنگ‌های ${playlist.name}`,
+            exact: true,
+        })
+        .click();
+    const dialog = page.getByRole("dialog", {
+        name: `آهنگ‌های ${playlist.name}`,
+        exact: true,
+    });
+    await expect(dialog.locator(".arrange-list li")).toHaveCount(
+        original.tracks.length,
+    );
+    await dialog
+        .getByRole("button", {
+            name: `پایین بردن ${original.tracks[0].title}`,
+            exact: true,
+        })
+        .click();
+    await expect(dialog.locator(".arrange-list li").first()).toContainText(
+        original.tracks[1].title,
+    );
+    const ids = original.tracks
+        .map((track: { id: number }) => track.id)
+        .reverse();
+    const changed = await page.request.put(
+        `/api/v1/admin/playlists/${playlist.id}/tracks`,
+        {
+            data: { revision: original.revision, track_ids: ids },
+            headers: await sessionHeaders(page),
+        },
+    );
+    expect(changed.status()).toBe(200);
+    await page.evaluate(() => {
+        window.dispatchEvent(new Event("offline"));
+        window.dispatchEvent(new Event("online"));
+    });
+    await expect(dialog.getByRole("alert")).toContainText(
+        "نسخهٔ تازه‌ای در سرور وجود دارد",
+    );
+    await expect(dialog.locator(".arrange-list li").first()).toContainText(
+        original.tracks[1].title,
+    );
+    await expect(
+        dialog.getByRole("button", { name: "ذخیرهٔ ترتیب و آهنگ‌ها" }),
+    ).toBeDisabled();
+    await dialog
+        .getByRole("button", {
+            name: "کنار گذاشتن این ترتیب و بارگذاری نسخهٔ تازه",
+        })
+        .click();
+    await expect(dialog.locator(".arrange-list li").first()).toContainText(
+        original.tracks.at(-1).title,
+    );
+    await expect(
+        dialog.getByRole("button", { name: "ذخیرهٔ ترتیب و آهنگ‌ها" }),
+    ).toBeEnabled();
+});
+test("super administrator can trash and restore catalog from the admin panel", async ({
+    page,
+}, info) => {
+    await login(
+        page,
+        info.project.name,
+        true,
+        info.title.startsWith("dirty") ? 11 : 21,
+    );
+    const tracks = await (
+        await page.request.get("/api/v1/admin/tracks")
+    ).json();
+    const track = tracks.data[0];
+    await page.goto("/admin?tab=catalog");
+    await page.getByRole("button", { name: "آهنگ‌ها", exact: true }).click();
+    await page
+        .getByRole("button", {
+            name: `انتقال ${track.title} به سطل بازیافت`,
+            exact: true,
+        })
+        .click();
+    const confirm = page.getByRole("dialog", {
+        name: `حذف ${track.title}`,
+        exact: true,
+    });
+    await confirm
+        .getByRole("button", { name: "انتقال به سطل بازیافت", exact: true })
+        .click();
+    await expect(confirm).toHaveCount(0);
+    await page.goto("/admin?tab=trash");
+    await page
+        .getByRole("button", { name: `بازیابی ${track.title}`, exact: true })
+        .click();
+    await expect(
+        page.getByRole("button", {
+            name: `بازیابی ${track.title}`,
+            exact: true,
+        }),
+    ).toHaveCount(0);
+    const after = await (await page.request.get("/api/v1/admin/tracks")).json();
+    expect(
+        after.data.some((item: { id: number }) => item.id === track.id),
+    ).toBe(true);
+    await page.screenshot({
+        path: `reports/admin-${info.project.name}.png`,
+        fullPage: true,
+    });
+});

@@ -2,20 +2,19 @@
 
 namespace App\Actions;
 
-use App\Enums\Permission;
 use App\Models\AuditEvent;
-use App\Models\LibrarySetting;
 use App\Models\Release;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
 class SaveRelease
 {
+    public function __construct(private AuthorizeLibraryWrite $authorize) {}
+
     public function handle(User $actor, array $data, ?Release $release = null): Release
     {
         return DB::transaction(function () use ($actor, $release, $data): Release {
-            LibrarySetting::whereKey(1)->increment('lock_version');
-            abort_unless(User::whereKey($actor->id)->firstOrFail()->hasPermission(Permission::CatalogManage), 403);
+            $actor = $this->authorize->handle($actor);
             $model = $release?->exists ? Release::whereKey($release->id)->lockForUpdate()->firstOrFail() : new Release;
             if ($model->exists) {
                 abort_unless((int) $model->revision === (int) $data['revision'], 409, 'اطلاعات انتشار تغییر کرده است.');

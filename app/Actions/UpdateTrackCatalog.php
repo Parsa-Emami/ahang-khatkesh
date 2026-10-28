@@ -2,10 +2,8 @@
 
 namespace App\Actions;
 
-use App\Enums\Permission;
 use App\Models\Artist;
 use App\Models\AuditEvent;
-use App\Models\LibrarySetting;
 use App\Models\Release;
 use App\Models\Track;
 use App\Models\User;
@@ -13,11 +11,12 @@ use Illuminate\Support\Facades\DB;
 
 class UpdateTrackCatalog
 {
+    public function __construct(private AuthorizeLibraryWrite $authorize) {}
+
     public function handle(Track $track, User $actor, array $data): Track
     {
         return DB::transaction(function () use ($track, $actor, $data): Track {
-            LibrarySetting::whereKey(1)->increment('lock_version');
-            abort_unless(User::whereKey($actor->id)->firstOrFail()->hasPermission(Permission::CatalogManage), 403);
+            $actor = $this->authorize->handle($actor);
             $locked = Track::whereKey($track->id)->lockForUpdate()->firstOrFail();
             abort_unless($locked->catalog_revision === (int) $data['revision'], 409, 'اطلاعات آهنگ تغییر کرده است؛ دوباره بارگذاری کنید.');
             $locked->artists()->detach();

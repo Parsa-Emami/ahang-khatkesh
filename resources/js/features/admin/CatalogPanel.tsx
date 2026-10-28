@@ -7,6 +7,7 @@ import { useToast } from "../../context/AppContext";
 import { digits, type Track, type Page } from "../../types";
 import type { Artist, Release } from "./contracts";
 import { adminApi, adminKeys } from "./api";
+import { TrashButton } from "./TrashPanel";
 import { ArtistPicker, TrackPicker } from "./Pickers";
 const releaseTypes = {
     album: "آلبوم",
@@ -113,6 +114,14 @@ export function CatalogPanel() {
                                 >
                                     <Pencil size={17} />
                                 </IconButton>
+                                {"artist" in item && (
+                                    <TrashButton
+                                        kind="track"
+                                        id={item.id}
+                                        title={item.title}
+                                        revision={item.revision}
+                                    />
+                                )}
                             </article>
                         ))}
                         {!query.data.data.length && (

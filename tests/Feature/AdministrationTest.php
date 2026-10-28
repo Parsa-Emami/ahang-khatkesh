@@ -20,11 +20,11 @@ class AdministrationTest extends TestCase
         return $user;
     }
 
-    public function test_curator_can_manage_catalog_but_cannot_manage_people_or_read_operations_and_audit(): void
+    public function test_curator_can_read_overview_but_cannot_manage_catalog_people_or_operations(): void
     {
         $this->administrator(UserRole::Curator);
         $this->getJson('/api/v1/admin/overview')->assertOk()->assertJsonPath('data.members', null);
-        $this->getJson('/api/v1/admin/artists')->assertOk();
+        $this->getJson('/api/v1/admin/artists')->assertForbidden();
         $this->getJson('/api/v1/admin/users')->assertForbidden();
         $this->getJson('/api/v1/admin/operations')->assertForbidden();
         $this->getJson('/api/v1/admin/audit-events')->assertForbidden();

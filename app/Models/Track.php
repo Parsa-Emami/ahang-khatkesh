@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Actions\EnsureTrackCatalog;
 use App\Enums\Permission;
 use App\Support\TextNormalizer;
 use Illuminate\Database\Eloquent\Attributes\Scope;
@@ -11,10 +10,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Track extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $fillable = ['media_asset_id', 'title', 'artist', 'album', 'search_text', 'catalog_revision', 'primary_release_id'];
 
@@ -28,7 +28,6 @@ class Track extends Model
         static::saving(function (Track $track): void {
             $track->search_text = TextNormalizer::normalize(implode(' ', [$track->title, $track->artist, $track->album]));
         });
-        static::created(fn (Track $track) => app(EnsureTrackCatalog::class)->handle($track));
     }
 
     public function mediaAsset(): BelongsTo

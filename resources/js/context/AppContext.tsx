@@ -7,7 +7,12 @@ import {
     type PropsWithChildren,
 } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { api } from "../lib/api";
+import {
+    api,
+    getCsrfToken,
+    setSessionIdentity,
+    invalidateSessionIdentity,
+} from "../lib/api";
 import type { Theme, User } from "../types";
 
 type SessionResult = { data: { user: User | null; csrf_token: string } };
@@ -27,16 +32,58 @@ export function SessionProvider({ children }: PropsWithChildren) {
         staleTime: Infinity,
     });
     useEffect(() => {
-        const expired = () => {
-            client.setQueryData(["session"], {
-                data: { user: null, csrf_token: "" },
+        const clearPrivate = () => {
+            void client.cancelQueries({
+                predicate: (query) => query.queryKey[0] !== "session",
             });
             client.removeQueries({
                 predicate: (query) => query.queryKey[0] !== "session",
             });
         };
+        const expired = () => {
+            invalidateSessionIdentity();
+            clearPrivate();
+            client.setQueryData(["session"], {
+                data: { user: null, csrf_token: "" },
+            });
+        };
+        const changed = () => {
+            expired();
+            void client.invalidateQueries({ queryKey: ["session"] });
+        };
+        const received = (event: Event) => {
+            const user = (event as CustomEvent<User | null>).detail;
+            const previous = client.getQueryData<SessionResult>(["session"])
+                ?.data.user;
+            if (
+                previous?.id !== user?.id ||
+                previous?.access_version !== user?.access_version
+            )
+                clearPrivate();
+            client.setQueryData(["session"], {
+                data: { user, csrf_token: getCsrfToken() },
+            });
+        };
+        const channel =
+            typeof BroadcastChannel === "undefined"
+                ? null
+                : new BroadcastChannel("ak-session-v1");
+        const announce = () => channel?.postMessage("session-changed");
+        if (channel)
+            channel.onmessage = (event) => {
+                if (event.data === "session-changed") changed();
+            };
         window.addEventListener("session-expired", expired);
-        return () => window.removeEventListener("session-expired", expired);
+        window.addEventListener("session-context-changed", changed);
+        window.addEventListener("session-identity", received);
+        window.addEventListener("session-auth-change", announce);
+        return () => {
+            window.removeEventListener("session-expired", expired);
+            window.removeEventListener("session-context-changed", changed);
+            window.removeEventListener("session-identity", received);
+            window.removeEventListener("session-auth-change", announce);
+            channel?.close();
+        };
     }, [client]);
     return (
         <SessionContext.Provider
@@ -45,7 +92,10 @@ export function SessionProvider({ children }: PropsWithChildren) {
                 pending: session.isPending,
                 error: session.error,
                 refresh: () => void session.refetch(),
-                setSession: (value) => client.setQueryData(["session"], value),
+                setSession: (value) => {
+                    setSessionIdentity(value.data.user);
+                    client.setQueryData(["session"], value);
+                },
             }}
         >
             {children}

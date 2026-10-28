@@ -11,6 +11,6 @@ class TrackPolicy
 {
     public function view(User $user, Track $track): Response
     {
-        return $user->is_active && ($user->hasPermission(Permission::CatalogManage) || $track->playlists()->where('status', 'published')->exists()) ? Response::allow() : Response::denyAsNotFound();
+        return $user->is_active && ! $track->trashed() && ($user->hasPermission(Permission::CatalogManage) || $track->playlists()->where('status', 'published')->exists()) ? Response::allow() : Response::denyAsNotFound();
     }
 }

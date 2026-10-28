@@ -6,7 +6,20 @@ import {
     useState,
     type PropsWithChildren,
 } from "react";
-import { api, ApiError, getCsrfToken, json } from "../lib/api";
+import { api, ApiError, getCsrfToken, json, sessionHeaders } from "../lib/api";
+import {
+    balancedOrder,
+    insertNext,
+    moveQueued,
+    removeQueued,
+    trimUpcoming,
+    type EditableQueue,
+} from "../lib/playback-tools";
+import {
+    createSleepTimer,
+    sleepExpired,
+    type SleepTimer,
+} from "../lib/sleep-timer";
 import { adjacent, makeOrder } from "../lib/queue";
 import type { PlaybackSnapshot, RepeatMode, Track } from "../types";
 
@@ -22,6 +35,7 @@ type State = {
     repeat: RepeatMode;
     error: string | null;
     syncError: string | null;
+    sleepTimer: SleepTimer;
 };
 type Player = State & {
     current: Track | null;
@@ -35,6 +49,12 @@ type Player = State & {
     cycleRepeat: () => void;
     select: (index: number) => void;
     setLiked: (id: number, value: boolean) => void;
+    enqueueNext: (track: Track) => void;
+    removeQueued: (id: number) => void;
+    moveQueued: (id: number, offset: -1 | 1) => void;
+    clearUpcoming: () => void;
+    clearQueue: () => void;
+    setSleep: (value: number | "end_of_track" | null) => void;
 };
 const Context = createContext<Player | null>(null);
 const initial: State = {
@@ -49,6 +69,7 @@ const initial: State = {
     repeat: "off",
     error: null,
     syncError: null,
+    sleepTimer: null,
 };
 
 export function PlayerProvider({ children }: PropsWithChildren) {
@@ -74,6 +95,44 @@ export function PlayerProvider({ children }: PropsWithChildren) {
         sequence.current++;
     };
 
+    function editQueue(
+        change: (queue: EditableQueue<Track>) => EditableQueue<Track>,
+    ) {
+        changed();
+        setState((s) => {
+            const ordered = s.order.map((i) => s.queue[i]);
+            const index = ordered.findIndex(
+                (t) => t.id === s.queue[s.index]?.id,
+            );
+            const next = change({
+                queue: ordered,
+                index: Math.max(0, index),
+                playing: s.playing,
+            });
+            if (next.queue[next.index]?.id !== s.queue[s.index]?.id)
+                pendingSeek.current = 0;
+            return {
+                ...s,
+                ...next,
+                order: makeOrder(next.queue.length, next.index, false),
+                position:
+                    next.queue[next.index]?.id === s.queue[s.index]?.id
+                        ? s.position
+                        : 0,
+            };
+        });
+    }
+    function stopForSleep() {
+        changed();
+        audio.pause();
+        latest.current = {
+            ...latest.current,
+            playing: false,
+            sleepTimer: null,
+        };
+        setState((s) => ({ ...s, playing: false, sleepTimer: null }));
+        void persist();
+    }
     function jump(index: number) {
         if (!latest.current.queue[index]) return;
         changed();
@@ -89,7 +148,16 @@ export function PlayerProvider({ children }: PropsWithChildren) {
     }
     function next() {
         const s = latest.current;
-        const index = adjacent(s.order, s.index, 1, s.repeat === "all");
+        let order = s.order;
+        if (
+            s.shuffle &&
+            s.repeat === "all" &&
+            order.indexOf(s.index) === order.length - 1
+        ) {
+            order = balancedOrder(s.queue, s.index);
+            setState((value) => ({ ...value, order }));
+        }
+        const index = adjacent(order, s.index, 1, s.repeat === "all");
         if (index === null) {
             changed();
             setState((v) => ({ ...v, playing: false }));
@@ -146,7 +214,7 @@ export function PlayerProvider({ children }: PropsWithChildren) {
                     method: "PUT",
                     body: json({
                         track_id: snapshot.queue[snapshot.index]?.id || null,
-                        queue: snapshot.queue.map((t) => t.id),
+                        queue: snapshot.order.map((i) => snapshot.queue[i].id),
                         position_seconds: snapshot.position,
                         volume: snapshot.volume,
                         shuffle: snapshot.shuffle,
@@ -189,11 +257,7 @@ export function PlayerProvider({ children }: PropsWithChildren) {
                         ...initial,
                         queue: data.queue,
                         index,
-                        order: makeOrder(
-                            data.queue.length,
-                            index,
-                            data.shuffle,
-                        ),
+                        order: makeOrder(data.queue.length, index, false),
                         position: data.position_seconds,
                         volume: data.volume,
                         shuffle: data.shuffle,
@@ -223,6 +287,9 @@ export function PlayerProvider({ children }: PropsWithChildren) {
         if (!current) {
             audio.pause();
             audio.removeAttribute("src");
+            document.title = "آهنگ خط‌کش";
+            if ("mediaSession" in navigator)
+                navigator.mediaSession.metadata = null;
             return;
         }
         audio.src = current.stream_url;
@@ -261,6 +328,10 @@ export function PlayerProvider({ children }: PropsWithChildren) {
     }, [state.volume, audio]);
     useEffect(() => {
         const time = () => {
+            if (sleepExpired(latest.current.sleepTimer)) {
+                stopForSleep();
+                return;
+            }
             if (latest.current.playing) sequence.current++;
             setState((s) => ({ ...s, position: audio.currentTime }));
         };
@@ -273,6 +344,10 @@ export function PlayerProvider({ children }: PropsWithChildren) {
             pendingSeek.current = 0;
         };
         const ended = () => {
+            if (sleepExpired(latest.current.sleepTimer, Date.now(), true)) {
+                stopForSleep();
+                return;
+            }
             if (latest.current.repeat === "one") {
                 audio.currentTime = 0;
                 void audio.play().catch(() => {});
@@ -399,10 +474,11 @@ export function PlayerProvider({ children }: PropsWithChildren) {
                     "Content-Type": "application/json",
                     Accept: "application/json",
                     "X-CSRF-TOKEN": getCsrfToken(),
+                    ...sessionHeaders(),
                 },
                 body: json({
                     track_id: s.queue[s.index]?.id || null,
-                    queue: s.queue.map((t) => t.id),
+                    queue: s.order.map((i) => s.queue[i].id),
                     position_seconds: s.position,
                     volume: s.volume,
                     shuffle: s.shuffle,
@@ -415,6 +491,22 @@ export function PlayerProvider({ children }: PropsWithChildren) {
         return () => window.removeEventListener("pagehide", flush);
     }, []);
 
+    useEffect(() => {
+        const timer = state.sleepTimer;
+        if (timer?.kind !== "deadline") return;
+        const check = () => {
+            if (sleepExpired(latest.current.sleepTimer)) stopForSleep();
+        };
+        const timeout = window.setTimeout(
+            check,
+            Math.max(0, timer.deadline - Date.now()),
+        );
+        document.addEventListener("visibilitychange", check);
+        return () => {
+            clearTimeout(timeout);
+            document.removeEventListener("visibilitychange", check);
+        };
+    }, [state.sleepTimer]);
     const value: Player = {
         ...state,
         current,
@@ -434,7 +526,9 @@ export function PlayerProvider({ children }: PropsWithChildren) {
                 ...s,
                 queue: unique,
                 index: start,
-                order: makeOrder(unique.length, start, s.shuffle),
+                order: s.shuffle
+                    ? balancedOrder(unique, start)
+                    : makeOrder(unique.length, start, false),
                 position: 0,
                 playing: true,
                 error: null,
@@ -456,7 +550,9 @@ export function PlayerProvider({ children }: PropsWithChildren) {
             setState((s) => ({
                 ...s,
                 shuffle: !s.shuffle,
-                order: makeOrder(s.queue.length, s.index, !s.shuffle),
+                order: !s.shuffle
+                    ? balancedOrder(s.queue, s.index)
+                    : makeOrder(s.queue.length, s.index, false),
             }));
         },
         cycleRepeat() {
@@ -472,6 +568,28 @@ export function PlayerProvider({ children }: PropsWithChildren) {
             }));
         },
         select: jump,
+        enqueueNext: (track) => editQueue((s) => insertNext(s, track)),
+        removeQueued: (id) =>
+            editQueue((s) =>
+                removeQueued(
+                    s,
+                    s.queue.findIndex((t) => t.id === id),
+                ),
+            ),
+        moveQueued: (id, offset) =>
+            editQueue((s) =>
+                moveQueued(
+                    s,
+                    s.queue.findIndex((t) => t.id === id),
+                    offset,
+                ),
+            ),
+        clearUpcoming: () => editQueue(trimUpcoming),
+        clearQueue: () =>
+            editQueue(() => ({ queue: [], index: 0, playing: false })),
+        setSleep(value) {
+            setState((s) => ({ ...s, sleepTimer: createSleepTimer(value) }));
+        },
         setLiked(id, is_liked) {
             setState((s) => ({
                 ...s,
