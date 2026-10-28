@@ -42,6 +42,20 @@ class ResolveImportPlan
         }
         $plan = ['version' => 1, 'rows' => $effective, 'snapshots' => $snapshots];
 
-        return $plan + ['hash' => hash('sha256', json_encode($plan, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR))];
+        return $plan + ['hash' => hash('sha256', json_encode($this->canonicalize($plan), JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR))];
+    }
+
+    private function canonicalize(array $value): array
+    {
+        if (! array_is_list($value)) {
+            ksort($value, SORT_STRING);
+        }
+        foreach ($value as $key => $item) {
+            if (is_array($item)) {
+                $value[$key] = $this->canonicalize($item);
+            }
+        }
+
+        return $value;
     }
 }
