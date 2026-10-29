@@ -31,7 +31,7 @@ async function openSettings(page: Page) {
         .getByRole("button", { name: "تنظیمات حساب", exact: true });
     if (await quick.isVisible()) {
         await quick.click();
-        return quick;
+        return page.locator(".header-actions button").last();
     }
     await page
         .getByRole("button", { name: "باز کردن منو", exact: true })
