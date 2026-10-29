@@ -12,7 +12,8 @@
     "format": "prettier --write resources/js resources/css vite.config.ts vitest.config.ts index.html playwright.config.ts tests/Browser/*.ts scripts/*.mjs",
     "format:check": "prettier --check resources/js resources/css vite.config.ts vitest.config.ts index.html playwright.config.ts tests/Browser/*.ts scripts/*.mjs",
     "test:browser": "npm run build && node scripts/run-browser-tests.mjs",
-    "test:architecture": "node --test scripts/roadmap.test.mjs"
+    "test:architecture": "node --test scripts/roadmap.test.mjs",
+    "audit:offline": "bash scripts/audit-npm.sh"
   },
   "dependencies": {
     "@fontsource-variable/manrope": "^5.2.0",
@@ -22,6 +23,7 @@
     "lucide-react": "^0.548.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
+    "react-intl": "^12.1.6",
     "react-router-dom": "^7.9.0"
   },
   "devDependencies": {

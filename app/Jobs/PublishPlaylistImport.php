@@ -44,7 +44,7 @@ class PublishPlaylistImport implements ShouldQueue
         try {
             $this->publish($register, $plans, $playback);
         } catch (ImportPlanChanged|MediaNotReady) {
-            $execution->finish($this->importId, $this->generation, $this->token, PlaylistImport::NEEDS_REVIEW, 'اطلاعات یا مالکیت کاتالوگ تغییر کرده است؛ پیش‌نمایش تازه بسازید.');
+            $execution->finish($this->importId, $this->generation, $this->token, PlaylistImport::NEEDS_REVIEW, __('اطلاعات یا مالکیت کاتالوگ تغییر کرده است؛ پیش‌نمایش تازه بسازید.'));
         }
     }
 
@@ -101,6 +101,6 @@ class PublishPlaylistImport implements ShouldQueue
 
             return;
         }
-        app(ImportExecution::class)->finish($this->importId, $this->generation ?? 0, $this->token ?? null, PlaylistImport::FAILED, 'ساخت پلی‌لیست انجام نشد؛ وضعیت worker را بررسی و دوباره تلاش کنید.');
+        app(ImportExecution::class)->finish($this->importId, $this->generation ?? 0, $this->token ?? null, PlaylistImport::FAILED, __('ساخت پلی‌لیست انجام نشد؛ وضعیت worker را بررسی و دوباره تلاش کنید.'));
     }
 }

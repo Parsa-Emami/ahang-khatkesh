@@ -18,7 +18,7 @@ class UpdateTrackCatalog
         return DB::transaction(function () use ($track, $actor, $data): Track {
             $actor = $this->authorize->handle($actor);
             $locked = Track::whereKey($track->id)->lockForUpdate()->firstOrFail();
-            abort_unless($locked->catalog_revision === (int) $data['revision'], 409, 'اطلاعات آهنگ تغییر کرده است؛ دوباره بارگذاری کنید.');
+            abort_unless($locked->catalog_revision === (int) $data['revision'], 409, __('اطلاعات آهنگ تغییر کرده است؛ دوباره بارگذاری کنید.'));
             $locked->artists()->detach();
             $credits = collect($data['credits'])->map(fn ($credit, $i) => ['track_id' => $locked->id, 'artist_id' => $credit['artist_id'], 'role' => $credit['role'], 'position' => $i + 1])->all();
             DB::table('artist_track')->insert($credits);
@@ -26,7 +26,7 @@ class UpdateTrackCatalog
             $display = collect($data['credits'])->whereIn('role', ['primary', 'featured'])->map(fn ($c) => $names[$c['artist_id']])->implode('، ');
             $primary = $data['primary_release_id'] ?? null;
             if ($primary !== null) {
-                abort_unless($locked->releases()->where('releases.id', $primary)->exists(), 422, 'ابتدا آهنگ را به فهرست انتشار اضافه کنید.');
+                abort_unless($locked->releases()->where('releases.id', $primary)->exists(), 422, __('ابتدا آهنگ را به فهرست انتشار اضافه کنید.'));
             }
             $locked->update(['title' => $data['title'], 'artist' => $display, 'primary_release_id' => $primary, 'album' => $primary ? Release::findOrFail($primary)->title : null, 'catalog_revision' => $locked->catalog_revision + 1]);
             AuditEvent::create(['user_id' => $actor->id, 'action' => 'catalog.track_updated', 'subject_type' => 'track', 'subject_id' => (string) $locked->id, 'metadata' => ['revision' => $locked->catalog_revision]]);

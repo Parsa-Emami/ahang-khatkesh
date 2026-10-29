@@ -1,3 +1,5 @@
+import { tr } from "./i18n/runtime";
+import { useLocale } from "./i18n/LocaleProvider";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { useSession } from "./context/AppContext";
 import { PlayerProvider } from "./context/PlayerContext";
@@ -15,12 +17,13 @@ import { SessionConfirmation } from "./features/security/SessionConfirmation";
 const AdminPage = lazy(() => import("./features/admin/AdminPage"));
 
 export function App() {
+    useLocale();
     const { user, pending, error, refresh } = useSession();
     if (pending)
         return (
             <div className="app-loading">
                 <Brand />
-                <Loading label="در حال تنظیم موج تو…" />
+                <Loading label={tr("m04f3962e37")} />
             </div>
         );
     if (error) return <ErrorState error={error} retry={refresh} />;
@@ -29,7 +32,7 @@ export function App() {
         <SessionConfirmation>
             <PlayerProvider key={user.id}>
                 <a className="skip-link" href="#main-content">
-                    رفتن به محتوای اصلی
+                    {tr("m71db9ed488")}
                 </a>
                 <Routes>
                     <Route element={<AppLayout />}>

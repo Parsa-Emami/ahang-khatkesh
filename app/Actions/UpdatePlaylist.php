@@ -18,16 +18,16 @@ class UpdatePlaylist
         return DB::transaction(function () use ($playlist, $actor, $data, $tracks): Playlist {
             $actor = $this->authorize->handle($actor);
             $locked = Playlist::whereKey($playlist->id)->lockForUpdate()->firstOrFail();
-            abort_unless((int) $locked->revision === (int) $data['revision'], 409, 'این پلی‌لیست هم‌زمان تغییر کرده است؛ اطلاعات تازه را بارگذاری کنید.');
+            abort_unless((int) $locked->revision === (int) $data['revision'], 409, __('این پلی‌لیست هم‌زمان تغییر کرده است؛ اطلاعات تازه را بارگذاری کنید.'));
             if ($tracks !== null) {
-                abort_unless(Track::whereIn('id', $tracks)->count() === count($tracks), 422, 'بعضی آهنگ‌ها در دسترس نیستند.');
+                abort_unless(Track::whereIn('id', $tracks)->count() === count($tracks), 422, __('بعضی آهنگ‌ها در دسترس نیستند.'));
                 $locked->tracks()->detach();
                 foreach ($tracks as $i => $id) {
                     $locked->tracks()->attach($id, ['position' => $i + 1]);
                 }
             }
             $locked->fill(collect($data)->except('revision')->all());
-            abort_if($locked->status === Playlist::PUBLISHED && (isset($data['status']) || $tracks !== null) && ! $locked->tracks()->exists(), 422, 'برای انتشار، حداقل یک آهنگ لازم است.');
+            abort_if($locked->status === Playlist::PUBLISHED && (isset($data['status']) || $tracks !== null) && ! $locked->tracks()->exists(), 422, __('برای انتشار، حداقل یک آهنگ لازم است.'));
             if ($locked->status === Playlist::PUBLISHED) {
                 $this->playback->assertReady($locked->tracks()->pluck('media_asset_id')->all());
             }

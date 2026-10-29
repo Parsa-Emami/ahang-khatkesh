@@ -11,7 +11,7 @@ class RequireGuestSession
     public function handle(Request $request, Closure $next): Response
     {
         if ($request->user() !== null) {
-            return response()->json(['message' => 'یک نشست فعال دارید؛ ابتدا از حساب خارج شوید.', 'code' => 'already_authenticated'], 409);
+            return response()->json(['message' => __('یک نشست فعال دارید؛ ابتدا از حساب خارج شوید.'), 'code' => 'already_authenticated'], 409);
         }
 
         return $next($request);

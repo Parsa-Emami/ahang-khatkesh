@@ -16,7 +16,7 @@ class User extends Authenticatable
 
     protected $attributes = ['is_active' => true, 'is_admin' => false, 'role' => 'listener', 'theme' => 'system', 'access_version' => 0];
 
-    protected $fillable = ['name', 'email', 'password', 'role', 'is_active', 'theme'];
+    protected $fillable = ['name', 'email', 'password', 'role', 'is_active', 'theme', 'locale', 'direction', 'motion', 'time_zone'];
 
     protected $hidden = ['password', 'remember_token', 'two_factor_secret', 'two_factor_recovery_codes'];
 

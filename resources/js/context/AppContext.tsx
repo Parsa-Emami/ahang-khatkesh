@@ -1,3 +1,6 @@
+import { localizeText } from "../i18n/runtime";
+import { tr } from "../i18n/runtime";
+import { useLocale } from "../i18n/LocaleProvider";
 import {
     createContext,
     useCallback,
@@ -24,6 +27,7 @@ const SessionContext = createContext<{
     setSession: (value: SessionResult) => void;
 } | null>(null);
 export function SessionProvider({ children }: PropsWithChildren) {
+    useLocale();
     const client = useQueryClient();
     const session = useQuery({
         queryKey: ["session"],
@@ -114,6 +118,7 @@ const ThemeContext = createContext<{
     setTheme: (theme: Theme) => void;
 } | null>(null);
 export function ThemeProvider({ children }: PropsWithChildren) {
+    useLocale();
     const [theme, setTheme] = useState<Theme>(() => {
         try {
             const saved = localStorage.getItem("ak-theme");
@@ -154,6 +159,7 @@ const ToastContext = createContext<(message: string, error?: boolean) => void>(
     () => {},
 );
 export function ToastProvider({ children }: PropsWithChildren) {
+    useLocale();
     const [toast, setToast] = useState<{
         message: string;
         error: boolean;
@@ -178,9 +184,9 @@ export function ToastProvider({ children }: PropsWithChildren) {
                         className={`toast ${toast.error ? "is-error" : ""}`}
                         role={toast.error ? "alert" : "status"}
                     >
-                        {toast.message}
+                        {localizeText(toast.message)}
                         <button
-                            aria-label="بستن پیام"
+                            aria-label={tr("md63482659f")}
                             onClick={() => setToast(null)}
                         >
                             ×

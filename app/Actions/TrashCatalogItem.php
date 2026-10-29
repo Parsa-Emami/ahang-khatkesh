@@ -21,7 +21,7 @@ class TrashCatalogItem
             if ($locked->trashed() !== $restore) {
                 return $locked;
             }
-            abort_unless((int) $locked->$column === $revision, 409, 'اطلاعات تغییر کرده است؛ دوباره بارگذاری کنید.');
+            abort_unless((int) $locked->$column === $revision, 409, __('اطلاعات تغییر کرده است؛ دوباره بارگذاری کنید.'));
             if ($restore && $locked instanceof Track) {
                 $names = $locked->artists()->wherePivotIn('role', ['primary', 'featured'])->pluck('name');
                 if ($names->isNotEmpty()) {

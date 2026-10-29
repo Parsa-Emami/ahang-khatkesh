@@ -35,19 +35,19 @@ class IngestMedia
         $claim = DB::transaction(function () use ($actor, $reservationId, $file, $purpose, $intent): StorageReservation {
             $actor = $this->authorize->handle($actor);
             $reservation = StorageReservation::whereKey($reservationId)->where('user_id', $actor->id)->lockForUpdate()->firstOrFail();
-            abort_unless($reservation->purpose === $purpose && $reservation->access_version === $actor->access_version && $reservation->size_bytes === $file->getSize(), 409, 'رزرو با فایل یا نشست جاری همخوان نیست.');
+            abort_unless($reservation->purpose === $purpose && $reservation->access_version === $actor->access_version && $reservation->size_bytes === $file->getSize(), 409, __('رزرو با فایل یا نشست جاری همخوان نیست.'));
             if ($reservation->result_blob_id) {
-                abort_unless($reservation->intent == $intent, 409, 'این رزرو قبلاً برای عملیات دیگری مصرف شده است.');
+                abort_unless($reservation->intent == $intent, 409, __('این رزرو قبلاً برای عملیات دیگری مصرف شده است.'));
 
                 return $reservation;
             }
-            abort_unless($reservation->status === 'reserved' && $reservation->expires_at->isFuture(), 409, 'رزرو منقضی یا در حال استفاده است.');
+            abort_unless($reservation->status === 'reserved' && $reservation->expires_at->isFuture(), 409, __('رزرو منقضی یا در حال استفاده است.'));
             $reservation->update(['status' => 'writing', 'lease_token' => (string) Str::uuid(), 'expires_at' => now()->addSeconds(config('music.upload_lease_seconds')), 'staging_path' => 'staging/'.$reservation->id.'/input', 'candidate_path' => 'blobs/'.substr(hash('sha256', $reservation->id), 0, 2).'/'.$reservation->id, 'intent' => $intent]);
 
             return $reservation;
         }, 5);
         if ($claim->result_blob_id) {
-            abort_unless(hash_equals(MediaBlob::findOrFail($claim->result_blob_id)->sha256, hash_file('sha256', $file->getRealPath())), 409, 'محتوای فایل این رزرو تغییر کرده است.');
+            abort_unless(hash_equals(MediaBlob::findOrFail($claim->result_blob_id)->sha256, hash_file('sha256', $file->getRealPath())), 409, __('محتوای فایل این رزرو تغییر کرده است.'));
 
             return ['asset' => $claim->result_asset_id ? MediaAsset::findOrFail($claim->result_asset_id) : null, 'blob' => MediaBlob::findOrFail($claim->result_blob_id), 'duplicate' => true, 'replayed' => true];
         }
@@ -57,10 +57,10 @@ class IngestMedia
                 $this->files->stage($file, $claim->staging_path);
                 $snapshot = $this->files->snapshot($claim->staging_path);
                 if (! $snapshot || $snapshot['size_bytes'] === 0 || $snapshot['size_bytes'] !== $claim->size_bytes) {
-                    throw ValidationException::withMessages(['audio' => 'فایل کامل نوشته نشد.']);
+                    throw ValidationException::withMessages(['audio' => __('فایل کامل نوشته نشد.')]);
                 }
                 $metadata = $purpose === 'audio' ? $this->probe->inspect(Storage::disk('media')->path($claim->staging_path)) : [];
-                abort_if($purpose === 'audio' && ($metadata['codec'] ?? null) !== 'flac' && $snapshot['size_bytes'] > config('music.max_regular_upload_bytes'), 422, 'سقف فایل غیر FLAC برابر ۱۰۰ MiB است.');
+                abort_if($purpose === 'audio' && ($metadata['codec'] ?? null) !== 'flac' && $snapshot['size_bytes'] > config('music.max_regular_upload_bytes'), 422, __('سقف فایل غیر FLAC برابر ۱۰۰ MiB است.'));
                 $this->assertLease($claim);
                 $this->files->promote($claim->staging_path, $claim->candidate_path);
 
@@ -71,7 +71,7 @@ class IngestMedia
                     $blob = MediaBlob::where('sha256', $snapshot['sha256'])->where('size_bytes', $snapshot['size_bytes'])->lockForUpdate()->first();
                     $duplicate = $blob !== null;
                     if ($blob) {
-                        abort_unless($blob->state === 'ready' && $this->files->snapshot($blob->path) === $snapshot, 409, 'رسانهٔ موجود نیاز به بررسی یکپارچگی دارد.');
+                        abort_unless($blob->state === 'ready' && $this->files->snapshot($blob->path) === $snapshot, 409, __('رسانهٔ موجود نیاز به بررسی یکپارچگی دارد.'));
                     } else {
                         $blob = MediaBlob::create($snapshot + ['path' => $claim->candidate_path, 'mime_type' => $file->getMimeType(), 'state' => 'ready', 'verified_at' => now()]);
                     }
@@ -119,6 +119,6 @@ class IngestMedia
 
     private function assertLease(StorageReservation $snapshot): void
     {
-        abort_unless(StorageReservation::whereKey($snapshot->id)->where('status', 'writing')->where('lease_token', $snapshot->lease_token)->where('expires_at', '>', now())->exists(), 409, 'مهلت یا مالکیت آپلود تغییر کرده است.');
+        abort_unless(StorageReservation::whereKey($snapshot->id)->where('status', 'writing')->where('lease_token', $snapshot->lease_token)->where('expires_at', '>', now())->exists(), 409, __('مهلت یا مالکیت آپلود تغییر کرده است.'));
     }
 }

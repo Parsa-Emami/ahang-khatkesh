@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { tr } from "../../i18n/runtime";
+import { useLocale } from "../../i18n/LocaleProvider";
+import { useState, useRef } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ImagePlus, Pencil, ListMusic, Plus } from "lucide-react";
 import { uploadWithReservation } from "./uploads";
@@ -23,6 +25,8 @@ import {
 } from "../../components/UI";
 
 export function ManageLibraryPanel() {
+    useLocale();
+    const editingBaseline = useRef("");
     const client = useQueryClient(),
         notify = useToast();
     const [page, setPage] = useState(1),
@@ -44,7 +48,7 @@ export function ManageLibraryPanel() {
             setCreating(false);
             setNewName("");
             void client.invalidateQueries({ queryKey: ["playlists"] });
-            notify("پیش‌نویس ساخته شد؛ آهنگ‌هایش را انتخاب کن.");
+            notify(tr("mbc049697c0"));
         },
         onError: (e) => notify(e.message, true),
     });
@@ -64,7 +68,7 @@ export function ManageLibraryPanel() {
             setEditing(null);
             void client.invalidateQueries({ queryKey: ["playlists"] });
             void client.invalidateQueries({ queryKey: ["playlist"] });
-            notify("پلی‌لیست به‌روزرسانی شد.");
+            notify(tr("m39bbf7b230"));
         },
         onError: (error) => notify(error.message, true),
     });
@@ -86,7 +90,7 @@ export function ManageLibraryPanel() {
         onSuccess: () => {
             void client.invalidateQueries({ queryKey: ["playlists"] });
             void client.invalidateQueries({ queryKey: ["playlist"] });
-            notify("کاور تازه ثبت شد.");
+            notify(tr("m6c37c2f0aa"));
         },
         onError: (error) => notify(error.message, true),
     });
@@ -101,18 +105,13 @@ export function ManageLibraryPanel() {
     return (
         <>
             <div className="admin-toolbar">
-                <p className="muted">
-                    نام‌های روشن و کوتاه، پیدا کردن مجموعه را آسان می‌کنند.
-                </p>
+                <p className="muted">{tr("mf66af47953")}</p>
                 <button className="button" onClick={() => setCreating(true)}>
                     <Plus size={16} />
-                    پلی‌لیست تازه
+                    {tr("m384f02a592")}
                 </button>
             </div>
-            <p className="muted">
-                پیش‌نویس‌ها فقط برای سوپرادمین دیده می‌شوند. با انتشار، همهٔ
-                اعضا به مجموعه دسترسی دارند.
-            </p>
+            <p className="muted">{tr("m265e118451")}</p>
             <div className="manage-list">
                 {query.data.data.map((playlist) => (
                     <div className="manage-row" key={playlist.id}>
@@ -122,29 +121,34 @@ export function ManageLibraryPanel() {
                         />
                         <div>
                             <Link to={`/playlists/${playlist.id}`}>
-                                <strong>{playlist.name}</strong>
+                                <strong dir="auto">{playlist.name}</strong>
                             </Link>
                             <small>
-                                {digits(playlist.tracks_count)} آهنگ ·{" "}
-                                {moodLabels[playlist.mood]}
+                                {tr("m540dfb95d2", {
+                                    v0: digits(playlist.tracks_count),
+                                    v1: moodLabels[playlist.mood],
+                                })}
                             </small>
                         </div>
                         <span
                             className={`status-pill status-${playlist.status === "published" ? "completed" : "ready"}`}
                         >
                             {playlist.status === "published"
-                                ? "منتشرشده"
+                                ? tr("m082d672daf")
                                 : playlist.status === "archived"
-                                  ? "بایگانی‌شده"
-                                  : "پیش‌نویس"}
+                                  ? tr("m217fad791a")
+                                  : tr("m7d739ea1cc")}
                         </span>
                         <label
                             className="icon-button cover-upload"
-                            title="تغییر کاور"
+                            title={tr("m3b2d3856d6")}
                         >
                             <ImagePlus size={18} />
                             <input
-                                aria-label={`تغییر کاور ${playlist.name}`}
+                                dir="auto"
+                                aria-label={tr("m44ea914810", {
+                                    v0: playlist.name,
+                                })}
                                 type="file"
                                 accept=".jpg,.jpeg,.png,.webp"
                                 disabled={cover.isPending}
@@ -156,14 +160,18 @@ export function ManageLibraryPanel() {
                             />
                         </label>
                         <IconButton
-                            label={`ترتیب آهنگ‌های ${playlist.name}`}
+                            label={tr("m1d37d5c204", { v0: playlist.name })}
                             onClick={() => setArranging(playlist)}
                         >
                             <ListMusic size={18} />
                         </IconButton>
                         <IconButton
-                            label={`ویرایش ${playlist.name}`}
-                            onClick={() => setEditing({ ...playlist })}
+                            label={tr("m54a609b1a4", { v0: playlist.name })}
+                            onClick={() => {
+                                editingBaseline.current =
+                                    JSON.stringify(playlist);
+                                setEditing({ ...playlist });
+                            }}
                         >
                             <Pencil size={18} />
                         </IconButton>
@@ -176,7 +184,7 @@ export function ManageLibraryPanel() {
                     </div>
                 ))}
                 {!query.data.data.length && (
-                    <p className="muted">پلی‌لیستی برای مدیریت وجود ندارد.</p>
+                    <p className="muted">{tr("m4ad2e3e933")}</p>
                 )}
             </div>
             {query.data.meta.last_page > 1 && (
@@ -186,7 +194,7 @@ export function ManageLibraryPanel() {
                         disabled={page === 1}
                         onClick={() => setPage((v) => v - 1)}
                     >
-                        قبلی
+                        {tr("m1a592f6b2d")}
                     </button>
                     <span>{digits(page)}</span>
                     <button
@@ -194,17 +202,19 @@ export function ManageLibraryPanel() {
                         disabled={page === query.data.meta.last_page}
                         onClick={() => setPage((v) => v + 1)}
                     >
-                        بعدی
+                        {tr("m54ee927e96")}
                     </button>
                 </div>
             )}
             <Dialog
                 open={creating}
+                dirty={!!newName}
+                onDiscard={() => setNewName("")}
                 onOpenChange={(v) => {
                     if (!create.isPending) setCreating(v);
                 }}
-                title="یک مجموعهٔ تازه"
-                description="پلی‌لیست به‌صورت پیش‌نویس ساخته می‌شود؛ سپس آهنگ و کاور اضافه کن."
+                title={tr("m3e01f24d25")}
+                description={tr("m45a92e34c4")}
             >
                 <form
                     className="stack-form"
@@ -214,8 +224,10 @@ export function ManageLibraryPanel() {
                     }}
                 >
                     <label>
-                        نام مجموعه
+                        {tr("m8a75d58198")}
                         <input
+                            dir="auto"
+                            name="name"
                             required
                             maxLength={160}
                             value={newName}
@@ -223,7 +235,7 @@ export function ManageLibraryPanel() {
                         />
                     </label>
                     <button className="button" disabled={create.isPending}>
-                        ساخت پیش‌نویس
+                        {tr("m15145e2f87")}
                     </button>
                 </form>
             </Dialog>
@@ -235,11 +247,16 @@ export function ManageLibraryPanel() {
             )}
             <Dialog
                 open={!!editing}
+                dirty={
+                    !!editing &&
+                    JSON.stringify(editing) !== editingBaseline.current
+                }
+                onDiscard={() => setEditing(null)}
                 onOpenChange={(value) => {
                     if (!value && !update.isPending) setEditing(null);
                 }}
-                title="ویرایش مجموعه"
-                description="اطلاعات و وضعیت دسترسی این پلی‌لیست را تغییر بده."
+                title={tr("m9d8cc5b670")}
+                description={tr("mba108739ff")}
             >
                 {editing && (
                     <form
@@ -250,8 +267,10 @@ export function ManageLibraryPanel() {
                         }}
                     >
                         <label>
-                            نام
+                            {tr("m45dd06ba40")}
                             <input
+                                dir="auto"
+                                name="name"
                                 required
                                 maxLength={160}
                                 value={editing.name}
@@ -264,8 +283,9 @@ export function ManageLibraryPanel() {
                             />
                         </label>
                         <label>
-                            توضیح
+                            {tr("md47dc50e87")}
                             <textarea
+                                dir="auto"
                                 maxLength={2000}
                                 rows={3}
                                 value={editing.description || ""}
@@ -278,8 +298,10 @@ export function ManageLibraryPanel() {
                             />
                         </label>
                         <label>
-                            حال‌وهوا
+                            {tr("m7a15be7b2e")}
                             <select
+                                dir="auto"
+                                name="mood"
                                 value={editing.mood}
                                 onChange={(e) =>
                                     setEditing({
@@ -298,8 +320,10 @@ export function ManageLibraryPanel() {
                             </select>
                         </label>
                         <label>
-                            وضعیت
+                            {tr("m55518965c6")}
                             <select
+                                dir="auto"
+                                name="status"
                                 value={editing.status}
                                 onChange={(e) =>
                                     setEditing({
@@ -309,13 +333,19 @@ export function ManageLibraryPanel() {
                                     })
                                 }
                             >
-                                <option value="draft">پیش‌نویس</option>
-                                <option value="archived">بایگانی‌شده</option>
-                                <option value="published">منتشرشده</option>
+                                <option value="draft">
+                                    {tr("m7d739ea1cc")}
+                                </option>
+                                <option value="archived">
+                                    {tr("m217fad791a")}
+                                </option>
+                                <option value="published">
+                                    {tr("m082d672daf")}
+                                </option>
                             </select>
                         </label>
                         <button className="button" disabled={update.isPending}>
-                            ذخیرهٔ تغییرات
+                            {tr("m745b2d2795")}
                         </button>
                     </form>
                 )}

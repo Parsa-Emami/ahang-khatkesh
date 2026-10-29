@@ -83,7 +83,8 @@ jobs:
       - run: composer validate --strict
       - run: composer audit
       - run: npm ci
-      - run: npm audit
+      - name: Offline npm advisory scan
+        run: bash scripts/audit-npm.sh
       - run: php vendor/bin/pint --test
       - run: npm run format:check
       - run: npm run build

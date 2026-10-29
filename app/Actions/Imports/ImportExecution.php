@@ -82,7 +82,7 @@ class ImportExecution
             foreach ($imports as $import) {
                 $creator = User::find($import->created_by);
                 if (! $creator || ! $creator->is_active || $creator->role !== UserRole::Owner || $creator->access_version !== ($import->report['actor_epoch'] ?? null)) {
-                    $this->finish($import->id, $import->generation, $import->execution_token, PlaylistImport::CANCELLED, 'دسترسی سازنده تغییر کرده است.');
+                    $this->finish($import->id, $import->generation, $import->execution_token, PlaylistImport::CANCELLED, __('دسترسی سازنده تغییر کرده است.'));
                     if (! $import->execution_token) {
                         $import->update(['status' => PlaylistImport::CANCELLED, 'error' => 'ایمپورت قدیمی نیاز به پیش‌نمایش تازه دارد.']);
                     }

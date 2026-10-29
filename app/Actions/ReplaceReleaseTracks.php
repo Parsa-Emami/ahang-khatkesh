@@ -17,8 +17,8 @@ class ReplaceReleaseTracks
         DB::transaction(function () use ($actor, $release, $data): void {
             $actor = $this->authorize->handle($actor);
             $locked = Release::whereKey($release->id)->lockForUpdate()->firstOrFail();
-            abort_unless((int) $locked->revision === (int) $data['revision'], 409, 'اطلاعات انتشار تغییر کرده است.');
-            abort_unless(Track::whereIn('id', array_column($data['tracks'], 'track_id'))->count() === count($data['tracks']), 422, 'بعضی آهنگ‌ها در دسترس نیستند.');
+            abort_unless((int) $locked->revision === (int) $data['revision'], 409, __('اطلاعات انتشار تغییر کرده است.'));
+            abort_unless(Track::whereIn('id', array_column($data['tracks'], 'track_id'))->count() === count($data['tracks']), 422, __('بعضی آهنگ‌ها در دسترس نیستند.'));
             Track::where('primary_release_id', $locked->id)->whereNotIn('id', array_column($data['tracks'], 'track_id'))->get()->each(fn ($track) => $track->update(['primary_release_id' => null, 'album' => null, 'catalog_revision' => $track->catalog_revision + 1]));
             $locked->tracks()->detach();
             foreach ($data['tracks'] as $row) {

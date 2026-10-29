@@ -1,4 +1,6 @@
-import { useEffect, useState } from "react";
+import { tr } from "../i18n/runtime";
+import { useLocale } from "../i18n/LocaleProvider";
+import { useEffect, useState, useRef } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import {
     Bookmark,
@@ -28,6 +30,11 @@ import { SettingsDialog } from "../components/SettingsDialog";
 import type { Page, Playlist, Theme, User } from "../types";
 
 export function AppLayout() {
+    const locale = useLocale();
+    const menuButton = useRef<HTMLButtonElement>(null);
+    const [mobile, setMobile] = useState(
+        () => matchMedia("(max-width: 760px)").matches,
+    );
     const session = useSession(),
         theme = useTheme(),
         notify = useToast(),
@@ -37,13 +44,60 @@ export function AppLayout() {
     const [search, setSearch] = useState(params.get("q") || ""),
         [menu, setMenu] = useState(false),
         [settings, setSettings] = useState(false);
+    useEffect(() => {
+        const query = matchMedia("(max-width: 760px)");
+        const changed = () => setMobile(query.matches);
+        query.addEventListener("change", changed);
+        return () => query.removeEventListener("change", changed);
+    }, []);
+    useEffect(() => {
+        if (!menu || !mobile) return;
+        const sidebar = document.querySelector<HTMLElement>(".sidebar");
+        sidebar?.querySelector<HTMLElement>("button, a")?.focus();
+        const keyboard = (event: KeyboardEvent) => {
+            if (event.key === "Escape") {
+                event.preventDefault();
+                setMenu(false);
+            }
+            if (event.key !== "Tab") return;
+            const focusable = [
+                ...(sidebar?.querySelectorAll<HTMLElement>("button, a[href]") ||
+                    []),
+            ].filter((node) => node.getClientRects().length > 0);
+            const first = focusable[0],
+                last = focusable.at(-1);
+            if (event.shiftKey && document.activeElement === first) {
+                event.preventDefault();
+                last?.focus();
+            } else if (!event.shiftKey && document.activeElement === last) {
+                event.preventDefault();
+                first?.focus();
+            }
+        };
+        window.addEventListener("keydown", keyboard);
+        return () => {
+            window.removeEventListener("keydown", keyboard);
+            menuButton.current?.focus();
+        };
+    }, [menu, mobile]);
     const playlists = useQuery({
         queryKey: ["playlists", "sidebar"],
         queryFn: () => api<Page<Playlist>>("/playlists"),
     });
     useEffect(() => {
-        if (session.user) theme.setTheme(session.user.theme);
+        if (session.user) {
+            theme.setTheme(session.user.theme);
+        }
     }, [session.user?.id, session.user?.theme]);
+    useEffect(() => {
+        if (session.user) locale.setPreferences(session.user);
+    }, [
+        session.user?.id,
+        session.user?.locale,
+        session.user?.direction,
+        session.user?.motion,
+        session.user?.time_zone,
+    ]);
     useEffect(() => {
         setMenu(false);
     }, [location.pathname]);
@@ -64,45 +118,57 @@ export function AppLayout() {
             {menu && (
                 <button
                     className="mobile-scrim"
-                    aria-label="بستن فهرست"
+                    aria-label={tr("m15537a8870")}
                     onClick={() => setMenu(false)}
                 />
             )}
-            <aside className={`sidebar ${menu ? "is-open" : ""}`}>
+            <aside
+                id="primary-navigation"
+                inert={mobile && !menu}
+                role={mobile && menu ? "dialog" : undefined}
+                aria-modal={mobile && menu ? true : undefined}
+                aria-label={tr("m6cade26874")}
+                className={`sidebar ${menu ? "is-open" : ""}`}
+            >
                 <div className="sidebar-brand">
                     <Brand />
                     <IconButton
-                        label="بستن منو"
+                        label={tr("mf6839701dc")}
                         className="mobile-only"
                         onClick={() => setMenu(false)}
                     >
                         <X size={19} />
                     </IconButton>
                 </div>
-                <nav className="main-nav" aria-label="ناوبری اصلی">
+                <nav className="main-nav" aria-label={tr("m6cade26874")}>
                     <NavLink to="/" end>
                         <House size={20} />
-                        خانه
+                        {tr("m1e0e4ac2e8")}
                     </NavLink>
                     <NavLink to="/search">
                         <Search size={20} />
-                        کشف و جستجو
+                        {tr("mc711e53d4d")}
                     </NavLink>
                     <NavLink to="/library">
                         <Bookmark size={20} />
-                        کتابخانهٔ من
+                        {tr("mbbe9bd4598")}
                     </NavLink>
                     <NavLink to="/liked">
                         <Heart size={20} />
-                        پسندیده‌ها
+                        {tr("m75f44e8bed")}
                     </NavLink>
                 </nav>
                 <div className="sidebar-divider" />
                 <div className="sidebar-section-title">
-                    <span>پلی‌لیست‌های شما</span>
-                    <span className="tiny-label">COLLECTION</span>
+                    <span>{tr("m123f7a4a31")}</span>
+                    <span className="tiny-label">
+                        {tr("editorial.collection")}
+                    </span>
                 </div>
-                <nav className="sidebar-playlists" aria-label="پلی‌لیست‌ها">
+                <nav
+                    className="sidebar-playlists"
+                    aria-label={tr("m810b71a913")}
+                >
                     {playlists.data?.data.slice(0, 6).map((playlist) => (
                         <NavLink
                             to={`/playlists/${playlist.id}`}
@@ -116,22 +182,26 @@ export function AppLayout() {
                                 {playlist.name}
                                 <small>
                                     {playlist.status === "draft"
-                                        ? "پیش‌نویس"
-                                        : "پلی‌لیست اختصاصی"}
+                                        ? tr("m7d739ea1cc")
+                                        : tr("ma906ac387c")}
                                 </small>
                             </span>
                         </NavLink>
                     ))}
-                    {!playlists.data?.data.length && (
-                        <p>اولین پلی‌لیست، شروع یک حال تازه است.</p>
-                    )}
+                    {!playlists.data?.data.length && <p>{tr("mafa5ad89db")}</p>}
                 </nav>
                 <div className="sidebar-bottom">
                     {session.user?.permissions.includes("admin.access") && (
                         <NavLink to="/admin" className="admin-link">
                             <Upload size={18} />
-                            مدیریت کتابخانه
-                            <span className="admin-label">ADMIN</span>
+                            {tr("m637bbcc24d")}
+                            <span
+                                className="admin-label"
+                                aria-hidden="true"
+                                lang="en"
+                            >
+                                ADMIN
+                            </span>
                         </NavLink>
                     )}
                     <button
@@ -147,8 +217,8 @@ export function AppLayout() {
                                 {session.user?.permissions.includes(
                                     "admin.access",
                                 )
-                                    ? "مدیر کتابخانه"
-                                    : "عضو کتابخانه"}
+                                    ? tr("m8baa813d52")
+                                    : tr("md603d77bf4")}
                             </small>
                         </span>
                         <ChevronDown size={15} />
@@ -158,13 +228,16 @@ export function AppLayout() {
             <div className="workspace">
                 <header className="app-header">
                     <IconButton
-                        label="باز کردن منو"
+                        ref={menuButton}
+                        aria-expanded={menu}
+                        aria-controls="primary-navigation"
+                        label={tr("m94b8c10e7e")}
                         className="mobile-only"
                         onClick={() => setMenu(true)}
                     >
                         <Menu size={22} />
                     </IconButton>
-                    <span className="header-label">روی موجِ خودت.</span>
+                    <span className="header-label">{tr("md7e5b3a0cc")}</span>
                     <form
                         className="global-search"
                         role="search"
@@ -177,8 +250,10 @@ export function AppLayout() {
                     >
                         <Search size={19} />
                         <input
-                            aria-label="جستجوی آهنگ، هنرمند یا پلی‌لیست"
-                            placeholder="آهنگ، هنرمند یا پلی‌لیست…"
+                            dir="auto"
+                            name="search"
+                            aria-label={tr("meffa573678")}
+                            placeholder={tr("m5514824801")}
                             maxLength={120}
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
@@ -189,8 +264,8 @@ export function AppLayout() {
                         <IconButton
                             label={
                                 theme.dark
-                                    ? "فعال کردن حالت روشن"
-                                    : "فعال کردن حالت تیره"
+                                    ? tr("m45d377d036")
+                                    : tr("m6a9a4a677e")
                             }
                             disabled={saveTheme.isPending}
                             onClick={() => {
@@ -206,7 +281,7 @@ export function AppLayout() {
                             )}
                         </IconButton>
                         <IconButton
-                            label="تنظیمات حساب"
+                            label={tr("mb9c7f76721")}
                             onClick={() => setSettings(true)}
                         >
                             <Settings2 size={20} />

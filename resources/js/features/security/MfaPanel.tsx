@@ -1,3 +1,7 @@
+import { useDraftGuard } from "../drafts/DraftNavigation";
+import { asciiDigits } from "../../i18n/runtime";
+import { tr } from "../../i18n/runtime";
+import { useLocale } from "../../i18n/LocaleProvider";
 import "../../../css/security.css";
 import { useState } from "react";
 import { ShieldCheck, KeyRound } from "lucide-react";
@@ -7,6 +11,7 @@ import type { User } from "../../types";
 
 type Setup = { setup_key: string; qr_svg: string };
 export function MfaPanel({ onReady }: { onReady?: () => void } = {}) {
+    useLocale();
     const session = useSession();
     const [setup, setSetup] = useState<Setup | null>(null);
     const [codes, setCodes] = useState<string[] | null>(null);
@@ -14,13 +19,19 @@ export function MfaPanel({ onReady }: { onReady?: () => void } = {}) {
     const [pending, setPending] = useState(false);
     const [error, setError] = useState("");
     const [rotation, setRotation] = useState(false);
+    useDraftGuard(!!(setup || codes || code), () => {
+        setSetup(null);
+        setCodes(null);
+        setCode("");
+        setRotation(false);
+    });
     async function run(task: () => Promise<void>) {
         setPending(true);
         setError("");
         try {
             await task();
         } catch (e) {
-            setError(e instanceof Error ? e.message : "عملیات انجام نشد.");
+            setError(e instanceof Error ? e.message : tr("m68a6e1d0cd"));
         } finally {
             setPending(false);
         }
@@ -30,21 +41,17 @@ export function MfaPanel({ onReady }: { onReady?: () => void } = {}) {
             <div className="panel-heading">
                 <ShieldCheck size={27} />
                 <div>
-                    <h2>امنیت حساب</h2>
+                    <h2>{tr("m34a02d2297")}</h2>
                     <p className="muted">
                         {session.user?.mfa_enabled
-                            ? "تأیید دومرحله‌ای فعال است."
-                            : "برای دسترسی مدیریتی، رمزساز را فعال کن."}
+                            ? tr("m9420648e05")
+                            : tr("mcca2602353")}
                     </p>
                 </div>
             </div>
             {!session.user?.mfa_enabled && !setup && (
                 <>
-                    <p className="muted">
-                        یک برنامهٔ سازگار با TOTP مثل رمزساز گوشی لازم داری.
-                        اتصال به سرویس خارجی انجام نمی‌شود. کلید و کدهای بازیابی
-                        را در جای امن نگه دار.
-                    </p>
+                    <p className="muted">{tr("m414bc2f2fa")}</p>
                     <button
                         className="button"
                         disabled={pending}
@@ -59,18 +66,16 @@ export function MfaPanel({ onReady }: { onReady?: () => void } = {}) {
                         }
                     >
                         <KeyRound size={17} />
-                        شروع فعال‌سازی رمزساز
+                        {tr("md775168987")}
                     </button>
                 </>
             )}
             {setup && (
                 <>
-                    <p>
-                        ۱. QR را با رمزساز اسکن کن، یا کلید زیر را دستی وارد کن.
-                    </p>
+                    <p>{tr("m00cfee7c22")}</p>
                     <img
                         className="mfa-qr"
-                        alt="کد QR راه‌اندازی رمزساز؛ کلید متنی در ادامه آمده است"
+                        alt={tr("m66125ed374")}
                         src={`data:image/svg+xml;charset=utf-8,${encodeURIComponent(setup.qr_svg)}`}
                     />
                     <code className="secret-key" dir="ltr">
@@ -88,7 +93,7 @@ export function MfaPanel({ onReady }: { onReady?: () => void } = {}) {
                                     };
                                 }>("/me/mfa/confirm", {
                                     method: "POST",
-                                    body: json({ code }),
+                                    body: json({ code: asciiDigits(code) }),
                                 });
                                 setSetup(null);
                                 setCode("");
@@ -103,8 +108,9 @@ export function MfaPanel({ onReady }: { onReady?: () => void } = {}) {
                         }}
                     >
                         <label>
-                            ۲. کد شش‌رقمی رمزساز
+                            {tr("me73147e9c6")}
                             <input
+                                name="code"
                                 type="text"
                                 autoComplete="one-time-code"
                                 inputMode="numeric"
@@ -117,18 +123,15 @@ export function MfaPanel({ onReady }: { onReady?: () => void } = {}) {
                             />
                         </label>
                         <button className="button" disabled={pending}>
-                            {pending ? "در حال بررسی…" : "تأیید و فعال‌سازی"}
+                            {pending ? tr("mcb16adca9a") : tr("mb777524491")}
                         </button>
                     </form>
                 </>
             )}
             {codes && (
                 <div className="recovery-box" role="status">
-                    <h3>کدهای بازیابی را ذخیره کن</h3>
-                    <p>
-                        هر کد یک بار قابل استفاده است. این کدها را همراه رمز
-                        عبور نگه ندار؛ با بستن این بخش از صفحه حذف می‌شوند.
-                    </p>
+                    <h3>{tr("m22c2f3d982")}</h3>
+                    <p>{tr("m4983470294")}</p>
                     <div className="recovery-codes" dir="ltr">
                         {codes.map((value) => (
                             <code key={value}>{value}</code>
@@ -141,7 +144,7 @@ export function MfaPanel({ onReady }: { onReady?: () => void } = {}) {
                             onReady?.();
                         }}
                     >
-                        ذخیره کردم؛ بستن کدها
+                        {tr("mc6c7282184")}
                     </button>
                 </div>
             )}
@@ -159,19 +162,19 @@ export function MfaPanel({ onReady }: { onReady?: () => void } = {}) {
                             })
                         }
                     >
-                        نمایش کدهای بازیابی
+                        {tr("m383871cfa7")}
                     </button>
                     <button
                         className="text-link"
                         onClick={() => setRotation(true)}
                     >
-                        جایگزینی کدهای بازیابی
+                        {tr("m6b6a0268d0")}
                     </button>
                 </div>
             )}
             {rotation && (
                 <div className="recovery-box">
-                    <p>با ساخت کدهای تازه، تمام کدهای قبلی نامعتبر می‌شوند.</p>
+                    <p>{tr("mfd55d3347c")}</p>
                     <div className="form-actions">
                         <button
                             className="button"
@@ -188,13 +191,13 @@ export function MfaPanel({ onReady }: { onReady?: () => void } = {}) {
                                 })
                             }
                         >
-                            ساخت و نمایش کدهای تازه
+                            {tr("mf165c4ff0b")}
                         </button>
                         <button
                             className="button secondary"
                             onClick={() => setRotation(false)}
                         >
-                            انصراف
+                            {tr("m106dfb4e0f")}
                         </button>
                     </div>
                 </div>

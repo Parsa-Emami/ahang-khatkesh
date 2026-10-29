@@ -1,4 +1,7 @@
-import { useState } from "react";
+import { roleLabel } from "../../i18n/runtime";
+import { tr } from "../../i18n/runtime";
+import { useLocale } from "../../i18n/LocaleProvider";
+import { useState, useRef } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Plus, Users, Pencil, ShieldCheck, KeyRound } from "lucide-react";
 import { api, json } from "../../lib/api";
@@ -10,6 +13,8 @@ import { adminKeys } from "./api";
 type Form = { name: string; email: string; password: string; role: Role };
 const blank: Form = { name: "", email: "", password: "", role: "listener" };
 export function MembersPanel() {
+    useLocale();
+    const editingBaseline = useRef("");
     const [resetting, setResetting] = useState<User | null>(null);
     const session = useSession(),
         client = useQueryClient(),
@@ -39,7 +44,7 @@ export function MembersPanel() {
             setOpen(false);
             setForm(blank);
             invalidate();
-            notify("حساب ساخته شد. اطلاعات ورود را از مسیر امن به عضو بده.");
+            notify(tr("m3e3f04286b"));
         },
         onError: (e) => notify(e.message, true),
     });
@@ -57,7 +62,7 @@ export function MembersPanel() {
                 window.dispatchEvent(new Event("session-expired"));
             setEditing(null);
             invalidate();
-            notify("دسترسی ثبت و نشست‌های قبلی این عضو باطل شد.");
+            notify(tr("m70d7f79476"));
         },
         onError: (e) => notify(e.message, true),
     });
@@ -76,10 +81,12 @@ export function MembersPanel() {
                 <Users size={29} />
                 <div>
                     <h3>
-                        {digits(users.data.data.length)} نفر از{" "}
-                        {digits(users.data.meta.capacity)} نفر
+                        {tr("m4e10b32a82", {
+                            v0: digits(users.data.data.length),
+                            v1: digits(users.data.meta.capacity),
+                        })}
                     </h3>
-                    <p>سقف ظرفیت شامل مدیرها و حساب‌های غیرفعال است.</p>
+                    <p>{tr("ma49fa4bbf7")}</p>
                 </div>
                 <button
                     className="button"
@@ -89,7 +96,7 @@ export function MembersPanel() {
                     onClick={() => setOpen(true)}
                 >
                     <Plus size={17} />
-                    عضو تازه
+                    {tr("mb11a12361e")}
                 </button>
             </div>
             <div className="members-list">
@@ -101,26 +108,30 @@ export function MembersPanel() {
                         <span>
                             <strong>
                                 {user.name}
-                                {user.id === session.user?.id ? " · شما" : ""}
+                                {user.id === session.user?.id
+                                    ? tr("m50cd43d6bf")
+                                    : ""}
                             </strong>
                             <small dir="ltr">{user.email}</small>
                         </span>
                         <span className="member-role">
-                            {user.role_label}
+                            {roleLabel(user.role)}
                             <small>
                                 <ShieldCheck size={12} />
                                 {user.mfa_enabled
-                                    ? "رمزساز فعال"
-                                    : "بدون رمزساز"}
+                                    ? tr("m389ea22819")
+                                    : tr("m8be5dae1c2")}
                             </small>
                         </span>
                         <span
                             className={`status-pill status-${user.is_active ? "completed" : "failed"}`}
                         >
-                            {user.is_active ? "فعال" : "غیرفعال"}
+                            {user.is_active
+                                ? tr("m6f63796667")
+                                : tr("md9ba416811")}
                         </span>
                         <IconButton
-                            label={`بازنشانی رمز ${user.name}`}
+                            label={tr("mf1c6d211f3", { v0: user.name })}
                             disabled={
                                 user.id === session.user?.id ||
                                 (session.user?.role !== "owner" &&
@@ -132,24 +143,23 @@ export function MembersPanel() {
                             <KeyRound size={17} />
                         </IconButton>
                         <IconButton
-                            label={`ویرایش دسترسی ${user.name}`}
+                            label={tr("m4b89d01675", { v0: user.name })}
                             disabled={
                                 session.user?.role !== "owner" &&
                                 (user.role === "owner" ||
                                     user.role === "administrator")
                             }
-                            onClick={() => setEditing({ ...user })}
+                            onClick={() => {
+                                editingBaseline.current = JSON.stringify(user);
+                                setEditing({ ...user });
+                            }}
                         >
                             <Pencil size={17} />
                         </IconButton>
                     </article>
                 ))}
             </div>
-            <p className="muted admin-footnote">
-                مالک نقش‌های مدیریتی را تعیین می‌کند. مدیر، اعضا و مدیران محتوا
-                را مدیریت می‌کند. آخرین مالک فعال قابل تنزل یا غیرفعال‌سازی
-                نیست.
-            </p>
+            <p className="muted admin-footnote">{tr("m30255ee738")}</p>
             {resetting && (
                 <MemberPasswordResetDialog
                     user={resetting}
@@ -158,14 +168,16 @@ export function MembersPanel() {
             )}
             <Dialog
                 open={open}
+                dirty={JSON.stringify(form) !== JSON.stringify(blank)}
+                onDiscard={() => setForm(blank)}
                 onOpenChange={(v) => {
                     if (!create.isPending) {
                         setOpen(v);
                         if (!v) setForm(blank);
                     }
                 }}
-                title="یک عضو تازه"
-                description="حساب خصوصی با نقش مشخص بساز. ثبت‌نام عمومی بسته است."
+                title={tr("mc3a7381f3c")}
+                description={tr("mab7573b7af")}
             >
                 <form
                     className="stack-form"
@@ -175,8 +187,10 @@ export function MembersPanel() {
                     }}
                 >
                     <label>
-                        نام
+                        {tr("m45dd06ba40")}
                         <input
+                            dir="auto"
+                            name="name"
                             required
                             maxLength={100}
                             autoComplete="off"
@@ -187,8 +201,9 @@ export function MembersPanel() {
                         />
                     </label>
                     <label>
-                        ایمیل
+                        {tr("mf1ad423d68")}
                         <input
+                            name="email"
                             type="email"
                             dir="ltr"
                             required
@@ -201,8 +216,9 @@ export function MembersPanel() {
                         />
                     </label>
                     <label>
-                        رمز اولیه
+                        {tr("m2f3b54d1c2")}
                         <input
+                            name="password"
                             type="password"
                             dir="ltr"
                             required
@@ -214,14 +230,13 @@ export function MembersPanel() {
                                 setForm({ ...form, password: e.target.value })
                             }
                         />
-                        <small>
-                            حداقل ۱۲ نویسه شامل حرف و عدد؛ از رمزهای تکراری
-                            استفاده نکن.
-                        </small>
+                        <small>{tr("m067d65f84d")}</small>
                     </label>
                     <label>
-                        نقش
+                        {tr("m9129ed2aed")}
                         <select
+                            dir="auto"
+                            name="role"
                             value={form.role}
                             onChange={(e) =>
                                 setForm({
@@ -232,26 +247,31 @@ export function MembersPanel() {
                         >
                             {roles.map((role) => (
                                 <option key={role.value} value={role.value}>
-                                    {role.label}
+                                    {roleLabel(role.value)}
                                 </option>
                             ))}
                         </select>
                     </label>
-                    <p className="muted">
-                        نقش مدیریتی تا فعال‌کردن رمزساز به پنل دسترسی ندارد.
-                    </p>
+                    <p className="muted">{tr("m23883187d8")}</p>
                     <button className="button" disabled={create.isPending}>
-                        {create.isPending ? "در حال ساخت…" : "ساخت حساب"}
+                        {create.isPending
+                            ? tr("m661bac03a9")
+                            : tr("ma2c1fc69c3")}
                     </button>
                 </form>
             </Dialog>
             <Dialog
                 open={!!editing}
+                dirty={
+                    !!editing &&
+                    JSON.stringify(editing) !== editingBaseline.current
+                }
+                onDiscard={() => setEditing(null)}
                 onOpenChange={(v) => {
                     if (!v && !update.isPending) setEditing(null);
                 }}
-                title="نقش و وضعیت حساب"
-                description="تغییر نقش یا وضعیت، همهٔ نشست‌های قبلی این عضو را باطل می‌کند."
+                title={tr("m1331d9510d")}
+                description={tr("m7b09d7788c")}
             >
                 {editing && (
                     <form
@@ -261,10 +281,12 @@ export function MembersPanel() {
                             update.mutate();
                         }}
                     >
-                        <strong>{editing.name}</strong>
+                        <strong dir="auto">{editing.name}</strong>
                         <label>
-                            نقش
+                            {tr("m9129ed2aed")}
                             <select
+                                dir="auto"
+                                name="role"
                                 value={editing.role}
                                 onChange={(e) =>
                                     setEditing({
@@ -275,13 +297,14 @@ export function MembersPanel() {
                             >
                                 {roles.map((role) => (
                                     <option key={role.value} value={role.value}>
-                                        {role.label}
+                                        {roleLabel(role.value)}
                                     </option>
                                 ))}
                             </select>
                         </label>
                         <label className="checkbox-label">
                             <input
+                                dir="auto"
                                 type="checkbox"
                                 checked={editing.is_active}
                                 disabled={editing.id === session.user?.id}
@@ -292,15 +315,13 @@ export function MembersPanel() {
                                     })
                                 }
                             />
-                            حساب فعال باشد
+                            {tr("md4b53472c8")}
                         </label>
                         {editing.id === session.user?.id && (
-                            <p className="muted">
-                                با تغییر نقش خودت، از حساب خارج می‌شوی.
-                            </p>
+                            <p className="muted">{tr("m8db7b1fda3")}</p>
                         )}
                         <button className="button" disabled={update.isPending}>
-                            ثبت دسترسی
+                            {tr("m10bae4bd20")}
                         </button>
                     </form>
                 )}

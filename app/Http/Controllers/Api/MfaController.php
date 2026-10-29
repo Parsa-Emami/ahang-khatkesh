@@ -35,7 +35,7 @@ class MfaController extends Controller
         return DB::transaction(function () use ($request, $enable): JsonResponse {
             $user = $this->accounts->handle($request->user(), (int) $request->session()->get('auth.access_version', -1));
             abort_unless($user->is_active, 403);
-            abort_if($user->hasEnabledTwoFactorAuthentication(), 409, 'تأیید دومرحله‌ای قبلاً فعال شده است.');
+            abort_if($user->hasEnabledTwoFactorAuthentication(), 409, __('تأیید دومرحله‌ای قبلاً فعال شده است.'));
             $enable($user);
             AuditEvent::create(['user_id' => $user->id, 'action' => 'auth.mfa_enrollment_started', 'subject_id' => (string) $user->id]);
 
@@ -91,7 +91,7 @@ class MfaController extends Controller
     {
         return DB::transaction(function () use ($request, $disable): JsonResponse {
             $user = $this->accounts->handle($request->user(), (int) $request->session()->get('auth.access_version', -1));
-            abort_if($user->role->allows(Permission::AdminAccess), 422, 'برای نقش مدیریتی، تأیید دومرحله‌ای الزامی است.');
+            abort_if($user->role->allows(Permission::AdminAccess), 422, __('برای نقش مدیریتی، تأیید دومرحله‌ای الزامی است.'));
             $disable($user);
             $user->forceFill(['access_version' => $user->access_version + 1, 'remember_token' => Str::random(60)])->save();
             $this->revokeOtherSessions($request, $user);
@@ -110,13 +110,13 @@ class MfaController extends Controller
         $observed = User::findOrFail($snapshot->id);
         abort_unless($observed->is_active && $observed->access_version === $snapshot->access_version && $observed->access_version === (int) $request->session()->get('auth.access_version', -1), 401);
         if (! Hash::check($data['password'], $observed->password)) {
-            throw ValidationException::withMessages(['password' => 'رمز فعلی درست نیست.']);
+            throw ValidationException::withMessages(['password' => __('رمز فعلی درست نیست.')]);
         }
         $mfa = DB::transaction(function () use ($snapshot, $observed, $request, $provider, $data): bool {
             $fresh = $this->accounts->handle($snapshot, (int) $request->session()->get('auth.access_version', -1));
             abort_unless(hash_equals($observed->password, $fresh->password), 401);
             if ($fresh->hasEnabledTwoFactorAuthentication() && (empty($data['code']) || ! $provider->verify(Fortify::currentEncrypter()->decrypt($fresh->two_factor_secret), $data['code']))) {
-                throw ValidationException::withMessages(['code' => 'کد دومرحله‌ای درست نیست یا قبلاً استفاده شده است.']);
+                throw ValidationException::withMessages(['code' => __('کد دومرحله‌ای درست نیست یا قبلاً استفاده شده است.')]);
             }
             AuditEvent::create(['user_id' => $fresh->id, 'action' => 'auth.password_confirmed', 'subject_id' => (string) $fresh->id]);
 

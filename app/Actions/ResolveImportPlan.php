@@ -31,14 +31,14 @@ class ResolveImportPlan
             $link = $links->get($row['asset_id']);
             if (! $asset || $asset->source_asset_id || ! $asset->blob_id || $asset->blob?->state !== 'ready' || $asset->blob->sha256 !== $asset->sha256 || $asset->blob->size_bytes !== $asset->size_bytes || $track?->trashed() || ($link && (! $track || (int) $link->track_id !== $track->id || $link->purpose !== 'original'))) {
                 if ($preview) {
-                    throw ValidationException::withMessages(['tracks.'.$index.'.asset_id' => 'فایل صوتی ردیف '.($index + 1).' در دسترس نیست؛ فایل اصلی معتبر انتخاب کنید.']);
+                    throw ValidationException::withMessages(['tracks.'.$index.'.asset_id' => __('فایل صوتی ردیف :row در دسترس نیست؛ فایل اصلی معتبر انتخاب کنید.', ['row' => $index + 1])]);
                 }
-                throw new ImportPlanChanged('رسانهٔ انتخابی دیگر برای این ایمپورت قابل استفاده نیست.');
+                throw new ImportPlanChanged(__('رسانهٔ انتخابی دیگر برای این ایمپورت قابل استفاده نیست.'));
             }
             $artist = isset($row['artist_id']) ? $artists->get($row['artist_id']) : null;
             $release = isset($row['release_id']) ? $releases->get($row['release_id']) : null;
             if ((isset($row['artist_id']) && ! $artist) || (isset($row['release_id']) && ! $release)) {
-                throw new ImportPlanChanged('هویت کاتالوگ تغییر کرده است.');
+                throw new ImportPlanChanged(__('هویت کاتالوگ تغییر کرده است.'));
             }
             $effective[] = array_replace($row, ['title' => $track?->title ?? $row['title'], 'artist' => $track?->artist ?? $artist?->name ?? $row['artist'], 'album' => $track ? $track->album : ($release?->title ?? $row['album'])]);
             $snapshots[] = ['asset' => $asset->id, 'sha256' => $asset->sha256, 'blob_id' => $asset->blob_id, 'track' => $track?->id, 'revision' => $track?->catalog_revision, 'link' => $link ? [$link->track_id, $link->purpose, $link->label] : null, 'artist' => $artist ? [$artist->id, $artist->revision] : null, 'release' => $release ? [$release->id, $release->revision] : null];

@@ -1,3 +1,5 @@
+import { tr } from "../i18n/runtime";
+import { useLocale } from "../i18n/LocaleProvider";
 import {
     createContext,
     useContext,
@@ -78,6 +80,7 @@ const initial: State = {
 };
 
 export function PlayerProvider({ children }: PropsWithChildren) {
+    const { locale } = useLocale();
     const [state, setState] = useState<State>(initial);
     const [audio] = useState(() => {
         const element = new Audio();
@@ -239,7 +242,7 @@ export function PlayerProvider({ children }: PropsWithChildren) {
             } else
                 setState((s) => ({
                     ...s,
-                    syncError: "پیشرفت پخش ذخیره نشد؛ اتصال را بررسی کنید.",
+                    syncError: tr("m77264156d3"),
                 }));
         } finally {
             saving.current = false;
@@ -275,8 +278,7 @@ export function PlayerProvider({ children }: PropsWithChildren) {
                 if (!cancelled)
                     setState((s) => ({
                         ...s,
-                        syncError:
-                            "بازیابی وضعیت پخش ناموفق بود. صفحه را تازه کنید.",
+                        syncError: tr("m6e4360d42d"),
                     }));
             });
         const timer = window.setInterval(() => void persist(), 15000);
@@ -293,21 +295,27 @@ export function PlayerProvider({ children }: PropsWithChildren) {
         if (!current) {
             audio.pause();
             audio.removeAttribute("src");
-            document.title = "آهنگ خط‌کش";
-            if ("mediaSession" in navigator)
-                navigator.mediaSession.metadata = null;
             return;
         }
         audio.src = streamUrl;
         audio.load();
-        document.title = `${current.title} · آهنگ خط‌کش`;
+    }, [current?.id, streamUrl, audio]);
+
+    useEffect(() => {
+        if (!current) {
+            document.title = tr("mb39fa3f0f8");
+            if ("mediaSession" in navigator)
+                navigator.mediaSession.metadata = null;
+            return;
+        }
+        document.title = tr("ma0ff9ce0f3", { v0: current.title });
         if ("mediaSession" in navigator)
             navigator.mediaSession.metadata = new MediaMetadata({
                 title: current.title,
                 artist: current.artist,
-                album: current.album || "آهنگ خط‌کش",
+                album: current.album || tr("mb39fa3f0f8"),
             });
-    }, [current?.id, streamUrl, audio]);
+    }, [locale, current?.id, current?.title, current?.artist, current?.album]);
 
     useEffect(() => {
         if (!current) return;
@@ -317,7 +325,7 @@ export function PlayerProvider({ children }: PropsWithChildren) {
                     setState((s) => ({
                         ...s,
                         playing: false,
-                        error: "پخش آغاز نشد. دوباره دکمهٔ پخش را بزنید.",
+                        error: tr("m64a408670e"),
                     }));
             });
         else {
@@ -368,7 +376,7 @@ export function PlayerProvider({ children }: PropsWithChildren) {
                 ...s,
                 playing: false,
                 loading: false,
-                error: "این فایل پخش نشد؛ دسترسی یا قالب فایل را بررسی کنید.",
+                error: tr("m548a910dd8"),
             }));
         audio.addEventListener("timeupdate", time);
         audio.addEventListener("loadedmetadata", metadata);

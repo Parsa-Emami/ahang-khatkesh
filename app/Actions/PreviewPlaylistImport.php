@@ -23,7 +23,7 @@ class PreviewPlaylistImport
         $rows = array_map(fn (array $row): array => ['asset_id' => $row['asset_id'], 'title' => trim($row['title']), 'artist' => trim($row['artist']), 'album' => isset($row['album']) ? trim($row['album']) : null] + (filled($row['artist_id'] ?? null) ? ['artist_id' => (int) $row['artist_id']] : []) + (filled($row['release_id'] ?? null) ? ['release_id' => (int) $row['release_id']] : []), $validated['tracks']);
         foreach ($rows as $row) {
             if ($row['title'] === '' || $row['artist'] === '') {
-                throw ValidationException::withMessages(['tracks' => 'عنوان و هنرمند نباید خالی باشند.']);
+                throw ValidationException::withMessages(['tracks' => __('عنوان و هنرمند نباید خالی باشند.')]);
             }
         }
         $payload = ['name' => trim($data['name']), 'description' => $data['description'] ?? null, 'mood' => $data['mood'], 'rows' => $rows];
@@ -46,7 +46,7 @@ class PreviewPlaylistImport
         } catch (UniqueConstraintViolationException) {
             $import = PlaylistImport::where($key)->firstOrFail();
         }
-        abort_unless(hash_equals($import->payload_hash, $hash), 409, 'این کلید قبلاً برای فایل یا اطلاعات دیگری استفاده شده است.');
+        abort_unless(hash_equals($import->payload_hash, $hash), 409, __('این کلید قبلاً برای فایل یا اطلاعات دیگری استفاده شده است.'));
 
         return $import;
     }

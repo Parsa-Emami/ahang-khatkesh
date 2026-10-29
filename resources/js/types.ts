@@ -1,3 +1,6 @@
+import { number } from "./i18n/runtime";
+import type { Preferences } from "./i18n/locales";
+import { tr } from "./i18n/runtime";
 export type Theme = "light" | "dark" | "system";
 export type Role = "owner" | "administrator" | "curator" | "listener";
 export type Permission =
@@ -10,7 +13,7 @@ export type Permission =
     | "roles.manage"
     | "audit.read"
     | "operations.read";
-export type User = {
+export type User = Partial<Preferences> & {
     id: number;
     access_version: number;
     name: string;
@@ -168,14 +171,23 @@ export type PlaybackSnapshot = {
     revision: number;
 };
 export const moodLabels: Record<Mood, string> = {
-    focus: "تمرکز",
-    night: "شبانه",
-    calm: "آرامش",
-    energy: "انرژی",
-    other: "انتخاب آزاد",
+    get focus() {
+        return tr("m6187182080");
+    },
+    get night() {
+        return tr("m4707b9a047");
+    },
+    get calm() {
+        return tr("m641a69e69f");
+    },
+    get energy() {
+        return tr("mc9ebe91684");
+    },
+    get other() {
+        return tr("m1d0ff5f26c");
+    },
 };
-export const digits = (value: number) =>
-    new Intl.NumberFormat("fa-IR").format(value);
+export const digits = (value: number) => number(value);
 export function duration(value: number) {
     const safe = Number.isFinite(value) ? Math.max(0, value) : 0;
     return `${Math.floor(safe / 60)}:${String(Math.floor(safe % 60)).padStart(2, "0")}`;

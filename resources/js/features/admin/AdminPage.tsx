@@ -1,3 +1,6 @@
+import { roleLabel } from "../../i18n/runtime";
+import { tr } from "../../i18n/runtime";
+import { useLocale } from "../../i18n/LocaleProvider";
 import "../../../css/admin.css";
 import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
@@ -33,76 +36,117 @@ const sections: {
 }[] = [
     {
         id: "overview",
-        label: "نمای کلی",
-        description: "نبض کتابخانه",
+        get label() {
+            return tr("mcdcef6d04a");
+        },
+        get description() {
+            return tr("m97802422f4");
+        },
         permission: "dashboard.read",
         icon: LayoutDashboard,
     },
     {
         id: "imports",
-        label: "ورود موسیقی",
-        description: "از فایل تا پلی‌لیست",
+        get label() {
+            return tr("m32c110efdb");
+        },
+        get description() {
+            return tr("m82c61b824d");
+        },
         permission: "imports.manage",
         icon: UploadCloud,
     },
     {
         id: "conversions",
-        label: "تبدیل صوت",
-        description: "FLAC، MP3 و سلامت خروجی",
+        get label() {
+            return tr("me45cdd8642");
+        },
+        get description() {
+            return tr("m5998577cb9");
+        },
         permission: "media.manage",
         icon: AudioLines,
     },
     {
         id: "library",
-        label: "پلی‌لیست‌ها",
-        description: "انتخاب، ترتیب و انتشار",
+        get label() {
+            return tr("m810b71a913");
+        },
+        get description() {
+            return tr("m52d367f294");
+        },
         permission: "catalog.manage",
         icon: ListMusic,
     },
     {
         id: "catalog",
-        label: "کاتالوگ",
-        description: "هنرمند، انتشار و آهنگ",
+        get label() {
+            return tr("m83f8b96a07");
+        },
+        get description() {
+            return tr("m4dec42d7ad");
+        },
         permission: "catalog.manage",
         icon: Disc3,
     },
     {
         id: "trash",
-        label: "سطل بازیافت",
-        description: "بازیابی انتخاب‌های حذف‌شده",
+        get label() {
+            return tr("m33a33be876");
+        },
+        get description() {
+            return tr("mfe0ef858b3");
+        },
         permission: "catalog.manage",
         icon: Trash2,
     },
     {
         id: "users",
-        label: "اعضا و دسترسی",
-        description: "کتابخانهٔ ده‌نفره",
+        get label() {
+            return tr("mc50f3a13b6");
+        },
+        get description() {
+            return tr("me9a079b15f");
+        },
         permission: "users.manage",
         icon: Users,
     },
     {
         id: "audit",
-        label: "رویدادها",
-        description: "رد تغییرات مدیریتی",
+        get label() {
+            return tr("m8d1d1dfc1f");
+        },
+        get description() {
+            return tr("m48186cf1d8");
+        },
         permission: "audit.read",
         icon: Fingerprint,
     },
     {
         id: "operations",
-        label: "وضعیت سیستم",
-        description: "زیرساخت و صف",
+        get label() {
+            return tr("ma700a96df8");
+        },
+        get description() {
+            return tr("mbeffee3078");
+        },
         permission: "operations.read",
         icon: Activity,
     },
     {
         id: "security",
-        label: "امنیت حساب",
-        description: "رمزساز و بازیابی",
+        get label() {
+            return tr("m34a02d2297");
+        },
+        get description() {
+            return tr("m3a5ff5459d");
+        },
         permission: "admin.access",
         icon: ShieldCheck,
     },
 ];
 export default function AdminPage() {
+    useLocale();
     const { user } = useSession();
     const [params, setParams] = useSearchParams();
     const [enrollment, setEnrollment] = useState(!user?.mfa_enabled);
@@ -115,30 +159,25 @@ export default function AdminPage() {
         <div className="page-enter admin-workspace">
             <header className="admin-title">
                 <div>
-                    <span className="eyebrow" lang="en">
-                        THE CURATOR’S DESK / 02
-                    </span>
-                    <h1>پشت صحنهٔ خط‌کش</h1>
-                    <p>هر انتخاب، بخشی از صدای این کتابخانه است.</p>
+                    <span className="eyebrow">{tr("editorial.desk")}</span>
+                    <h1>{tr("mcbac960bbe")}</h1>
+                    <p>{tr("mb23d146821")}</p>
                 </div>
                 <span className="admin-role">
                     <ShieldCheck size={16} />
-                    {user?.role_label}
+                    {roleLabel(user?.role)}
                 </span>
             </header>
             {enrollment || !user?.mfa_enabled ? (
                 <div className="admin-panel enrollment-panel">
-                    <span className="eyebrow">پیش از اولین تغییر</span>
-                    <h2>یک قفل دیگر، برای انتخاب‌های تو.</h2>
-                    <p>
-                        مدیریت کتابخانه به تأیید دومرحله‌ای نیاز دارد. فعال‌سازی
-                        را کامل کن و کدهای بازیابی را ذخیره کن.
-                    </p>
+                    <span className="eyebrow">{tr("m8c868bc477")}</span>
+                    <h2>{tr("me3f3cd5503")}</h2>
+                    <p>{tr("m4b2e249123")}</p>
                     <MfaPanel onReady={() => setEnrollment(false)} />
                 </div>
             ) : (
                 <div className="admin-workspace-grid">
-                    <nav className="admin-nav" aria-label="بخش‌های مدیریت">
+                    <nav className="admin-nav" aria-label={tr("m7b143199db")}>
                         {visible.map(
                             ({ id, label, description, icon: Icon }) => (
                                 <button
@@ -161,15 +200,15 @@ export default function AdminPage() {
                             ),
                         )}
                         <p>
-                            فضای خصوصی، انتخاب‌های دقیق.
+                            {tr("md1f7133312")}
                             <br />
                             AHANG KHATKESH
                         </p>
                     </nav>
                     <section className="admin-stage" aria-label={active.label}>
                         <div className="admin-section-title">
-                            <span className="eyebrow" lang="en">
-                                LIBRARY CONTROL
+                            <span className="eyebrow">
+                                {tr("editorial.control")}
                             </span>
                             <h2>{active.label}</h2>
                             <p>{active.description}</p>

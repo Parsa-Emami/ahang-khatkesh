@@ -21,9 +21,9 @@ class ReserveStorage
             $actor = $this->authorize->handle($actor);
             $this->budget->assertReady();
             $budget = $this->budget->snapshot();
-            abort_if(StorageReservation::whereIn('status', StorageReservation::CHARGED)->count() >= config('music.max_active_reservations'), 429, 'رزروهای قبلی باید تکمیل یا آزاد شوند.');
-            abort_if($bytes > $budget['quota_available_bytes'], 507, 'ظرفیت مجاز کتابخانه کافی نیست.');
-            abort_if($bytes > $budget['disk_available_bytes'], 507, 'فضای امن دیسک کافی نیست.');
+            abort_if(StorageReservation::whereIn('status', StorageReservation::CHARGED)->count() >= config('music.max_active_reservations'), 429, __('رزروهای قبلی باید تکمیل یا آزاد شوند.'));
+            abort_if($bytes > $budget['quota_available_bytes'], 507, __('ظرفیت مجاز کتابخانه کافی نیست.'));
+            abort_if($bytes > $budget['disk_available_bytes'], 507, __('فضای امن دیسک کافی نیست.'));
 
             return StorageReservation::create(['user_id' => $actor->id, 'access_version' => $actor->access_version, 'purpose' => $purpose, 'size_bytes' => $bytes, 'status' => 'reserved', 'expires_at' => now()->addSeconds(config('music.reservation_seconds'))]);
         }, 5);

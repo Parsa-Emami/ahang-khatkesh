@@ -1,6 +1,12 @@
 <?php
 
 return [
+    'timezone' => 'منطقهٔ زمانی معتبر انتخاب کنید.',
+    'date' => 'تاریخ معتبر وارد کنید.',
+    'list' => 'ساختار :attribute باید یک فهرست باشد.',
+    'required_with' => 'فیلد :attribute همراه :values الزامی است.',
+    'required_if' => 'فیلد :attribute در این وضعیت الزامی است.',
+    'size' => ['string' => ':attribute باید :size نویسه باشد.', 'numeric' => ':attribute باید :size باشد.', 'array' => ':attribute باید :size مورد داشته باشد.'],
     'digits' => ':attribute باید :digits رقم باشد.',
     'enum' => 'گزینهٔ :attribute معتبر نیست.',
     'filled' => ':attribute نباید خالی باشد.',
@@ -14,5 +20,5 @@ return [
     'min' => ['string' => ':attribute حداقل :min نویسه باشد.', 'array' => ':attribute حداقل :min مورد داشته باشد.', 'numeric' => ':attribute حداقل :min باشد.'],
     'between' => ['numeric' => ':attribute باید بین :min و :max باشد.'],
     'password' => ['letters' => 'رمز عبور باید حرف داشته باشد.', 'numbers' => 'رمز عبور باید عدد داشته باشد.'],
-    'attributes' => ['code' => 'کد رمزساز', 'recovery_code' => 'کد بازیابی', 'role' => 'نقش', 'revision' => 'نسخهٔ اطلاعات', 'title' => 'عنوان', 'artist_ids' => 'هنرمندان', 'credits' => 'اعتبار هنری', 'track_ids' => 'آهنگ‌ها', 'name' => 'نام', 'email' => 'ایمیل', 'password' => 'رمز عبور', 'current_password' => 'رمز فعلی', 'manifest' => 'فهرست پلی‌لیست', 'audio' => 'صوت', 'mood' => 'حال‌وهوا', 'queue' => 'صف پخش', 'cover' => 'کاور'],
+    'attributes' => ['locale' => 'زبان', 'direction' => 'جهت', 'motion' => 'حرکت رابط', 'time_zone' => 'منطقهٔ زمانی', 'theme' => 'تم', 'code' => 'کد رمزساز', 'recovery_code' => 'کد بازیابی', 'role' => 'نقش', 'revision' => 'نسخهٔ اطلاعات', 'title' => 'عنوان', 'artist_ids' => 'هنرمندان', 'credits' => 'اعتبار هنری', 'track_ids' => 'آهنگ‌ها', 'name' => 'نام', 'email' => 'ایمیل', 'password' => 'رمز عبور', 'current_password' => 'رمز فعلی', 'manifest' => 'فهرست پلی‌لیست', 'audio' => 'صوت', 'mood' => 'حال‌وهوا', 'queue' => 'صف پخش', 'cover' => 'کاور'],
 ];

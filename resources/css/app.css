@@ -764,7 +764,7 @@ select {
 .art-number {
     position: absolute;
     top: 7%;
-    left: 7%;
+    inset-inline-end: 7%;
     font-family: "Manrope Variable", sans-serif;
     font-size: clamp(7px, 0.7vw, 10px);
     letter-spacing: 1px;
@@ -773,7 +773,7 @@ select {
 .art-caption {
     position: absolute;
     bottom: 6%;
-    left: 7%;
+    inset-inline-end: 7%;
     font-size: clamp(8px, 1vw, 13px);
     line-height: 1.3;
     font-weight: 700;
@@ -1563,7 +1563,7 @@ input[type="file"]::file-selector-button {
     width: 380px;
     position: absolute;
     bottom: -50px;
-    left: -70px;
+    inset-inline-end: -70px;
     transform: rotate(18deg);
     border-radius: 9px;
     box-shadow: var(--shadow);
@@ -2296,7 +2296,7 @@ input[type="file"]::file-selector-button {
     }
     .login-art > .artwork {
         width: 320px;
-        left: -115px;
+        inset-inline-end: -115px;
         bottom: -30px;
     }
 }
@@ -2548,7 +2548,7 @@ input[type="file"]::file-selector-button {
         grid-row: 1;
         justify-content: flex-start;
         gap: 1px;
-        direction: rtl;
+        direction: inherit;
     }
     .player-tools .icon-button {
         min-width: 36px;
@@ -2636,7 +2636,7 @@ input[type="file"]::file-selector-button {
     }
     .login-art > .artwork {
         width: 220px;
-        left: -85px;
+        inset-inline-end: -85px;
         bottom: -70px;
         opacity: 0.7;
     }
@@ -2761,7 +2761,7 @@ input[type="file"]::file-selector-button {
     }
     .featured-art {
         position: absolute;
-        left: -27px;
+        inset-inline-end: -27px;
         top: 36px;
         width: 155px;
         opacity: 0.32;
@@ -3216,5 +3216,73 @@ input[type="file"]::file-selector-button {
 @media (max-width: 700px) {
     .player-bar.has-quality {
         grid-template-columns: minmax(0, 1fr) 148px;
+    }
+}
+.preference-controls {
+    display: grid;
+    gap: 12px;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 160px), 1fr));
+    margin-block: 16px;
+}
+.preference-controls label {
+    display: grid;
+    gap: 6px;
+    font-size: 12px;
+    min-inline-size: 0;
+}
+.preference-controls select {
+    min-inline-size: 0;
+    inline-size: 100%;
+}
+.login-preferences {
+    inline-size: min(100%, 400px);
+    margin-inline: auto;
+}
+.login-preferences .preference-controls {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+[dir="auto"],
+bdi {
+    unicode-bidi: isolate;
+    overflow-wrap: anywhere;
+}
+:root:lang(en) {
+    font-family: "Manrope Variable", "Vazirmatn", sans-serif;
+}
+:root[dir="ltr"] .lucide-arrow-left {
+    transform: scaleX(-1);
+}
+:root[dir="ltr"] .toast-region {
+    transform: translateX(-50%);
+}
+:root[data-motion="reduced"] *,
+:root[data-motion="reduced"] *::before,
+:root[data-motion="reduced"] *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+}
+.field-error {
+    color: var(--danger);
+    font-size: 12px;
+    display: block;
+    margin-block: 5px;
+}
+.dialog-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-block-start: 20px;
+}
+@media (max-width: 760px) {
+    :root[dir="ltr"] .sidebar:not(.is-open) {
+        transform: translateX(-110%);
+    }
+    .login-preferences {
+        padding-block-start: 35px;
+    }
+    .preference-controls {
+        grid-template-columns: minmax(0, 1fr);
     }
 }

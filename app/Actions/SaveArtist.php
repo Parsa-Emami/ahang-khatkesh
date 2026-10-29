@@ -17,7 +17,7 @@ class SaveArtist
             $actor = $this->authorize->handle($actor);
             $model = $artist?->exists ? Artist::whereKey($artist->id)->lockForUpdate()->firstOrFail() : new Artist;
             if ($model->exists) {
-                abort_unless((int) $model->revision === (int) $data['revision'], 409, 'اطلاعات هنرمند تغییر کرده است.');
+                abort_unless((int) $model->revision === (int) $data['revision'], 409, __('اطلاعات هنرمند تغییر کرده است.'));
             }
             $model->fill(collect($data)->except('revision')->all());
             $model->revision = ($model->revision ?? 0) + 1;

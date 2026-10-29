@@ -112,10 +112,14 @@ for (const phase of roadmap.phases) {
         "pint",
         "composer_validate",
         "composer_audit",
-        "npm_audit",
+
         "architecture",
     ])
         assert.equal(record.checks[gate], "passed");
+    assert.equal(
+        record.checks.npm_advisory_scan ?? record.checks.npm_audit,
+        "passed",
+    );
     for (const required of phase.required_tests)
         assert(
             record.test_inventory.some((name) => name.includes(required)),

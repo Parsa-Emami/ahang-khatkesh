@@ -18,7 +18,7 @@ class ChangeOwnPassword
         $observed = User::findOrFail($snapshot->id);
         abort_unless($observed->is_active && $observed->access_version === $snapshot->access_version && $observed->access_version === $presentedVersion, 401);
         if (! Hash::check($currentPassword, $observed->password)) {
-            throw ValidationException::withMessages(['current_password' => 'رمز فعلی درست نیست.']);
+            throw ValidationException::withMessages(['current_password' => __('رمز فعلی درست نیست.')]);
         }
         $encoded = Hash::make($password);
 

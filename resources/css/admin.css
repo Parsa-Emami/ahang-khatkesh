@@ -146,7 +146,7 @@
     z-index: -1;
     width: 270px;
     height: 270px;
-    left: -55px;
+    inset-inline-end: -55px;
     bottom: -45px;
     transform: rotate(-28deg);
     opacity: 0.65;
@@ -633,7 +633,7 @@
     .admin-welcome-art {
         width: 240px;
         height: 240px;
-        left: -110px;
+        inset-inline-end: -110px;
     }
     .audit-actor {
         flex-wrap: wrap;

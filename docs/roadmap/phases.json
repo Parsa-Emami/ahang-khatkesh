@@ -6,7 +6,7 @@
     {
       "id": "F01",
       "title": "مرز سوپرادمین و سطل بازیافت",
-      "status": "verified",
+      "status": "implemented",
       "depends_on": [],
       "implemented_paths": [
         "app/Actions/AuthorizeLibraryWrite.php",
@@ -27,7 +27,7 @@
     {
       "id": "F02",
       "title": "پیش‌نمایش مؤثر و انتشار اتمیک ایمپورت",
-      "status": "verified",
+      "status": "implemented",
       "depends_on": [
         "F01"
       ],
@@ -51,7 +51,7 @@
     {
       "id": "F03",
       "title": "نسخهٔ امنیتی جاری و کنترل credential",
-      "status": "verified",
+      "status": "implemented",
       "depends_on": [
         "F01"
       ],
@@ -76,7 +76,7 @@
     {
       "id": "F04",
       "title": "پاک‌سازی بادوام فایل‌های بدون ارجاع",
-      "status": "verified",
+      "status": "implemented",
       "depends_on": [
         "F01",
         "F03"
@@ -99,7 +99,7 @@
     {
       "id": "F05",
       "title": "صف شخصی و تایمر خواب",
-      "status": "verified",
+      "status": "implemented",
       "depends_on": [
         "F01",
         "F03"
@@ -124,7 +124,7 @@
     {
       "id": "F06",
       "title": "حفظ draft، نشست چندتب و قرارداد پاسخ",
-      "status": "verified",
+      "status": "implemented",
       "depends_on": [
         "F02",
         "F03",
@@ -154,7 +154,7 @@
     {
       "id": "F07",
       "title": "چرخهٔ کامل job، blob، quota و reconciliation",
-      "status": "verified",
+      "status": "implemented",
       "depends_on": [
         "F02",
         "F03",
@@ -189,7 +189,7 @@
     {
       "id": "F08",
       "title": "FLAC به MP3 320k و انتخاب کیفیت",
-      "status": "verified",
+      "status": "implemented",
       "depends_on": [
         "F07"
       ],
@@ -224,14 +224,24 @@
     {
       "id": "F09",
       "title": "زبان و جهت سراسری و دسترس‌پذیری پایه",
-      "status": "planned",
+      "status": "implemented",
       "depends_on": [
         "F06"
       ],
-      "implemented_paths": [],
+      "implemented_paths": [
+        "resources/js/i18n/LocaleProvider.tsx",
+        "resources/js/i18n/messages/fa-IR.json",
+        "resources/js/i18n/messages/en-US.json",
+        "resources/js/features/drafts/DraftNavigation.tsx",
+        "app/Http/Middleware/SetLocale.php",
+        "database/migrations/2026_10_29_130000_add_user_interface_preferences.php",
+        "tests/Feature/LocalePreferencesTest.php",
+        "tests/Browser/f09.e2e.ts"
+      ],
       "required_tests": [
         "locale direction theme matrix",
-        "DraftNavigationTest"
+        "DraftNavigationTest",
+        "LocalePreferencesTest"
       ],
       "acceptance": [
         "همه ۶۴ قرارداد کامپوننت در fa/en و RTL/LTR و light/dark/system پوشش داشته باشند.",

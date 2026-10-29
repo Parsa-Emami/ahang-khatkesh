@@ -1,3 +1,5 @@
+import { currentPreferences, localizeText } from "../i18n/runtime";
+import { tr } from "../i18n/runtime";
 import type { User } from "../types";
 
 let csrfToken = "";
@@ -32,6 +34,10 @@ export class ApiError extends Error {
         public requestId?: string,
     ) {
         super(message);
+        Object.defineProperty(this, "message", {
+            get: () => localizeText(message),
+            configurable: true,
+        });
     }
 }
 export const getCsrfToken = () => csrfToken;
@@ -44,12 +50,7 @@ function announce(user: User | null, broadcast: boolean) {
     if (broadcast) window.dispatchEvent(new Event("session-auth-change"));
 }
 function contextError() {
-    return new ApiError(
-        409,
-        "هویت یا دسترسی نشست تغییر کرده است؛ عملیات را دوباره از صفحهٔ تازه آغاز کنید.",
-        {},
-        "session_context_changed",
-    );
+    return new ApiError(409, tr("md7f5c71a4a"), {}, "session_context_changed");
 }
 export async function api<T>(
     path: string,
@@ -63,6 +64,7 @@ export async function api<T>(
         path === "/session" || path === "/login" || path === "/login/challenge";
     const headers = new Headers(options.headers);
     headers.set("Accept", "application/json");
+    headers.set("Accept-Language", currentPreferences().locale);
     headers.set("X-Requested-With", "XMLHttpRequest");
     if (csrfToken) headers.set("X-CSRF-TOKEN", csrfToken);
     if (!identityRequest && capturedKey)
@@ -78,17 +80,14 @@ export async function api<T>(
         });
     } catch (error) {
         if (error instanceof Error && error.name === "AbortError") throw error;
-        throw new ApiError(
-            0,
-            "ارتباط برقرار نشد. اتصال اینترنت و سرور را بررسی کنید.",
-        );
+        throw new ApiError(0, tr("m418cce799c"));
     }
     let payload;
     try {
         payload = await response.json();
     } catch (error) {
         if (error instanceof Error && error.name === "AbortError") throw error;
-        payload = { message: "پاسخ سرور قابل خواندن نیست." };
+        payload = { message: tr("m7ea5b18f87") };
     }
     if (captured !== generation) throw contextError();
     const unchanged = () =>
@@ -105,11 +104,15 @@ export async function api<T>(
         confirmSession
     ) {
         if (!(await confirmSession()))
-            throw new ApiError(423, "تأیید هویت لغو شد؛ تغییری ثبت نشد.");
+            throw new ApiError(423, tr("mf1a9855d9d"));
         if (!unchanged()) throw contextError();
         return api<T>(path, options, retryCsrf, false);
     }
     if (!response.ok) {
+        if (response.status === 422 && payload.errors)
+            window.dispatchEvent(
+                new CustomEvent("api-field-errors", { detail: payload.errors }),
+            );
         if (
             response.status === 401 ||
             payload.code === "session_context_changed" ||
@@ -130,7 +133,7 @@ export async function api<T>(
                 .flat()
                 .join(" · ") ||
                 payload.message ||
-                "عملیات انجام نشد.",
+                tr("m68a6e1d0cd"),
             payload.errors,
             payload.code,
             response.headers.get("X-Request-ID") || undefined,

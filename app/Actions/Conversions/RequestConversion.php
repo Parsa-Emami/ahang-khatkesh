@@ -28,7 +28,7 @@ class RequestConversion
         $source = $source->fresh('blob');
         if (! $source->codec) {
             $snapshot = $this->files->snapshot($source->storagePath());
-            abort_unless($snapshot && $snapshot['sha256'] === $source->sha256 && $snapshot['size_bytes'] === $source->size_bytes, 409, 'فایل اصلی نیاز به بررسی یکپارچگی دارد.');
+            abort_unless($snapshot && $snapshot['sha256'] === $source->sha256 && $snapshot['size_bytes'] === $source->size_bytes, 409, __('فایل اصلی نیاز به بررسی یکپارچگی دارد.'));
             $facts = $this->probe->inspect(Storage::disk('media')->path($source->storagePath()));
         } else {
             $facts = null;
@@ -37,7 +37,7 @@ class RequestConversion
         return DB::transaction(function () use ($actor, $source, $revision, $profileVersion, $facts): MediaConversion {
             $actor = $this->authorize->handle($actor);
             $source = MediaAsset::with('blob')->whereKey($source->id)->lockForUpdate()->firstOrFail();
-            abort_unless($source->ownership_revision === $revision && $profileVersion === ConversionProfile::VERSION, 409, 'نسخهٔ رسانه یا پروفایل تغییر کرده است.');
+            abort_unless($source->ownership_revision === $revision && $profileVersion === ConversionProfile::VERSION, 409, __('نسخهٔ رسانه یا پروفایل تغییر کرده است.'));
             if ($facts) {
                 $source->update($facts);
             }
@@ -49,7 +49,7 @@ class RequestConversion
     public function fromStoredFacts(User $actor, MediaAsset $source): MediaConversion
     {
         $this->queue->verify('media_database');
-        abort_unless(config('music.conversions_enabled'), 503, 'سرویس تبدیل صوت هنوز فعال نشده است.');
+        abort_unless(config('music.conversions_enabled'), 503, __('سرویس تبدیل صوت هنوز فعال نشده است.'));
         if (DB::transactionLevel() < 1) {
             throw new \LogicException('Conversion admission requires the global SQL transaction.');
         }
@@ -71,7 +71,7 @@ class RequestConversion
         $active = MediaConversion::where(function ($q): void {
             $q->whereIn('status', MediaConversion::ACTIVE)->orWhereNotNull('next_retry_at');
         })->when($except, fn ($q) => $q->whereKeyNot($except))->count();
-        abort_if($active >= config('music.max_active_conversions'), 429, 'صف تبدیل پُر است؛ پس از تکمیل کارهای قبلی دوباره تلاش کنید.');
+        abort_if($active >= config('music.max_active_conversions'), 429, __('صف تبدیل پُر است؛ پس از تکمیل کارهای قبلی دوباره تلاش کنید.'));
     }
 
     public function enqueue(User $actor, MediaAsset $source, MediaConversion $conversion): void

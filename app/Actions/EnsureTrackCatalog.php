@@ -35,7 +35,7 @@ class EnsureTrackCatalog
         }
         $link = DB::table('track_media')->where('media_asset_id', $track->media_asset_id)->first();
         if ($link && ((int) $link->track_id !== $track->id || $link->purpose !== 'original')) {
-            throw new ImportPlanChanged('رسانه به ضبط دیگری متصل است.');
+            throw new ImportPlanChanged(__('رسانه به ضبط دیگری متصل است.'));
         }
         if (! $link) {
             DB::table('track_media')->insert(['track_id' => $track->id, 'media_asset_id' => $track->media_asset_id, 'purpose' => 'original', 'label' => 'original']);

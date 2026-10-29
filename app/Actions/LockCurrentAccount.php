@@ -16,7 +16,7 @@ class LockCurrentAccount
         }
         LibrarySetting::whereKey(1)->increment('lock_version');
         $current = User::whereKey($snapshot->id)->lockForUpdate()->first();
-        abort_unless($current && $current->is_active && $current->access_version === $snapshot->access_version && ($presentedVersion === null || $current->access_version === $presentedVersion), 401, 'نشست تغییر کرده است؛ دوباره وارد شوید.');
+        abort_unless($current && $current->is_active && $current->access_version === $snapshot->access_version && ($presentedVersion === null || $current->access_version === $presentedVersion), 401, __('نشست تغییر کرده است؛ دوباره وارد شوید.'));
 
         return $current;
     }

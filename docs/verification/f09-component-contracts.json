@@ -1,0 +1,1223 @@
+{
+  "format_version": 1,
+  "phase": "F09",
+  "components": [
+    {
+      "id": "C01",
+      "component": "Button",
+      "locale_contract": [
+        "fa-IR",
+        "en-US"
+      ],
+      "direction_contract": [
+        "rtl",
+        "ltr"
+      ],
+      "theme_contract": [
+        "light",
+        "dark",
+        "system"
+      ],
+      "runtime_scope": "existing_runtime_or_shared_primitive",
+      "verification": "shared_catalog_parity_and_browser_matrix"
+    },
+    {
+      "id": "C02",
+      "component": "IconButton",
+      "locale_contract": [
+        "fa-IR",
+        "en-US"
+      ],
+      "direction_contract": [
+        "rtl",
+        "ltr"
+      ],
+      "theme_contract": [
+        "light",
+        "dark",
+        "system"
+      ],
+      "runtime_scope": "existing_runtime_or_shared_primitive",
+      "verification": "shared_catalog_parity_and_browser_matrix"
+    },
+    {
+      "id": "C03",
+      "component": "UiIcon",
+      "locale_contract": [
+        "fa-IR",
+        "en-US"
+      ],
+      "direction_contract": [
+        "rtl",
+        "ltr"
+      ],
+      "theme_contract": [
+        "light",
+        "dark",
+        "system"
+      ],
+      "runtime_scope": "existing_runtime_or_shared_primitive",
+      "verification": "shared_catalog_parity_and_browser_matrix"
+    },
+    {
+      "id": "C04",
+      "component": "Field",
+      "locale_contract": [
+        "fa-IR",
+        "en-US"
+      ],
+      "direction_contract": [
+        "rtl",
+        "ltr"
+      ],
+      "theme_contract": [
+        "light",
+        "dark",
+        "system"
+      ],
+      "runtime_scope": "existing_runtime_or_shared_primitive",
+      "verification": "shared_catalog_parity_and_browser_matrix"
+    },
+    {
+      "id": "C05",
+      "component": "SelectField",
+      "locale_contract": [
+        "fa-IR",
+        "en-US"
+      ],
+      "direction_contract": [
+        "rtl",
+        "ltr"
+      ],
+      "theme_contract": [
+        "light",
+        "dark",
+        "system"
+      ],
+      "runtime_scope": "existing_runtime_or_shared_primitive",
+      "verification": "shared_catalog_parity_and_browser_matrix"
+    },
+    {
+      "id": "C06",
+      "component": "Dialog",
+      "locale_contract": [
+        "fa-IR",
+        "en-US"
+      ],
+      "direction_contract": [
+        "rtl",
+        "ltr"
+      ],
+      "theme_contract": [
+        "light",
+        "dark",
+        "system"
+      ],
+      "runtime_scope": "existing_runtime_or_shared_primitive",
+      "verification": "shared_catalog_parity_and_browser_matrix"
+    },
+    {
+      "id": "C07",
+      "component": "ConfirmDialog",
+      "locale_contract": [
+        "fa-IR",
+        "en-US"
+      ],
+      "direction_contract": [
+        "rtl",
+        "ltr"
+      ],
+      "theme_contract": [
+        "light",
+        "dark",
+        "system"
+      ],
+      "runtime_scope": "existing_runtime_or_shared_primitive",
+      "verification": "shared_catalog_parity_and_browser_matrix"
+    },
+    {
+      "id": "C08",
+      "component": "Tabs",
+      "locale_contract": [
+        "fa-IR",
+        "en-US"
+      ],
+      "direction_contract": [
+        "rtl",
+        "ltr"
+      ],
+      "theme_contract": [
+        "light",
+        "dark",
+        "system"
+      ],
+      "runtime_scope": "existing_runtime_or_shared_primitive",
+      "verification": "shared_catalog_parity_and_browser_matrix"
+    },
+    {
+      "id": "C09",
+      "component": "Menu",
+      "locale_contract": [
+        "fa-IR",
+        "en-US"
+      ],
+      "direction_contract": [
+        "rtl",
+        "ltr"
+      ],
+      "theme_contract": [
+        "light",
+        "dark",
+        "system"
+      ],
+      "runtime_scope": "existing_runtime_or_shared_primitive",
+      "verification": "shared_catalog_parity_and_browser_matrix"
+    },
+    {
+      "id": "C10",
+      "component": "DataTable",
+      "locale_contract": [
+        "fa-IR",
+        "en-US"
+      ],
+      "direction_contract": [
+        "rtl",
+        "ltr"
+      ],
+      "theme_contract": [
+        "light",
+        "dark",
+        "system"
+      ],
+      "runtime_scope": "existing_runtime_or_shared_primitive",
+      "verification": "shared_catalog_parity_and_browser_matrix"
+    },
+    {
+      "id": "C11",
+      "component": "Pagination",
+      "locale_contract": [
+        "fa-IR",
+        "en-US"
+      ],
+      "direction_contract": [
+        "rtl",
+        "ltr"
+      ],
+      "theme_contract": [
+        "light",
+        "dark",
+        "system"
+      ],
+      "runtime_scope": "existing_runtime_or_shared_primitive",
+      "verification": "shared_catalog_parity_and_browser_matrix"
+    },
+    {
+      "id": "C12",
+      "component": "StatusBadge",
+      "locale_contract": [
+        "fa-IR",
+        "en-US"
+      ],
+      "direction_contract": [
+        "rtl",
+        "ltr"
+      ],
+      "theme_contract": [
+        "light",
+        "dark",
+        "system"
+      ],
+      "runtime_scope": "existing_runtime_or_shared_primitive",
+      "verification": "shared_catalog_parity_and_browser_matrix"
+    },
+    {
+      "id": "C13",
+      "component": "AsyncState",
+      "locale_contract": [
+        "fa-IR",
+        "en-US"
+      ],
+      "direction_contract": [
+        "rtl",
+        "ltr"
+      ],
+      "theme_contract": [
+        "light",
+        "dark",
+        "system"
+      ],
+      "runtime_scope": "existing_runtime_or_shared_primitive",
+      "verification": "shared_catalog_parity_and_browser_matrix"
+    },
+    {
+      "id": "C14",
+      "component": "ToastRegion",
+      "locale_contract": [
+        "fa-IR",
+        "en-US"
+      ],
+      "direction_contract": [
+        "rtl",
+        "ltr"
+      ],
+      "theme_contract": [
+        "light",
+        "dark",
+        "system"
+      ],
+      "runtime_scope": "existing_runtime_or_shared_primitive",
+      "verification": "shared_catalog_parity_and_browser_matrix"
+    },
+    {
+      "id": "C15",
+      "component": "ErrorBoundary",
+      "locale_contract": [
+        "fa-IR",
+        "en-US"
+      ],
+      "direction_contract": [
+        "rtl",
+        "ltr"
+      ],
+      "theme_contract": [
+        "light",
+        "dark",
+        "system"
+      ],
+      "runtime_scope": "existing_runtime_or_shared_primitive",
+      "verification": "shared_catalog_parity_and_browser_matrix"
+    },
+    {
+      "id": "C16",
+      "component": "AppShell",
+      "locale_contract": [
+        "fa-IR",
+        "en-US"
+      ],
+      "direction_contract": [
+        "rtl",
+        "ltr"
+      ],
+      "theme_contract": [
+        "light",
+        "dark",
+        "system"
+      ],
+      "runtime_scope": "existing_runtime_or_shared_primitive",
+      "verification": "shared_catalog_parity_and_browser_matrix"
+    },
+    {
+      "id": "C17",
+      "component": "Navigation",
+      "locale_contract": [
+        "fa-IR",
+        "en-US"
+      ],
+      "direction_contract": [
+        "rtl",
+        "ltr"
+      ],
+      "theme_contract": [
+        "light",
+        "dark",
+        "system"
+      ],
+      "runtime_scope": "existing_runtime_or_shared_primitive",
+      "verification": "shared_catalog_parity_and_browser_matrix"
+    },
+    {
+      "id": "C18",
+      "component": "SearchBox",
+      "locale_contract": [
+        "fa-IR",
+        "en-US"
+      ],
+      "direction_contract": [
+        "rtl",
+        "ltr"
+      ],
+      "theme_contract": [
+        "light",
+        "dark",
+        "system"
+      ],
+      "runtime_scope": "existing_runtime_or_shared_primitive",
+      "verification": "shared_catalog_parity_and_browser_matrix"
+    },
+    {
+      "id": "C19",
+      "component": "LocaleSwitcher",
+      "locale_contract": [
+        "fa-IR",
+        "en-US"
+      ],
+      "direction_contract": [
+        "rtl",
+        "ltr"
+      ],
+      "theme_contract": [
+        "light",
+        "dark",
+        "system"
+      ],
+      "runtime_scope": "existing_runtime_or_shared_primitive",
+      "verification": "shared_catalog_parity_and_browser_matrix"
+    },
+    {
+      "id": "C20",
+      "component": "ThemeSwitcher",
+      "locale_contract": [
+        "fa-IR",
+        "en-US"
+      ],
+      "direction_contract": [
+        "rtl",
+        "ltr"
+      ],
+      "theme_contract": [
+        "light",
+        "dark",
+        "system"
+      ],
+      "runtime_scope": "existing_runtime_or_shared_primitive",
+      "verification": "shared_catalog_parity_and_browser_matrix"
+    },
+    {
+      "id": "C21",
+      "component": "MotionPreference",
+      "locale_contract": [
+        "fa-IR",
+        "en-US"
+      ],
+      "direction_contract": [
+        "rtl",
+        "ltr"
+      ],
+      "theme_contract": [
+        "light",
+        "dark",
+        "system"
+      ],
+      "runtime_scope": "existing_runtime_or_shared_primitive",
+      "verification": "shared_catalog_parity_and_browser_matrix"
+    },
+    {
+      "id": "C22",
+      "component": "Artwork",
+      "locale_contract": [
+        "fa-IR",
+        "en-US"
+      ],
+      "direction_contract": [
+        "rtl",
+        "ltr"
+      ],
+      "theme_contract": [
+        "light",
+        "dark",
+        "system"
+      ],
+      "runtime_scope": "existing_runtime_or_shared_primitive",
+      "verification": "shared_catalog_parity_and_browser_matrix"
+    },
+    {
+      "id": "C23",
+      "component": "PlaylistCard",
+      "locale_contract": [
+        "fa-IR",
+        "en-US"
+      ],
+      "direction_contract": [
+        "rtl",
+        "ltr"
+      ],
+      "theme_contract": [
+        "light",
+        "dark",
+        "system"
+      ],
+      "runtime_scope": "existing_runtime_or_shared_primitive",
+      "verification": "shared_catalog_parity_and_browser_matrix"
+    },
+    {
+      "id": "C24",
+      "component": "TrackRow",
+      "locale_contract": [
+        "fa-IR",
+        "en-US"
+      ],
+      "direction_contract": [
+        "rtl",
+        "ltr"
+      ],
+      "theme_contract": [
+        "light",
+        "dark",
+        "system"
+      ],
+      "runtime_scope": "existing_runtime_or_shared_primitive",
+      "verification": "shared_catalog_parity_and_browser_matrix"
+    },
+    {
+      "id": "C25",
+      "component": "TrackList",
+      "locale_contract": [
+        "fa-IR",
+        "en-US"
+      ],
+      "direction_contract": [
+        "rtl",
+        "ltr"
+      ],
+      "theme_contract": [
+        "light",
+        "dark",
+        "system"
+      ],
+      "runtime_scope": "existing_runtime_or_shared_primitive",
+      "verification": "shared_catalog_parity_and_browser_matrix"
+    },
+    {
+      "id": "C26",
+      "component": "LikeButton",
+      "locale_contract": [
+        "fa-IR",
+        "en-US"
+      ],
+      "direction_contract": [
+        "rtl",
+        "ltr"
+      ],
+      "theme_contract": [
+        "light",
+        "dark",
+        "system"
+      ],
+      "runtime_scope": "existing_runtime_or_shared_primitive",
+      "verification": "shared_catalog_parity_and_browser_matrix"
+    },
+    {
+      "id": "C27",
+      "component": "SavePlaylistButton",
+      "locale_contract": [
+        "fa-IR",
+        "en-US"
+      ],
+      "direction_contract": [
+        "rtl",
+        "ltr"
+      ],
+      "theme_contract": [
+        "light",
+        "dark",
+        "system"
+      ],
+      "runtime_scope": "existing_runtime_or_shared_primitive",
+      "verification": "shared_catalog_parity_and_browser_matrix"
+    },
+    {
+      "id": "C28",
+      "component": "PlayerBar",
+      "locale_contract": [
+        "fa-IR",
+        "en-US"
+      ],
+      "direction_contract": [
+        "rtl",
+        "ltr"
+      ],
+      "theme_contract": [
+        "light",
+        "dark",
+        "system"
+      ],
+      "runtime_scope": "existing_runtime_or_shared_primitive",
+      "verification": "shared_catalog_parity_and_browser_matrix"
+    },
+    {
+      "id": "C29",
+      "component": "SeekSlider",
+      "locale_contract": [
+        "fa-IR",
+        "en-US"
+      ],
+      "direction_contract": [
+        "rtl",
+        "ltr"
+      ],
+      "theme_contract": [
+        "light",
+        "dark",
+        "system"
+      ],
+      "runtime_scope": "existing_runtime_or_shared_primitive",
+      "verification": "shared_catalog_parity_and_browser_matrix"
+    },
+    {
+      "id": "C30",
+      "component": "VolumeControl",
+      "locale_contract": [
+        "fa-IR",
+        "en-US"
+      ],
+      "direction_contract": [
+        "rtl",
+        "ltr"
+      ],
+      "theme_contract": [
+        "light",
+        "dark",
+        "system"
+      ],
+      "runtime_scope": "existing_runtime_or_shared_primitive",
+      "verification": "shared_catalog_parity_and_browser_matrix"
+    },
+    {
+      "id": "C31",
+      "component": "QueuePanel",
+      "locale_contract": [
+        "fa-IR",
+        "en-US"
+      ],
+      "direction_contract": [
+        "rtl",
+        "ltr"
+      ],
+      "theme_contract": [
+        "light",
+        "dark",
+        "system"
+      ],
+      "runtime_scope": "existing_runtime_or_shared_primitive",
+      "verification": "shared_catalog_parity_and_browser_matrix"
+    },
+    {
+      "id": "C32",
+      "component": "NowPlaying",
+      "locale_contract": [
+        "fa-IR",
+        "en-US"
+      ],
+      "direction_contract": [
+        "rtl",
+        "ltr"
+      ],
+      "theme_contract": [
+        "light",
+        "dark",
+        "system"
+      ],
+      "runtime_scope": "existing_runtime_or_shared_primitive",
+      "verification": "shared_catalog_parity_and_browser_matrix"
+    },
+    {
+      "id": "C33",
+      "component": "PlaybackError",
+      "locale_contract": [
+        "fa-IR",
+        "en-US"
+      ],
+      "direction_contract": [
+        "rtl",
+        "ltr"
+      ],
+      "theme_contract": [
+        "light",
+        "dark",
+        "system"
+      ],
+      "runtime_scope": "existing_runtime_or_shared_primitive",
+      "verification": "shared_catalog_parity_and_browser_matrix"
+    },
+    {
+      "id": "C34",
+      "component": "ShaderBackdrop",
+      "locale_contract": [
+        "fa-IR",
+        "en-US"
+      ],
+      "direction_contract": [
+        "rtl",
+        "ltr"
+      ],
+      "theme_contract": [
+        "light",
+        "dark",
+        "system"
+      ],
+      "runtime_scope": "deferred_to_F10",
+      "verification": "inherited_contract_only_no_runtime_effect_claim"
+    },
+    {
+      "id": "C35",
+      "component": "EffectBoundary",
+      "locale_contract": [
+        "fa-IR",
+        "en-US"
+      ],
+      "direction_contract": [
+        "rtl",
+        "ltr"
+      ],
+      "theme_contract": [
+        "light",
+        "dark",
+        "system"
+      ],
+      "runtime_scope": "deferred_to_F10",
+      "verification": "inherited_contract_only_no_runtime_effect_claim"
+    },
+    {
+      "id": "C36",
+      "component": "LoginForm",
+      "locale_contract": [
+        "fa-IR",
+        "en-US"
+      ],
+      "direction_contract": [
+        "rtl",
+        "ltr"
+      ],
+      "theme_contract": [
+        "light",
+        "dark",
+        "system"
+      ],
+      "runtime_scope": "existing_runtime_or_shared_primitive",
+      "verification": "shared_catalog_parity_and_browser_matrix"
+    },
+    {
+      "id": "C37",
+      "component": "MfaChallenge",
+      "locale_contract": [
+        "fa-IR",
+        "en-US"
+      ],
+      "direction_contract": [
+        "rtl",
+        "ltr"
+      ],
+      "theme_contract": [
+        "light",
+        "dark",
+        "system"
+      ],
+      "runtime_scope": "existing_runtime_or_shared_primitive",
+      "verification": "shared_catalog_parity_and_browser_matrix"
+    },
+    {
+      "id": "C38",
+      "component": "MfaEnrollment",
+      "locale_contract": [
+        "fa-IR",
+        "en-US"
+      ],
+      "direction_contract": [
+        "rtl",
+        "ltr"
+      ],
+      "theme_contract": [
+        "light",
+        "dark",
+        "system"
+      ],
+      "runtime_scope": "existing_runtime_or_shared_primitive",
+      "verification": "shared_catalog_parity_and_browser_matrix"
+    },
+    {
+      "id": "C39",
+      "component": "RecoveryCodes",
+      "locale_contract": [
+        "fa-IR",
+        "en-US"
+      ],
+      "direction_contract": [
+        "rtl",
+        "ltr"
+      ],
+      "theme_contract": [
+        "light",
+        "dark",
+        "system"
+      ],
+      "runtime_scope": "existing_runtime_or_shared_primitive",
+      "verification": "shared_catalog_parity_and_browser_matrix"
+    },
+    {
+      "id": "C40",
+      "component": "StepUpDialog",
+      "locale_contract": [
+        "fa-IR",
+        "en-US"
+      ],
+      "direction_contract": [
+        "rtl",
+        "ltr"
+      ],
+      "theme_contract": [
+        "light",
+        "dark",
+        "system"
+      ],
+      "runtime_scope": "existing_runtime_or_shared_primitive",
+      "verification": "shared_catalog_parity_and_browser_matrix"
+    },
+    {
+      "id": "C41",
+      "component": "SettingsDialog",
+      "locale_contract": [
+        "fa-IR",
+        "en-US"
+      ],
+      "direction_contract": [
+        "rtl",
+        "ltr"
+      ],
+      "theme_contract": [
+        "light",
+        "dark",
+        "system"
+      ],
+      "runtime_scope": "existing_runtime_or_shared_primitive",
+      "verification": "shared_catalog_parity_and_browser_matrix"
+    },
+    {
+      "id": "C42",
+      "component": "AdminWorkspace",
+      "locale_contract": [
+        "fa-IR",
+        "en-US"
+      ],
+      "direction_contract": [
+        "rtl",
+        "ltr"
+      ],
+      "theme_contract": [
+        "light",
+        "dark",
+        "system"
+      ],
+      "runtime_scope": "existing_runtime_or_shared_primitive",
+      "verification": "shared_catalog_parity_and_browser_matrix"
+    },
+    {
+      "id": "C43",
+      "component": "OverviewPanel",
+      "locale_contract": [
+        "fa-IR",
+        "en-US"
+      ],
+      "direction_contract": [
+        "rtl",
+        "ltr"
+      ],
+      "theme_contract": [
+        "light",
+        "dark",
+        "system"
+      ],
+      "runtime_scope": "existing_runtime_or_shared_primitive",
+      "verification": "shared_catalog_parity_and_browser_matrix"
+    },
+    {
+      "id": "C44",
+      "component": "UploadQueue",
+      "locale_contract": [
+        "fa-IR",
+        "en-US"
+      ],
+      "direction_contract": [
+        "rtl",
+        "ltr"
+      ],
+      "theme_contract": [
+        "light",
+        "dark",
+        "system"
+      ],
+      "runtime_scope": "existing_runtime_or_shared_primitive",
+      "verification": "shared_catalog_parity_and_browser_matrix"
+    },
+    {
+      "id": "C45",
+      "component": "ImportWizard",
+      "locale_contract": [
+        "fa-IR",
+        "en-US"
+      ],
+      "direction_contract": [
+        "rtl",
+        "ltr"
+      ],
+      "theme_contract": [
+        "light",
+        "dark",
+        "system"
+      ],
+      "runtime_scope": "existing_runtime_or_shared_primitive",
+      "verification": "shared_catalog_parity_and_browser_matrix"
+    },
+    {
+      "id": "C46",
+      "component": "ImportPreviewTable",
+      "locale_contract": [
+        "fa-IR",
+        "en-US"
+      ],
+      "direction_contract": [
+        "rtl",
+        "ltr"
+      ],
+      "theme_contract": [
+        "light",
+        "dark",
+        "system"
+      ],
+      "runtime_scope": "existing_runtime_or_shared_primitive",
+      "verification": "shared_catalog_parity_and_browser_matrix"
+    },
+    {
+      "id": "C47",
+      "component": "ImportStatus",
+      "locale_contract": [
+        "fa-IR",
+        "en-US"
+      ],
+      "direction_contract": [
+        "rtl",
+        "ltr"
+      ],
+      "theme_contract": [
+        "light",
+        "dark",
+        "system"
+      ],
+      "runtime_scope": "existing_runtime_or_shared_primitive",
+      "verification": "shared_catalog_parity_and_browser_matrix"
+    },
+    {
+      "id": "C48",
+      "component": "PlaylistEditor",
+      "locale_contract": [
+        "fa-IR",
+        "en-US"
+      ],
+      "direction_contract": [
+        "rtl",
+        "ltr"
+      ],
+      "theme_contract": [
+        "light",
+        "dark",
+        "system"
+      ],
+      "runtime_scope": "existing_runtime_or_shared_primitive",
+      "verification": "shared_catalog_parity_and_browser_matrix"
+    },
+    {
+      "id": "C49",
+      "component": "PlaylistTracksEditor",
+      "locale_contract": [
+        "fa-IR",
+        "en-US"
+      ],
+      "direction_contract": [
+        "rtl",
+        "ltr"
+      ],
+      "theme_contract": [
+        "light",
+        "dark",
+        "system"
+      ],
+      "runtime_scope": "existing_runtime_or_shared_primitive",
+      "verification": "shared_catalog_parity_and_browser_matrix"
+    },
+    {
+      "id": "C50",
+      "component": "CoverUploader",
+      "locale_contract": [
+        "fa-IR",
+        "en-US"
+      ],
+      "direction_contract": [
+        "rtl",
+        "ltr"
+      ],
+      "theme_contract": [
+        "light",
+        "dark",
+        "system"
+      ],
+      "runtime_scope": "existing_runtime_or_shared_primitive",
+      "verification": "shared_catalog_parity_and_browser_matrix"
+    },
+    {
+      "id": "C51",
+      "component": "EntityPicker",
+      "locale_contract": [
+        "fa-IR",
+        "en-US"
+      ],
+      "direction_contract": [
+        "rtl",
+        "ltr"
+      ],
+      "theme_contract": [
+        "light",
+        "dark",
+        "system"
+      ],
+      "runtime_scope": "existing_runtime_or_shared_primitive",
+      "verification": "shared_catalog_parity_and_browser_matrix"
+    },
+    {
+      "id": "C52",
+      "component": "ArtistEditor",
+      "locale_contract": [
+        "fa-IR",
+        "en-US"
+      ],
+      "direction_contract": [
+        "rtl",
+        "ltr"
+      ],
+      "theme_contract": [
+        "light",
+        "dark",
+        "system"
+      ],
+      "runtime_scope": "existing_runtime_or_shared_primitive",
+      "verification": "shared_catalog_parity_and_browser_matrix"
+    },
+    {
+      "id": "C53",
+      "component": "ReleaseEditor",
+      "locale_contract": [
+        "fa-IR",
+        "en-US"
+      ],
+      "direction_contract": [
+        "rtl",
+        "ltr"
+      ],
+      "theme_contract": [
+        "light",
+        "dark",
+        "system"
+      ],
+      "runtime_scope": "existing_runtime_or_shared_primitive",
+      "verification": "shared_catalog_parity_and_browser_matrix"
+    },
+    {
+      "id": "C54",
+      "component": "RecordingEditor",
+      "locale_contract": [
+        "fa-IR",
+        "en-US"
+      ],
+      "direction_contract": [
+        "rtl",
+        "ltr"
+      ],
+      "theme_contract": [
+        "light",
+        "dark",
+        "system"
+      ],
+      "runtime_scope": "existing_runtime_or_shared_primitive",
+      "verification": "shared_catalog_parity_and_browser_matrix"
+    },
+    {
+      "id": "C55",
+      "component": "MembersPanel",
+      "locale_contract": [
+        "fa-IR",
+        "en-US"
+      ],
+      "direction_contract": [
+        "rtl",
+        "ltr"
+      ],
+      "theme_contract": [
+        "light",
+        "dark",
+        "system"
+      ],
+      "runtime_scope": "existing_runtime_or_shared_primitive",
+      "verification": "shared_catalog_parity_and_browser_matrix"
+    },
+    {
+      "id": "C56",
+      "component": "MemberPasswordReset",
+      "locale_contract": [
+        "fa-IR",
+        "en-US"
+      ],
+      "direction_contract": [
+        "rtl",
+        "ltr"
+      ],
+      "theme_contract": [
+        "light",
+        "dark",
+        "system"
+      ],
+      "runtime_scope": "existing_runtime_or_shared_primitive",
+      "verification": "shared_catalog_parity_and_browser_matrix"
+    },
+    {
+      "id": "C57",
+      "component": "AuditTimeline",
+      "locale_contract": [
+        "fa-IR",
+        "en-US"
+      ],
+      "direction_contract": [
+        "rtl",
+        "ltr"
+      ],
+      "theme_contract": [
+        "light",
+        "dark",
+        "system"
+      ],
+      "runtime_scope": "existing_runtime_or_shared_primitive",
+      "verification": "shared_catalog_parity_and_browser_matrix"
+    },
+    {
+      "id": "C58",
+      "component": "OperationsPanel",
+      "locale_contract": [
+        "fa-IR",
+        "en-US"
+      ],
+      "direction_contract": [
+        "rtl",
+        "ltr"
+      ],
+      "theme_contract": [
+        "light",
+        "dark",
+        "system"
+      ],
+      "runtime_scope": "existing_runtime_or_shared_primitive",
+      "verification": "shared_catalog_parity_and_browser_matrix"
+    },
+    {
+      "id": "C59",
+      "component": "MediaProfileBadge",
+      "locale_contract": [
+        "fa-IR",
+        "en-US"
+      ],
+      "direction_contract": [
+        "rtl",
+        "ltr"
+      ],
+      "theme_contract": [
+        "light",
+        "dark",
+        "system"
+      ],
+      "runtime_scope": "existing_runtime_or_shared_primitive",
+      "verification": "shared_catalog_parity_and_browser_matrix"
+    },
+    {
+      "id": "C60",
+      "component": "ConversionPanel",
+      "locale_contract": [
+        "fa-IR",
+        "en-US"
+      ],
+      "direction_contract": [
+        "rtl",
+        "ltr"
+      ],
+      "theme_contract": [
+        "light",
+        "dark",
+        "system"
+      ],
+      "runtime_scope": "existing_runtime_or_shared_primitive",
+      "verification": "shared_catalog_parity_and_browser_matrix"
+    },
+    {
+      "id": "C61",
+      "component": "ConversionStatus",
+      "locale_contract": [
+        "fa-IR",
+        "en-US"
+      ],
+      "direction_contract": [
+        "rtl",
+        "ltr"
+      ],
+      "theme_contract": [
+        "light",
+        "dark",
+        "system"
+      ],
+      "runtime_scope": "existing_runtime_or_shared_primitive",
+      "verification": "shared_catalog_parity_and_browser_matrix"
+    },
+    {
+      "id": "C62",
+      "component": "ConversionDetail",
+      "locale_contract": [
+        "fa-IR",
+        "en-US"
+      ],
+      "direction_contract": [
+        "rtl",
+        "ltr"
+      ],
+      "theme_contract": [
+        "light",
+        "dark",
+        "system"
+      ],
+      "runtime_scope": "existing_runtime_or_shared_primitive",
+      "verification": "shared_catalog_parity_and_browser_matrix"
+    },
+    {
+      "id": "C63",
+      "component": "StorageBudget",
+      "locale_contract": [
+        "fa-IR",
+        "en-US"
+      ],
+      "direction_contract": [
+        "rtl",
+        "ltr"
+      ],
+      "theme_contract": [
+        "light",
+        "dark",
+        "system"
+      ],
+      "runtime_scope": "existing_runtime_or_shared_primitive",
+      "verification": "shared_catalog_parity_and_browser_matrix"
+    },
+    {
+      "id": "C64",
+      "component": "ConflictResolution",
+      "locale_contract": [
+        "fa-IR",
+        "en-US"
+      ],
+      "direction_contract": [
+        "rtl",
+        "ltr"
+      ],
+      "theme_contract": [
+        "light",
+        "dark",
+        "system"
+      ],
+      "runtime_scope": "existing_runtime_or_shared_primitive",
+      "verification": "shared_catalog_parity_and_browser_matrix"
+    }
+  ],
+  "note": "This is a contract mapping, not 64 independent browser tests. ShaderBackdrop and EffectBoundary are intentionally deferred to F10. Existing components retain their prior feature limits."
+}

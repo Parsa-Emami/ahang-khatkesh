@@ -1,9 +1,13 @@
+import { asciiDigits } from "../../i18n/runtime";
+import { tr } from "../../i18n/runtime";
+import { useLocale } from "../../i18n/LocaleProvider";
 import { useEffect, useRef, useState, type PropsWithChildren } from "react";
 import { Dialog } from "../../components/UI";
 import { api, json, setSessionConfirmation } from "../../lib/api";
 import { useSession } from "../../context/AppContext";
 
 export function SessionConfirmation({ children }: PropsWithChildren) {
+    useLocale();
     const { user } = useSession();
     const [open, setOpen] = useState(false);
     const [password, setPassword] = useState("");
@@ -40,8 +44,8 @@ export function SessionConfirmation({ children }: PropsWithChildren) {
                 onOpenChange={(value) => {
                     if (!value && !pending) finish(false);
                 }}
-                title="تأیید دوبارهٔ هویت"
-                description="برای ثبت این تغییر، رمز فعلی و در صورت فعال بودن، کد تازهٔ برنامهٔ رمزساز را وارد کن."
+                title={tr("mceec555aed")}
+                description={tr("m941e92096f")}
             >
                 <form
                     className="stack-form"
@@ -59,7 +63,7 @@ export function SessionConfirmation({ children }: PropsWithChildren) {
                             setError(
                                 e instanceof Error
                                     ? e.message
-                                    : "تأیید انجام نشد.",
+                                    : tr("mdd82db9f92"),
                             );
                             setPassword("");
                             setCode("");
@@ -69,8 +73,9 @@ export function SessionConfirmation({ children }: PropsWithChildren) {
                     }}
                 >
                     <label>
-                        رمز فعلی
+                        {tr("m6b87803653")}
                         <input
+                            name="password"
                             type="password"
                             autoComplete="current-password"
                             dir="ltr"
@@ -82,8 +87,9 @@ export function SessionConfirmation({ children }: PropsWithChildren) {
                     </label>
                     {user?.mfa_enabled && (
                         <label>
-                            کد رمزساز
+                            {tr("m91b332b9ef")}
                             <input
+                                name="code"
                                 type="text"
                                 inputMode="numeric"
                                 autoComplete="one-time-code"
@@ -94,10 +100,7 @@ export function SessionConfirmation({ children }: PropsWithChildren) {
                                 value={code}
                                 onChange={(e) => setCode(e.target.value)}
                             />
-                            <small>
-                                کدی که قبلاً استفاده شده پذیرفته نمی‌شود؛ از کد
-                                تازه استفاده کن.
-                            </small>
+                            <small>{tr("mc55bff396a")}</small>
                         </label>
                     )}
                     {error && (
@@ -106,7 +109,7 @@ export function SessionConfirmation({ children }: PropsWithChildren) {
                         </p>
                     )}
                     <button className="button" disabled={pending}>
-                        {pending ? "در حال بررسی…" : "تأیید و ادامه"}
+                        {pending ? tr("mcb16adca9a") : tr("m36e8e73118")}
                     </button>
                     <button
                         className="button secondary"
@@ -114,7 +117,7 @@ export function SessionConfirmation({ children }: PropsWithChildren) {
                         disabled={pending}
                         onClick={() => finish(false)}
                     >
-                        انصراف
+                        {tr("m106dfb4e0f")}
                     </button>
                 </form>
             </Dialog>

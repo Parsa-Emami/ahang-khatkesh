@@ -1,3 +1,5 @@
+import { tr } from "../../i18n/runtime";
+import { useLocale } from "../../i18n/LocaleProvider";
 import { useState } from "react";
 import { Dialog } from "../../components/UI";
 import { api, json } from "../../lib/api";
@@ -10,6 +12,7 @@ export function MemberPasswordResetDialog({
     user: User;
     close: () => void;
 }) {
+    useLocale();
     const [password, setPassword] = useState(""),
         [confirmation, setConfirmation] = useState(""),
         [pending, setPending] = useState(false),
@@ -17,12 +20,13 @@ export function MemberPasswordResetDialog({
     const notify = useToast();
     return (
         <Dialog
+            dirty={!!(password || confirmation)}
             open
             onOpenChange={(value) => {
                 if (!value && !pending) close();
             }}
-            title={`بازنشانی رمز ${user.name}`}
-            description="تمام نشست‌های قبلی عضو باطل می‌شوند. رمزساز فعال او حفظ می‌شود. رمز جدید را از مسیر امن به خودش بده."
+            title={tr("mf1c6d211f3", { v0: user.name })}
+            description={tr("m49338b1920")}
         >
             <form
                 className="stack-form"
@@ -40,11 +44,11 @@ export function MemberPasswordResetDialog({
                         });
                         setPassword("");
                         setConfirmation("");
-                        notify("رمز بازنشانی و نشست‌های قبلی باطل شدند.");
+                        notify(tr("mc7c6f590d5"));
                         close();
                     } catch (e) {
                         setError(
-                            e instanceof Error ? e.message : "ثبت انجام نشد.",
+                            e instanceof Error ? e.message : tr("m1d3314ddc8"),
                         );
                     } finally {
                         setPending(false);
@@ -52,8 +56,9 @@ export function MemberPasswordResetDialog({
                 }}
             >
                 <label>
-                    رمز جدید عضو
+                    {tr("mca9e8b3c7c")}
                     <input
+                        name="password"
                         type="password"
                         autoComplete="new-password"
                         dir="ltr"
@@ -65,8 +70,9 @@ export function MemberPasswordResetDialog({
                     />
                 </label>
                 <label>
-                    تکرار رمز جدید
+                    {tr("mafc7aa3dd9")}
                     <input
+                        name="confirmation"
                         type="password"
                         autoComplete="new-password"
                         dir="ltr"
@@ -82,9 +88,7 @@ export function MemberPasswordResetDialog({
                     </p>
                 )}
                 <button className="button" disabled={pending}>
-                    {pending
-                        ? "در حال ثبت…"
-                        : "بازنشانی رمز و خروج از دستگاه‌ها"}
+                    {pending ? tr("m03e4d57d5a") : tr("m5d6e25a8bf")}
                 </button>
             </form>
         </Dialog>

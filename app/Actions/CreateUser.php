@@ -27,7 +27,7 @@ class CreateUser
                 $role = UserRole::Owner;
             }
             if (User::count() >= LibrarySetting::MAX_USERS) {
-                throw ValidationException::withMessages(['email' => 'ظرفیت ۱۰ حساب، با احتساب مدیر و حساب‌های غیرفعال، تکمیل است.']);
+                throw ValidationException::withMessages(['email' => __('ظرفیت ۱۰ حساب، با احتساب مدیر و حساب‌های غیرفعال، تکمیل است.')]);
             }
             $user = User::create(['name' => $data['name'], 'email' => mb_strtolower(trim($data['email'])), 'password' => $data['password'], 'role' => $role, 'is_active' => true]);
             AuditEvent::create(['user_id' => $actor?->id, 'action' => 'user.created', 'subject_id' => (string) $user->id, 'metadata' => ['role_after' => $role->value]]);

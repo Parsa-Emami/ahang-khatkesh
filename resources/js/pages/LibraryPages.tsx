@@ -1,3 +1,5 @@
+import { tr } from "../i18n/runtime";
+import { useLocale } from "../i18n/LocaleProvider";
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, ArrowRight, Disc3, Play, Shuffle } from "lucide-react";
@@ -26,6 +28,7 @@ function Pager({
     last: number;
     change: (page: number) => void;
 }) {
+    useLocale();
     return last > 1 ? (
         <div className="pager">
             <button
@@ -34,17 +37,17 @@ function Pager({
                 onClick={() => change(page - 1)}
             >
                 <ArrowRight size={16} />
-                قبلی
+                {tr("m1a592f6b2d")}
             </button>
             <span>
-                {digits(page)} از {digits(last)}
+                {tr("m3dadd024d7", { v0: digits(page), v1: digits(last) })}
             </span>
             <button
                 className="button secondary"
                 disabled={page >= last}
                 onClick={() => change(page + 1)}
             >
-                بعدی
+                {tr("m54ee927e96")}
                 <ArrowLeft size={16} />
             </button>
         </div>
@@ -73,6 +76,7 @@ function usePlaylistPlay() {
     });
 }
 export function LibraryPage({ saved = false }: { saved?: boolean }) {
+    useLocale();
     const { user } = useSession(),
         player = usePlaylistPlay();
     const [mood, setMood] = useState<Mood | "">(""),
@@ -106,17 +110,21 @@ export function LibraryPage({ saved = false }: { saved?: boolean }) {
                     <span className="eyebrow">
                         {saved ? "YOUR COLLECTION" : "YOUR EVERYDAY SOUNDTRACK"}
                     </span>
-                    <h1>{saved ? "کتابخانهٔ تو" : "هر حال، یک آهنگ."}</h1>
+                    <h1>{saved ? tr("m3bb7980642") : tr("m7e49718b74")}</h1>
                     <p>
                         {saved
-                            ? "انتخاب‌هایی که دوست داری، همیشه نزدیک تو."
-                            : `${user?.name.split(" ")[0]}، اینجا همه‌چیز روی حال تو تنظیم می‌شود.`}
+                            ? tr("m4443acf78b")
+                            : tr("m9808e0ac01", {
+                                  v0: user?.name.split(" ")[0],
+                              })}
                     </p>
                 </div>
                 {!saved && (
                     <span className="library-count">
                         <Disc3 size={17} />
-                        {digits(stats.data?.data.tracks || 0)} آهنگ در کتابخانه
+                        {tr("m43ed92bcbb", {
+                            v0: digits(stats.data?.data.tracks || 0),
+                        })}
                     </span>
                 )}
             </div>
@@ -124,8 +132,9 @@ export function LibraryPage({ saved = false }: { saved?: boolean }) {
                 <section className="featured">
                     <div className="featured-text">
                         <span className="feature-eyebrow">
-                            <span className="live-dot" /> انتخاب این لحظه{" "}
-                            <span lang="en">AK SELECTS / 001</span>
+                            <span className="live-dot" />
+                            {tr("ma1ce3ec2e4")}
+                            <span>{tr("editorial.selects")}</span>
                         </span>
                         <h2 dir="auto">{featured.name}</h2>
                         <p>{featured.description}</p>
@@ -138,20 +147,23 @@ export function LibraryPage({ saved = false }: { saved?: boolean }) {
                                 }
                             >
                                 <Play size={18} fill="currentColor" />
-                                پخش پلی‌لیست
+                                {tr("m1b4008129b")}
                             </button>
                             <Link
                                 to={`/playlists/${featured.id}`}
                                 className="text-link"
                             >
-                                کشف آهنگ‌ها
+                                {tr("maeac03271e")}
                                 <ArrowLeft size={18} />
                             </Link>
                         </div>
                         <span className="feature-meta">
-                            {digits(featured.tracks_count)} آهنگ <span>·</span>{" "}
-                            {moodLabels[featured.mood]} <span>·</span> فقط برای
-                            اعضا
+                            {tr("mb5e27e3711", {
+                                v0: digits(featured.tracks_count),
+                            })}
+                            <span>·</span> {moodLabels[featured.mood]}{" "}
+                            <span>·</span>
+                            {tr("mdc4042e89c")}
                         </span>
                     </div>
                     <Link
@@ -171,10 +183,14 @@ export function LibraryPage({ saved = false }: { saved?: boolean }) {
                 </section>
             )}
             <div className="section-heading">
-                <h2>{saved ? "انتخاب‌های ذخیره‌شده" : "به حال خودت گوش کن"}</h2>
-                <span>{digits(playlists.data.meta.total)} مجموعه</span>
+                <h2>{saved ? tr("m48113a6829") : tr("m42b273825c")}</h2>
+                <span>
+                    {tr("ma755196422", {
+                        v0: digits(playlists.data.meta.total),
+                    })}
+                </span>
             </div>
-            <div className="filter-chips" aria-label="فیلتر حال‌وهوا">
+            <div className="filter-chips" aria-label={tr("mbfbb51603a")}>
                 <button
                     aria-pressed={!mood}
                     className={!mood ? "selected" : ""}
@@ -183,7 +199,7 @@ export function LibraryPage({ saved = false }: { saved?: boolean }) {
                         setPage(1);
                     }}
                 >
-                    همه
+                    {tr("mbf742c5a3d")}
                 </button>
                 {Object.entries(moodLabels).map(([key, label]) => (
                     <button
@@ -212,16 +228,8 @@ export function LibraryPage({ saved = false }: { saved?: boolean }) {
                 </div>
             ) : (
                 <EmptyState
-                    title={
-                        saved
-                            ? "کتابخانه‌ات منتظر انتخاب توست"
-                            : "هنوز صدایی به اینجا نرسیده"
-                    }
-                    text={
-                        saved
-                            ? "با دکمهٔ نشانک در صفحهٔ هر پلی‌لیست، آن را ذخیره کن."
-                            : "پلی‌لیست‌های واردشده از پنل مدیریت، اینجا قرار می‌گیرند."
-                    }
+                    title={saved ? tr("mf353f650ac") : tr("m5aee0a9b95")}
+                    text={saved ? tr("m0dc6b5d4e0") : tr("m4b9831eb42")}
                     admin={user?.permissions.includes("admin.access") && !saved}
                 />
             )}
@@ -232,13 +240,14 @@ export function LibraryPage({ saved = false }: { saved?: boolean }) {
             />
             <div className="page-footer">
                 <span className="ruler-line" />
-                <p>برای گوش دادن. برای خودت.</p>
+                <p>{tr("mcf6d8b6ee9")}</p>
                 <span lang="en">AHANG KHATKESH</span>
             </div>
         </div>
     );
 }
 export function PlaylistPage() {
+    useLocale();
     const { id } = useParams(),
         { user } = useSession(),
         player = usePlayer();
@@ -268,7 +277,7 @@ export function PlaylistPage() {
         <div className="page-enter">
             <Link to="/" className="back-link">
                 <ArrowRight size={16} />
-                همهٔ پلی‌لیست‌ها
+                {tr("mc69a5555d5")}
             </Link>
             <section className="playlist-hero">
                 <Artwork
@@ -279,14 +288,16 @@ export function PlaylistPage() {
                 <div>
                     <span className="eyebrow">
                         {playlist.status === "draft"
-                            ? "پیش‌نویس · فقط مدیران"
-                            : "پلی‌لیست اختصاصی"}
+                            ? tr("m9bdec27f97")
+                            : tr("ma906ac387c")}
                     </span>
                     <h1 dir="auto">{playlist.name}</h1>
                     <p>{playlist.description}</p>
                     <div className="playlist-meta">
-                        <span className="brand-dot">AK</span> آهنگ خط‌کش{" "}
-                        <span>·</span> {digits(tracks.length)} آهنگ{" "}
+                        <span className="brand-dot">AK</span>
+                        {tr("m0d95cf7cb3")}
+                        <span>·</span>
+                        {tr("m41ffc70bd9", { v0: digits(tracks.length) })}
                         <span>·</span> <span dir="ltr">{duration(total)}</span>
                     </div>
                 </div>
@@ -298,7 +309,7 @@ export function PlaylistPage() {
                     onClick={() => player.play(tracks)}
                 >
                     <Play size={20} fill="currentColor" />
-                    پخش همه
+                    {tr("m639f237b3e")}
                 </button>
                 <button
                     className="button secondary"
@@ -309,7 +320,7 @@ export function PlaylistPage() {
                     }}
                 >
                     <Shuffle size={18} />
-                    تصادفی
+                    {tr("m7678b785f8")}
                 </button>
                 <SaveButton playlist={playlist} />
                 {user?.permissions.includes("admin.access") && (
@@ -317,7 +328,7 @@ export function PlaylistPage() {
                         className="text-link admin-edit"
                         to="/admin?tab=library"
                     >
-                        مدیریت پلی‌لیست
+                        {tr("m9d49d86b99")}
                         <ArrowLeft size={16} />
                     </Link>
                 )}
@@ -326,14 +337,15 @@ export function PlaylistPage() {
                 <TrackList tracks={tracks} seed={playlist.artwork_seed} />
             ) : (
                 <EmptyState
-                    title="این پلی‌لیست خالی است"
-                    text="برای افزودن آهنگ از مسیر ورود پلی‌لیست در مدیریت استفاده کنید."
+                    title={tr("m0fbd067b78")}
+                    text={tr("m57b1f2b99c")}
                 />
             )}
         </div>
     );
 }
 export function LikedPage() {
+    useLocale();
     const [page, setPage] = useState(1);
     const query = useQuery({
         queryKey: ["tracks", "liked", page],
@@ -353,11 +365,12 @@ export function LikedPage() {
         <div className="page-enter">
             <div className="page-intro">
                 <div>
-                    <span className="eyebrow">ON REPEAT, IN YOUR HEART</span>
-                    <h1>پسندیده‌ها</h1>
+                    <span className="eyebrow">{tr("editorial.liked")}</span>
+                    <h1>{tr("m75f44e8bed")}</h1>
                     <p>
-                        {digits(query.data.meta.total)} آهنگ که یک جایی به دلت
-                        نشسته‌اند.
+                        {tr("m2fabca4889", {
+                            v0: digits(query.data.meta.total),
+                        })}
                     </p>
                 </div>
                 <button
@@ -366,15 +379,15 @@ export function LikedPage() {
                     onClick={() => player.play(tracks)}
                 >
                     <Play size={18} fill="currentColor" />
-                    پخش این صفحه
+                    {tr("mee8fa9e019")}
                 </button>
             </div>
             {tracks.length ? (
                 <TrackList tracks={tracks} />
             ) : (
                 <EmptyState
-                    title="هنوز آهنگی را نپسندیده‌ای"
-                    text="روی قلب کنار آهنگ‌ها بزن تا مجموعهٔ خودت را بسازی."
+                    title={tr("mcb5a698aa0")}
+                    text={tr("m27c811bc71")}
                 />
             )}
             <Pager
@@ -386,6 +399,7 @@ export function LikedPage() {
     );
 }
 export function SearchPage() {
+    useLocale();
     const [params, setParams] = useSearchParams();
     const q = params.get("q") || "",
         page = Number(params.get("page") || "1");
@@ -406,10 +420,7 @@ export function SearchPage() {
     const play = usePlaylistPlay();
     if (!q)
         return (
-            <EmptyState
-                title="دنبال چه صدایی می‌گردی؟"
-                text="نام آهنگ، هنرمند، آلبوم یا پلی‌لیست را در جستجوی بالای صفحه بنویس."
-            />
+            <EmptyState title={tr("md1516efa97")} text={tr("mb3cd712731")} />
         );
     if (tracks.isPending || playlists.isPending) return <Loading />;
     if (tracks.error || playlists.error)
@@ -426,16 +437,20 @@ export function SearchPage() {
         <div className="page-enter">
             <div className="page-intro">
                 <div>
-                    <span className="eyebrow">FIND YOUR FREQUENCY</span>
-                    <h1>نتیجه برای «{q}»</h1>
-                    <p>در آهنگ‌ها، هنرمندان و مجموعه‌های کتابخانهٔ خودت.</p>
+                    <span className="eyebrow">{tr("editorial.search")}</span>
+                    <h1>{tr("m7e7cd73bad", { v0: q })}</h1>
+                    <p>{tr("mc3960046d2")}</p>
                 </div>
             </div>
             {!!playlists.data?.data.length && (
                 <>
                     <div className="section-heading">
-                        <h2>پلی‌لیست‌ها</h2>
-                        <span>{digits(playlists.data.meta.total)} مجموعه</span>
+                        <h2>{tr("m810b71a913")}</h2>
+                        <span>
+                            {tr("ma755196422", {
+                                v0: digits(playlists.data.meta.total),
+                            })}
+                        </span>
                     </div>
                     <div className="playlist-grid">
                         {playlists.data.data.map((p) => (
@@ -450,15 +465,19 @@ export function SearchPage() {
                 </>
             )}
             <div className="section-heading">
-                <h2>آهنگ‌ها</h2>
-                <span>{digits(tracks.data?.meta.total || 0)} آهنگ</span>
+                <h2>{tr("mfc7b9f1ff7")}</h2>
+                <span>
+                    {tr("m0816e22877", {
+                        v0: digits(tracks.data?.meta.total || 0),
+                    })}
+                </span>
             </div>
             {tracks.data?.data.length ? (
                 <TrackList tracks={tracks.data.data} />
             ) : (
                 <EmptyState
-                    title="آهنگی پیدا نشد"
-                    text="یک نام کوتاه‌تر یا نام هنرمند را امتحان کن."
+                    title={tr("mea85ae1f09")}
+                    text={tr("mdb1217de70")}
                 />
             )}
             <Pager

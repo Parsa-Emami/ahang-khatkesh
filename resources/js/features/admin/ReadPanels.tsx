@@ -1,3 +1,6 @@
+import { currentPreferences } from "../../i18n/runtime";
+import { tr } from "../../i18n/runtime";
+import { useLocale } from "../../i18n/LocaleProvider";
 import { useDeferredValue, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -15,11 +18,13 @@ import { ErrorState, Loading } from "../../components/UI";
 import { digits } from "../../types";
 import { adminApi, adminKeys } from "./api";
 const date = (value: string) =>
-    new Intl.DateTimeFormat("fa-IR", {
+    new Intl.DateTimeFormat(currentPreferences().locale, {
+        timeZone: currentPreferences().time_zone,
         dateStyle: "medium",
         timeStyle: "short",
     }).format(new Date(value));
 export function OverviewPanel({ go }: { go: (value: string) => void }) {
+    useLocale();
     const query = useQuery({
         queryKey: adminKeys.overview,
         queryFn: adminApi.overview,
@@ -35,21 +40,24 @@ export function OverviewPanel({ go }: { go: (value: string) => void }) {
         );
     const d = query.data.data;
     const stats = [
-        { label: "آهنگ در کاتالوگ", value: digits(d.tracks), icon: Music2 },
+        { label: tr("me137a4ae1c"), value: digits(d.tracks), icon: Music2 },
         {
-            label: "پلی‌لیست منتشرشده",
+            label: tr("m191965535a"),
             value: digits(d.published_playlists),
             icon: ListMusic,
         },
         {
-            label: "پیش‌نویس",
+            label: tr("m7d739ea1cc"),
             value: digits(d.draft_playlists),
             icon: ListMusic,
         },
         {
-            label: d.members ? "عضو کتابخانه" : "فضای فایل‌ها",
+            label: d.members ? tr("md603d77bf4") : tr("mc9e5748665"),
             value: d.members
-                ? `${digits(d.members.total)} از ${digits(d.members.capacity)}`
+                ? tr("m3dadd024d7", {
+                      v0: digits(d.members.total),
+                      v1: digits(d.members.capacity),
+                  })
                 : `${digits(Math.ceil(d.media_bytes / 1048576))} MB`,
             icon: d.members ? Users : HardDrive,
         },
@@ -57,21 +65,16 @@ export function OverviewPanel({ go }: { go: (value: string) => void }) {
     return (
         <>
             <div className="admin-welcome">
-                <span className="eyebrow">
-                    انتخاب امروز از اینجا شروع می‌شود
-                </span>
+                <span className="eyebrow">{tr("m9224c56280")}</span>
                 <h3>
-                    موسیقی خوب،
+                    {tr("ma6623f4e49")}
                     <br />
-                    با نظم بهتر.
+                    {tr("mda3eab6147")}
                 </h3>
-                <p>
-                    فایل‌ها را وارد کن، اطلاعات را مرتب کن و مجموعه را برای اعضا
-                    منتشر کن.
-                </p>
+                <p>{tr("me9c5f7ef93")}</p>
                 <button className="button" onClick={() => go("imports")}>
                     <UploadCloud size={17} />
-                    ورود موسیقی
+                    {tr("m32c110efdb")}
                     <ArrowLeft size={17} />
                 </button>
                 <div className="admin-welcome-art" aria-hidden="true">
@@ -95,34 +98,21 @@ export function OverviewPanel({ go }: { go: (value: string) => void }) {
                 <div className="admin-notice">
                     <AlertCircle size={20} />
                     <p>
-                        {digits(d.processing_imports)} ایمپورت در حال ساخت و{" "}
-                        {digits(d.failed_imports)} مورد نیازمند بررسی.
+                        {tr("m00fd3da19e", {
+                            v0: digits(d.processing_imports),
+                            v1: digits(d.failed_imports),
+                        })}
                     </p>
                     <button className="text-link" onClick={() => go("imports")}>
-                        دیدن سابقه
+                        {tr("m315507fad6")}
                     </button>
                 </div>
             )}
             <div className="admin-next-grid">
                 {[
-                    [
-                        "01",
-                        "ورود فایل و پیش‌نمایش",
-                        "صوت خصوصی را آپلود کن و خطاها را پیش از ساخت ببین.",
-                        "imports",
-                    ],
-                    [
-                        "02",
-                        "مرتب‌کردن کاتالوگ",
-                        "هنرمند و انتشار را با شناسهٔ مشخص به آهنگ وصل کن.",
-                        "catalog",
-                    ],
-                    [
-                        "03",
-                        "ساخت یک مجموعه",
-                        "نام، ترتیب و کاور را انتخاب کن؛ انتشار در اختیار توست.",
-                        "library",
-                    ],
+                    ["01", tr("m0746cb4186"), tr("m0a8dda41c6"), "imports"],
+                    ["02", tr("m7abf13371d"), tr("m24b481aab3"), "catalog"],
+                    ["03", tr("m9d5d1ceb8a"), tr("m4967bdf381"), "library"],
                 ].map(([n, title, text, id]) => (
                     <button key={id} onClick={() => go(id)}>
                         <span lang="en">{n}</span>
@@ -133,18 +123,19 @@ export function OverviewPanel({ go }: { go: (value: string) => void }) {
                 ))}
             </div>
             <small className="muted">
-                اعداد از دیتابیس برنامه خوانده شده‌اند.{" "}
+                {tr("m22303f1f45")}
                 <button
                     className="text-link"
                     onClick={() => void query.refetch()}
                 >
-                    به‌روزرسانی
+                    {tr("m915a6b85fe")}
                 </button>
             </small>
         </>
     );
 }
 export function OperationsPanel() {
+    useLocale();
     const query = useQuery({
         queryKey: adminKeys.operations,
         queryFn: adminApi.operations,
@@ -163,26 +154,23 @@ export function OperationsPanel() {
         <>
             <div className="admin-notice">
                 <CheckCircle2 size={20} />
-                <p>
-                    ارتباط این درخواست با برنامه برقرار است. شمارش صف، زنده‌بودن
-                    worker یا بازیابی موفق بکاپ را اثبات نمی‌کند.
-                </p>
+                <p>{tr("m0c1e8a1db7")}</p>
             </div>
             <dl className="operations-grid">
                 {[
                     ["PHP", d.php_version],
                     ["Laravel", d.laravel_version],
-                    ["دیتابیس", d.database_driver],
-                    ["درایور صف", d.queue_driver],
-                    ["کارهای صف", digits(d.queued_jobs)],
-                    ["کارهای شکست‌خورده", digits(d.failed_jobs)],
+                    [tr("me28ce058f5"), d.database_driver],
+                    [tr("m4fe3d3125e"), d.queue_driver],
+                    [tr("mc03c413f05"), digits(d.queued_jobs)],
+                    [tr("mc541970bf1"), digits(d.failed_jobs)],
                     [
-                        "دسترس‌پذیری FFprobe",
+                        tr("mf3704f9f9b"),
                         d.ffprobe_available
-                            ? "یافت شد"
-                            : "نیاز به نصب یا تنظیم",
+                            ? tr("m30572438bf")
+                            : tr("m8ef9e291f9"),
                     ],
-                    ["زمان بررسی", date(d.checked_at)],
+                    [tr("m2fa21e0b08"), date(d.checked_at)],
                 ].map(([key, value]) => (
                     <div key={key}>
                         <dt>{key}</dt>
@@ -196,16 +184,14 @@ export function OperationsPanel() {
                 onClick={() => void query.refetch()}
             >
                 <RefreshCw size={16} />
-                بررسی دوباره
+                {tr("m9551d7a298")}
             </button>
-            <p className="muted admin-footnote">
-                مدیریت بکاپ، سرویس worker و تنظیمات سرور از راهنمای عملیات انجام
-                می‌شود. هیچ فرمان سروری از این صفحه اجرا نمی‌شود.
-            </p>
+            <p className="muted admin-footnote">{tr("m9d01da0c78")}</p>
         </>
     );
 }
 export function AuditPanel() {
+    useLocale();
     const [action, setAction] = useState("");
     const [since, setSince] = useState("");
     const [until, setUntil] = useState("");
@@ -219,8 +205,9 @@ export function AuditPanel() {
         <>
             <div className="admin-filter-grid">
                 <label>
-                    شناسهٔ رویداد
+                    {tr("mc730eaa490")}
                     <input
+                        name="action"
                         value={action}
                         dir="ltr"
                         placeholder="playlist.updated"
@@ -232,8 +219,10 @@ export function AuditPanel() {
                     />
                 </label>
                 <label>
-                    از تاریخ میلادی، UTC
+                    {tr("m12424763de")}
                     <input
+                        dir="auto"
+                        name="since"
                         type="date"
                         value={since}
                         onChange={(e) => {
@@ -243,8 +232,10 @@ export function AuditPanel() {
                     />
                 </label>
                 <label>
-                    تا تاریخ میلادی، UTC
+                    {tr("mb2b7ac8a0d")}
                     <input
+                        dir="auto"
+                        name="until"
                         type="date"
                         min={since}
                         value={until}
@@ -255,10 +246,7 @@ export function AuditPanel() {
                     />
                 </label>
             </div>
-            <p className="muted admin-footnote">
-                رویدادها با ترتیب جدیدترین شناسه نمایش داده می‌شوند؛ رمز، کلید
-                رمزساز و کد بازیابی در این فهرست نیست.
-            </p>
+            <p className="muted admin-footnote">{tr("mf00df49715")}</p>
             {query.isPending ? (
                 <Loading />
             ) : query.error ? (
@@ -274,15 +262,16 @@ export function AuditPanel() {
                                 <div className="audit-dot" />
                                 <div>
                                     <span className="audit-actor">
-                                        {event.actor?.name || "عملیات سیستم"}
+                                        {event.actor?.name || tr("m09b06da6a1")}
                                         <time dateTime={event.created_at}>
                                             {date(event.created_at)}
                                         </time>
                                     </span>
                                     <strong dir="ltr">{event.action}</strong>
                                     <p>
-                                        موجودیت: {event.subject_type || "—"} ·
-                                        شناسه:{" "}
+                                        {tr("m46f03d4903", {
+                                            v0: event.subject_type || "—",
+                                        })}
                                         <bdi>{event.subject_id || "—"}</bdi>
                                     </p>
                                     {Object.keys(event.metadata).length > 0 && (
@@ -298,10 +287,10 @@ export function AuditPanel() {
                                         </dl>
                                     )}
                                     <details>
-                                        <summary>شناسهٔ پیگیری درخواست</summary>
+                                        <summary>{tr("me5d8b54730")}</summary>
                                         <code dir="ltr">
                                             {event.request_id ||
-                                                "برای این رویداد ثبت نشده"}
+                                                tr("mbb9d347b85")}
                                         </code>
                                     </details>
                                 </div>
@@ -309,11 +298,8 @@ export function AuditPanel() {
                         ))}
                         {!query.data.data.length && (
                             <div className="empty-state">
-                                <h3>رویدادی در این بازه پیدا نشد.</h3>
-                                <p>
-                                    فیلترها را تغییر بده یا پس از ثبت یک تغییر
-                                    برگرد.
-                                </p>
+                                <h3>{tr("m7f970348db")}</h3>
+                                <p>{tr("mce806c7ebb")}</p>
                             </div>
                         )}
                     </div>
@@ -323,7 +309,7 @@ export function AuditPanel() {
                             disabled={!cursor}
                             onClick={() => setCursor("")}
                         >
-                            جدیدترین‌ها
+                            {tr("m3b88aec624")}
                         </button>
                         <button
                             className="button secondary"
@@ -332,7 +318,7 @@ export function AuditPanel() {
                                 setCursor(query.data.meta.next_cursor || "")
                             }
                         >
-                            رویدادهای قدیمی‌تر
+                            {tr("mecbf1930d6")}
                         </button>
                     </div>
                 </>

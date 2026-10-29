@@ -25,7 +25,7 @@ class QueueImport
             if (in_array($locked->status, [PlaylistImport::COMPLETED, PlaylistImport::PROCESSING, PlaylistImport::RUNNING], true)) {
                 return;
             }
-            abort_if(in_array($locked->status, [PlaylistImport::NEEDS_REVIEW, PlaylistImport::CANCELLED], true) || empty($locked->report['plan_hash']), 409, 'پیش‌نمایش تازه بسازید.');
+            abort_if(in_array($locked->status, [PlaylistImport::NEEDS_REVIEW, PlaylistImport::CANCELLED], true) || empty($locked->report['plan_hash']), 409, __('پیش‌نمایش تازه بسازید.'));
             if ($publish) {
                 $this->playback->assertReady(array_column($locked->report['source_rows'], 'asset_id'));
             }

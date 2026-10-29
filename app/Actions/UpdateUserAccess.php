@@ -24,11 +24,11 @@ class UpdateUserAccess
             $role = isset($data['role']) ? UserRole::from($data['role']) : $subject->role;
             $active = (bool) ($data['is_active'] ?? $subject->is_active);
             if ($actor->id === $subject->id && ! $active) {
-                throw ValidationException::withMessages(['is_active' => 'نمی‌توانید حساب خودتان را غیرفعال کنید.']);
+                throw ValidationException::withMessages(['is_active' => __('نمی‌توانید حساب خودتان را غیرفعال کنید.')]);
             }
             abort_if(! $actor->hasPermission(Permission::RolesManage) && ($subject->role->isPrivileged() || $role->isPrivileged()), 403);
             if ($subject->role === UserRole::Owner && ($role !== UserRole::Owner || ! $active) && ! User::where('role', UserRole::Owner)->where('is_active', true)->where('id', '!=', $subject->id)->exists()) {
-                throw ValidationException::withMessages(['role' => 'ابتدا یک مالک فعال دیگر تعیین کنید؛ آخرین مالک فعال قابل تنزل نیست.']);
+                throw ValidationException::withMessages(['role' => __('ابتدا یک مالک فعال دیگر تعیین کنید؛ آخرین مالک فعال قابل تنزل نیست.')]);
             }
             $before = ['role_before' => $subject->role->value, 'is_active_before' => $subject->is_active];
             $subject->fill(['role' => $role, 'is_active' => $active]);

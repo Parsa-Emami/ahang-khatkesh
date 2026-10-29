@@ -1,3 +1,7 @@
+import { PreferenceControls } from "../i18n/PreferenceControls";
+import { asciiDigits } from "../i18n/runtime";
+import { tr } from "../i18n/runtime";
+import { useLocale } from "../i18n/LocaleProvider";
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { Moon, ShieldCheck, Sun } from "lucide-react";
@@ -7,6 +11,7 @@ import { Artwork, Brand, IconButton } from "../components/UI";
 import type { User } from "../types";
 
 export function LoginPage() {
+    useLocale();
     const session = useSession(),
         theme = useTheme();
     const [challenge, setChallenge] = useState(false),
@@ -28,7 +33,7 @@ export function LoginPage() {
                     challenge
                         ? recovery
                             ? { recovery_code: code }
-                            : { code }
+                            : { code: asciiDigits(code) }
                         : { email, password },
                 ),
             }),
@@ -53,30 +58,31 @@ export function LoginPage() {
             <section className="login-art">
                 <Brand />
                 <div>
-                    <span className="eyebrow">
-                        A LITTLE LESS NOISE. A LOT MORE YOU.
-                    </span>
+                    <span className="eyebrow">{tr("editorial.login")}</span>
                     <h1>
-                        صدای خودت
+                        {tr("m3be76b5516")}
                         <br />
-                        را پیدا کن.
+                        {tr("mb25d89b4df")}
                     </h1>
                     <p>
-                        موسیقی‌هایی که دوست داری،
+                        {tr("m3748958dc4")}
                         <br />
-                        در یک جای کوچک و شخصی.
+                        {tr("ma21bea4045")}
                     </p>
                 </div>
                 <Artwork seed={0} />
                 <div className="login-art-footer">
-                    <span>روی موج خودت.</span>
-                    <span lang="en">AK / PRIVATE LISTENING</span>
+                    <span>{tr("mb3a2330f7d")}</span>
+                    <span>{tr("editorial.private")}</span>
                 </div>
             </section>
             <section className="login-form-panel">
+                <div className="login-preferences">
+                    <PreferenceControls />
+                </div>
                 <IconButton
                     className="login-theme"
-                    label="تغییر تم"
+                    label={tr("mbdb0f33b8c")}
                     onClick={() =>
                         theme.setTheme(theme.dark ? "light" : "dark")
                     }
@@ -90,20 +96,15 @@ export function LoginPage() {
                         login.mutate();
                     }}
                 >
-                    <span className="eyebrow">خوش برگشتی</span>
-                    <h2>
-                        {challenge ? "یک قدم تا ورود" : "بیا یک آهنگ گوش کنیم."}
-                    </h2>
-                    <p>
-                        {challenge
-                            ? "کد رمزساز یا یکی از کدهای بازیابی را وارد کن. فرصت این مرحله ۱۰ دقیقه است."
-                            : "برای ورود به کتابخانهٔ خصوصی، وارد حساب خودت شو."}
-                    </p>
+                    <span className="eyebrow">{tr("m696ef9ec3e")}</span>
+                    <h2>{challenge ? tr("m382fc09e37") : tr("m138a2273e8")}</h2>
+                    <p>{challenge ? tr("mb4d344a386") : tr("m427cf173c9")}</p>
                     {!challenge && (
                         <>
                             <label>
-                                ایمیل
+                                {tr("mf1ad423d68")}
                                 <input
+                                    name="email"
                                     type="email"
                                     dir="ltr"
                                     autoComplete="username"
@@ -115,8 +116,9 @@ export function LoginPage() {
                                 />
                             </label>
                             <label>
-                                رمز عبور
+                                {tr("m9cf5bce9a4")}
                                 <input
+                                    name="password"
                                     type="password"
                                     dir="ltr"
                                     autoComplete="current-password"
@@ -133,8 +135,11 @@ export function LoginPage() {
                     {challenge && (
                         <>
                             <label>
-                                {recovery ? "کد بازیابی" : "کد رمزساز"}
+                                {recovery
+                                    ? tr("m89ecb7b676")
+                                    : tr("m91b332b9ef")}
                                 <input
+                                    name="code"
                                     type="text"
                                     autoComplete="one-time-code"
                                     inputMode={recovery ? "text" : "numeric"}
@@ -156,8 +161,8 @@ export function LoginPage() {
                                 }}
                             >
                                 {recovery
-                                    ? "استفاده از رمزساز"
-                                    : "استفاده از کد بازیابی"}
+                                    ? tr("m2d65ff8f54")
+                                    : tr("m71a4f897d9")}
                             </button>
                         </>
                     )}
@@ -167,7 +172,9 @@ export function LoginPage() {
                         </p>
                     )}
                     <button className="button" disabled={login.isPending}>
-                        {login.isPending ? "در حال ورود…" : "ورود به خط‌کش"}
+                        {login.isPending
+                            ? tr("m9ab9801b16")
+                            : tr("m3df4ea534f")}
                         <span aria-hidden="true">←</span>
                     </button>
                     {challenge && (
@@ -180,15 +187,14 @@ export function LoginPage() {
                                 login.reset();
                             }}
                         >
-                            بازگشت به ورود با رمز
+                            {tr("m9aa81b51a8")}
                         </button>
                     )}
                     <span className="login-private">
-                        <ShieldCheck size={16} /> فقط برای اعضای دعوت‌شده
+                        <ShieldCheck size={16} />
+                        {tr("m9410c42241")}
                     </span>
-                    <small>
-                        حساب و بازیابی دسترسی را مدیر کتابخانه انجام می‌دهد.
-                    </small>
+                    <small>{tr("me73108c582")}</small>
                 </form>
                 <p className="login-copyright" lang="en">
                     AHANG KHATKESH — MUSIC, IN GOOD MEASURE.

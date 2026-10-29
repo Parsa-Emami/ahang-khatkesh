@@ -62,7 +62,7 @@ class CatalogManagementController extends Controller
         $data = $request->validate(['revision' => ['required', 'integer', 'min:0'], 'tracks' => ['present', 'array', 'max:500'], 'tracks.*' => ['required', 'array:track_id,disc_number,track_number'], 'tracks.*.track_id' => ['required', 'integer', 'distinct', 'exists:tracks,id'], 'tracks.*.disc_number' => ['required', 'integer', 'between:1,999'], 'tracks.*.track_number' => ['required', 'integer', 'between:1,999']]);
         $slots = collect($data['tracks'])->map(fn ($t) => $t['disc_number'].':'.$t['track_number']);
         if ($slots->unique()->count() !== $slots->count()) {
-            throw ValidationException::withMessages(['tracks' => 'شمارهٔ آهنگ در هر دیسک باید یکتا باشد.']);
+            throw ValidationException::withMessages(['tracks' => __('شمارهٔ آهنگ در هر دیسک باید یکتا باشد.')]);
         }
         $replace->handle($request->user(), $release, $data);
 
@@ -81,7 +81,7 @@ class CatalogManagementController extends Controller
         $data = $request->validate(['title' => ['required', 'string', 'max:255'], 'primary_release_id' => ['nullable', 'integer', 'exists:releases,id'], 'revision' => ['required', 'integer', 'min:0'], 'credits' => ['required', 'array', 'min:1', 'max:30'], 'credits.*' => ['required', 'array:artist_id,role'], 'credits.*.artist_id' => ['required', 'integer', 'exists:artists,id'], 'credits.*.role' => ['required', Rule::in(['primary', 'featured', 'composer', 'producer'])]]);
         $credits = collect($data['credits']);
         if (! $credits->contains('role', 'primary') || $credits->map(fn ($c) => $c['artist_id'].':'.$c['role'])->unique()->count() !== $credits->count()) {
-            throw ValidationException::withMessages(['credits' => 'حداقل یک هنرمند اصلی لازم است؛ نقش تکراری برای یک هنرمند مجاز نیست.']);
+            throw ValidationException::withMessages(['credits' => __('حداقل یک هنرمند اصلی لازم است؛ نقش تکراری برای یک هنرمند مجاز نیست.')]);
         }
 
         return new TrackResource($update->handle($track, $request->user(), $data)->load(['mediaAsset.blob', PlaybackMedia::EAGER, 'artists', 'releases']));

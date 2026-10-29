@@ -1,3 +1,7 @@
+import { localizeText } from "../i18n/runtime";
+import { currentPreferences } from "../i18n/runtime";
+import { tr } from "../i18n/runtime";
+import { useLocale } from "../i18n/LocaleProvider";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
     Bookmark,
@@ -37,6 +41,7 @@ import {
 import { Artwork, Dialog, IconButton } from "./UI";
 
 export function LikeButton({ track }: { track: Track }) {
+    useLocale();
     const client = useQueryClient(),
         player = usePlayer(),
         notify = useToast();
@@ -54,9 +59,7 @@ export function LikeButton({ track }: { track: Track }) {
     });
     return (
         <IconButton
-            label={
-                track.is_liked ? "حذف از پسندیده‌ها" : "افزودن به پسندیده‌ها"
-            }
+            label={track.is_liked ? tr("mb9d4f6c42b") : tr("m4bf6c9ac88")}
             aria-pressed={track.is_liked}
             disabled={mutation.isPending}
             className={track.is_liked ? "liked" : ""}
@@ -67,6 +70,7 @@ export function LikeButton({ track }: { track: Track }) {
     );
 }
 export function SaveButton({ playlist }: { playlist: Playlist }) {
+    useLocale();
     const client = useQueryClient(),
         notify = useToast();
     const mutation = useMutation({
@@ -79,17 +83,13 @@ export function SaveButton({ playlist }: { playlist: Playlist }) {
             void client.invalidateQueries({
                 queryKey: ["playlist", playlist.id],
             });
-            notify(
-                playlist.is_saved
-                    ? "از کتابخانه حذف شد."
-                    : "به کتابخانه اضافه شد.",
-            );
+            notify(playlist.is_saved ? tr("m2ab4a384c1") : tr("m50fcb56388"));
         },
         onError: (error) => notify(error.message, true),
     });
     return (
         <IconButton
-            label={playlist.is_saved ? "حذف از کتابخانه" : "ذخیره در کتابخانه"}
+            label={playlist.is_saved ? tr("m12686f2fc5") : tr("m7778bb5bce")}
             aria-pressed={playlist.is_saved}
             disabled={mutation.isPending}
             onClick={() => mutation.mutate()}
@@ -110,6 +110,7 @@ export function PlaylistCard({
     onPlay: () => void;
     pending?: boolean;
 }) {
+    useLocale();
     return (
         <article className="playlist-card">
             <div className="playlist-card-art">
@@ -128,7 +129,7 @@ export function PlaylistCard({
                     className="card-play"
                     onClick={onPlay}
                     disabled={pending || !playlist.tracks_count}
-                    aria-label={`پخش ${playlist.name}`}
+                    aria-label={tr("m84995b84c0", { v0: playlist.name })}
                 >
                     {pending ? (
                         <LoaderCircle size={23} className="spin" />
@@ -142,8 +143,8 @@ export function PlaylistCard({
                     <h3 dir="auto">{playlist.name}</h3>
                 </Link>
                 <span>
-                    {moodLabels[playlist.mood]} <span className="dot">·</span>{" "}
-                    {digits(playlist.tracks_count)} آهنگ
+                    {moodLabels[playlist.mood]} <span className="dot">·</span>
+                    {tr("m607a37d687", { v0: digits(playlist.tracks_count) })}
                 </span>
             </div>
         </article>
@@ -156,19 +157,20 @@ export function TrackList({
     tracks: Track[];
     seed?: number;
 }) {
+    useLocale();
     const player = usePlayer();
     return (
-        <div className="track-list" role="table" aria-label="فهرست آهنگ‌ها">
+        <div className="track-list" role="table" aria-label={tr("m68e0c3bfdc")}>
             <div className="track-row track-heading" role="row">
                 <span role="columnheader">#</span>
-                <span role="columnheader">آهنگ / هنرمند</span>
+                <span role="columnheader">{tr("m9294a0da00")}</span>
                 <span className="track-album" role="columnheader">
-                    آلبوم
+                    {tr("m7cd289235e")}
                 </span>
                 <span role="columnheader" className="visually-hidden">
-                    عملیات آهنگ
+                    {tr("m42f7fc0276")}
                 </span>
-                <span role="columnheader" aria-label="مدت">
+                <span role="columnheader" aria-label={tr("mc46aff0539")}>
                     <Clock3 size={15} />
                 </span>
             </div>
@@ -183,7 +185,7 @@ export function TrackList({
                         <div role="cell">
                             <button
                                 className="track-play"
-                                aria-label={`${active && player.playing ? "توقف" : "پخش"} ${track.title}`}
+                                aria-label={`${active && player.playing ? tr("mbfc3318bde") : tr("md83169b1f4")} ${track.title}`}
                                 onClick={() =>
                                     active
                                         ? player.toggle()
@@ -221,11 +223,11 @@ export function TrackList({
                             <small dir="auto">{track.artist}</small>
                         </div>
                         <span className="track-album" role="cell" dir="auto">
-                            {track.album || "تک‌آهنگ"}
+                            {track.album || tr("mb25f61389c")}
                         </span>
                         <div role="cell" className="track-actions">
                             <IconButton
-                                label={`پخش بعدی ${track.title}`}
+                                label={tr("m75e2e05181", { v0: track.title })}
                                 disabled={
                                     player.queue.length >= 500 &&
                                     !player.queue.some((t) => t.id === track.id)
@@ -246,6 +248,7 @@ export function TrackList({
     );
 }
 export function QueueContent() {
+    useLocale();
     const player = usePlayer();
     return (
         <div className="queue-list">
@@ -255,10 +258,10 @@ export function QueueContent() {
                         className="text-link"
                         onClick={player.clearUpcoming}
                     >
-                        پاک کردن ادامهٔ صف
+                        {tr("m7443ac7c50")}
                     </button>
                     <button className="text-link" onClick={player.clearQueue}>
-                        خالی کردن صف
+                        {tr("ma3939f0f38")}
                     </button>
                 </div>
             )}
@@ -271,7 +274,7 @@ export function QueueContent() {
                     >
                         <button
                             className="queue-track"
-                            aria-label={`پخش ${track.title} از صف`}
+                            aria-label={tr("mbde261fc68", { v0: track.title })}
                             onClick={() => player.select(index)}
                         >
                             <span className="queue-index">
@@ -287,14 +290,14 @@ export function QueueContent() {
                         </button>
                         <div className="queue-edit-actions">
                             <IconButton
-                                label={`بالا بردن ${track.title} در صف`}
+                                label={tr("mc3b47d4bab", { v0: track.title })}
                                 disabled={orderIndex === 0}
                                 onClick={() => player.moveQueued(track.id, -1)}
                             >
                                 <ArrowUp size={15} />
                             </IconButton>
                             <IconButton
-                                label={`پایین بردن ${track.title} در صف`}
+                                label={tr("m1160d527f0", { v0: track.title })}
                                 disabled={
                                     orderIndex === player.order.length - 1
                                 }
@@ -303,7 +306,7 @@ export function QueueContent() {
                                 <ArrowDown size={15} />
                             </IconButton>
                             <IconButton
-                                label={`برداشتن ${track.title} از صف`}
+                                label={tr("mb27eca428d", { v0: track.title })}
                                 onClick={() => player.removeQueued(track.id)}
                             >
                                 <X size={15} />
@@ -313,21 +316,20 @@ export function QueueContent() {
                 );
             })}
             {!player.queue.length && (
-                <p className="muted">
-                    با پخش یک پلی‌لیست، آهنگ‌های بعدی اینجا قرار می‌گیرند.
-                </p>
+                <p className="muted">{tr("me54b440950")}</p>
             )}
         </div>
     );
 }
 export function SleepTimerControl() {
+    useLocale();
     const player = usePlayer(),
         [open, setOpen] = useState(false);
     const timer = player.sleepTimer;
     return (
         <>
             <IconButton
-                label="تایمر خواب"
+                label={tr("mb4cbcfc206")}
                 aria-pressed={!!timer}
                 onClick={() => setOpen(true)}
             >
@@ -336,15 +338,25 @@ export function SleepTimerControl() {
             <Dialog
                 open={open}
                 onOpenChange={setOpen}
-                title="تایمر خواب"
-                description="پخش در زمان انتخابی یا پس از پایان آهنگ جاری متوقف می‌شود."
+                title={tr("mb4cbcfc206")}
+                description={tr("m429f7486e2")}
             >
                 <p role="status">
                     {timer?.kind === "end_of_track"
-                        ? "فعال تا پایان آهنگ"
+                        ? tr("mcf64af366a")
                         : timer?.kind === "deadline"
-                          ? `فعال تا ${new Intl.DateTimeFormat("fa-IR", { hour: "2-digit", minute: "2-digit" }).format(timer.deadline)}`
-                          : "تایمر خاموش است."}
+                          ? tr("mdff08489aa", {
+                                v0: new Intl.DateTimeFormat(
+                                    currentPreferences().locale,
+                                    {
+                                        timeZone:
+                                            currentPreferences().time_zone,
+                                        hour: "2-digit",
+                                        minute: "2-digit",
+                                    },
+                                ).format(timer.deadline),
+                            })
+                          : tr("m78e6f9877a")}
                 </p>
                 <div className="sleep-options">
                     {sleepPresets.map((minutes) => (
@@ -356,7 +368,7 @@ export function SleepTimerControl() {
                                 setOpen(false);
                             }}
                         >
-                            {digits(minutes)} دقیقه
+                            {tr("m49722e8908", { v0: digits(minutes) })}
                         </button>
                     ))}
                 </div>
@@ -367,7 +379,7 @@ export function SleepTimerControl() {
                         setOpen(false);
                     }}
                 >
-                    پایان آهنگ جاری
+                    {tr("mac6d498672")}
                 </button>
                 {timer && (
                     <button
@@ -377,7 +389,7 @@ export function SleepTimerControl() {
                             setOpen(false);
                         }}
                     >
-                        لغو تایمر
+                        {tr("m072fcab9ab")}
                     </button>
                 )}
             </Dialog>
@@ -385,15 +397,14 @@ export function SleepTimerControl() {
     );
 }
 export function NowPlaying() {
+    useLocale();
     const player = usePlayer(),
         current = player.current;
     return (
         <aside className="now-playing">
             <div className="panel-heading">
-                <h2>همین حالا</h2>
-                <span className="tiny-label" lang="en">
-                    ON YOUR FREQUENCY
-                </span>
+                <h2>{tr("m2f6b22ecce")}</h2>
+                <span className="tiny-label">{tr("editorial.frequency")}</span>
             </div>
             <Artwork
                 seed={current?.artwork_seed ?? current?.id ?? 0}
@@ -402,29 +413,27 @@ export function NowPlaying() {
             />
             <div className="now-title">
                 <div>
-                    <h3 dir="auto">{current?.title || "جایی برای صدای تو"}</h3>
-                    <p dir="auto">
-                        {current?.artist ||
-                            "یک آهنگ انتخاب کن و به حال خودت برس."}
-                    </p>
+                    <h3 dir="auto">{current?.title || tr("m605b5cc99a")}</h3>
+                    <p dir="auto">{current?.artist || tr("m1a6bc1bd66")}</p>
                 </div>
                 {current && <LikeButton track={current} />}
             </div>
             <div className="listening-note">
                 <span className="live-dot" />{" "}
-                {player.playing
-                    ? "در حال پخش از کتابخانهٔ شما"
-                    : "به اندازهٔ یک آهنگ، برای خودت وقت بگذار."}
+                {player.playing ? tr("mbf317fc15a") : tr("m1e4c6f7ddc")}
             </div>
             <div className="panel-heading queue-heading">
-                <h2>صف پخش</h2>
-                <span>{digits(player.queue.length)} آهنگ</span>
+                <h2>{tr("mf2d7a34efa")}</h2>
+                <span>
+                    {tr("m0816e22877", { v0: digits(player.queue.length) })}
+                </span>
             </div>
             <QueueContent />
         </aside>
     );
 }
 export function PlayerBar() {
+    useLocale();
     const player = usePlayer(),
         current = player.current;
     const [qualityOpen, setQualityOpen] = useState(false);
@@ -435,7 +444,7 @@ export function PlayerBar() {
         <>
             <footer
                 className={`player-bar ${hasQualityChoice ? "has-quality" : ""}`}
-                aria-label="کنترل پخش"
+                aria-label={tr("m66becb6623")}
             >
                 <div className="player-track">
                     <Artwork
@@ -444,10 +453,10 @@ export function PlayerBar() {
                     />
                     <div>
                         <strong dir="auto">
-                            {current?.title || "موسیقی از اینجا شروع می‌شود"}
+                            {current?.title || tr("m9b3b1e10e7")}
                         </strong>
                         <small dir="auto">
-                            {current?.artist || "پلی‌لیست دلخواهت را انتخاب کن"}
+                            {current?.artist || tr("m70fd5f26c1")}
                         </small>
                     </div>
                     {current && <LikeButton track={current} />}
@@ -455,7 +464,7 @@ export function PlayerBar() {
                 <div className="playback-controls">
                     <div className="transport" dir="ltr">
                         <IconButton
-                            label="پخش تصادفی متعادل"
+                            label={tr("mb0b9a44dbf")}
                             aria-pressed={player.shuffle}
                             className={player.shuffle ? "enabled" : ""}
                             disabled={!current}
@@ -464,14 +473,18 @@ export function PlayerBar() {
                             <Shuffle size={17} />
                         </IconButton>
                         <IconButton
-                            label="آهنگ قبلی"
+                            label={tr("m4241fd2fd4")}
                             disabled={!current}
                             onClick={player.previous}
                         >
                             <SkipBack size={20} fill="currentColor" />
                         </IconButton>
                         <IconButton
-                            label={player.playing ? "توقف پخش" : "پخش موسیقی"}
+                            label={
+                                player.playing
+                                    ? tr("m66703b010c")
+                                    : tr("m2260125ca7")
+                            }
                             className="main-play"
                             disabled={!current}
                             onClick={player.toggle}
@@ -485,14 +498,21 @@ export function PlayerBar() {
                             )}
                         </IconButton>
                         <IconButton
-                            label="آهنگ بعدی"
+                            label={tr("m7eb2f064d0")}
                             disabled={!current}
                             onClick={player.next}
                         >
                             <SkipForward size={20} fill="currentColor" />
                         </IconButton>
                         <IconButton
-                            label={`تکرار: ${player.repeat === "off" ? "خاموش" : player.repeat === "all" ? "همه" : "یک آهنگ"}`}
+                            label={tr("mba1305367f", {
+                                v0:
+                                    player.repeat === "off"
+                                        ? tr("mb2e61b5037")
+                                        : player.repeat === "all"
+                                          ? tr("mbf742c5a3d")
+                                          : tr("m5d2bd957be"),
+                            })}
                             aria-pressed={player.repeat !== "off"}
                             className={player.repeat !== "off" ? "enabled" : ""}
                             disabled={!current}
@@ -510,8 +530,10 @@ export function PlayerBar() {
                             {duration(player.position)}
                         </span>
                         <input
-                            aria-label="موقعیت پخش"
+                            dir="auto"
+                            aria-label={tr("m6546753d1d")}
                             type="range"
+                            aria-valuetext={`${duration(player.position)} / ${duration(current?.duration_seconds || 0)}`}
                             min="0"
                             max={current?.duration_seconds || 1}
                             step="0.1"
@@ -532,7 +554,7 @@ export function PlayerBar() {
                 <div className="player-tools">
                     {hasQualityChoice && (
                         <IconButton
-                            label="انتخاب کیفیت پخش"
+                            label={tr("m024a3b906d")}
                             onClick={() => setQualityOpen(true)}
                         >
                             <AudioLines size={20} />
@@ -540,14 +562,18 @@ export function PlayerBar() {
                     )}
                     <SleepTimerControl />
                     <IconButton
-                        label="نمایش صف پخش"
+                        label={tr("m8d3e2fbcb3")}
                         onClick={() => setQueueOpen(true)}
                     >
                         <ListMusic size={21} />
                     </IconButton>
                     <span className="tool-divider" />
                     <IconButton
-                        label={player.volume ? "بی‌صدا کردن" : "بازگرداندن صدا"}
+                        label={
+                            player.volume
+                                ? tr("m474ca157e4")
+                                : tr("m3cd691d675")
+                        }
                         onClick={() => {
                             if (player.volume) {
                                 setLastVolume(player.volume);
@@ -562,9 +588,12 @@ export function PlayerBar() {
                         )}
                     </IconButton>
                     <input
+                        name="volume"
                         className="volume-range"
+                        dir="ltr"
                         type="range"
-                        aria-label="بلندی صدا"
+                        aria-label={tr("mcf0e93d2f1")}
+                        aria-valuetext={`${digits(Math.round(player.volume * 100))}%`}
                         min="0"
                         max="1"
                         step="0.01"
@@ -578,13 +607,15 @@ export function PlayerBar() {
             <Dialog
                 open={qualityOpen}
                 onOpenChange={setQualityOpen}
-                title="کیفیت پخش"
-                description="کیفیت دلخواه را انتخاب کن؛ موقعیت پخش حفظ می‌شود."
+                title={tr("maf59da77db")}
+                description={tr("mc8fa61f66d")}
             >
                 <label className="quality-picker">
-                    کیفیت پخش
+                    {tr("maf59da77db")}
                     <select
-                        aria-label="کیفیت پخش"
+                        dir="auto"
+                        name="quality"
+                        aria-label={tr("maf59da77db")}
                         value={player.quality}
                         onChange={(event) =>
                             player.setQuality(
@@ -593,26 +624,26 @@ export function PlayerBar() {
                             )
                         }
                     >
-                        <option value="auto">خودکار · MP3 320</option>
+                        <option value="auto">{tr("mdf0e52ea91")}</option>
                         {current?.audio_qualities?.map((option) => (
                             <option key={option.id} value={option.id}>
-                                {option.label}
+                                {tr(
+                                    option.id === "original"
+                                        ? "quality.original"
+                                        : "quality.mp3",
+                                )}
                             </option>
                         ))}
                     </select>
                 </label>
-                <p>
-                    MP3 با کیفیت 320kbps اتلافی است. FLAC اصلِ بدون افت است و
-                    ممکن است حجم بیشتری برای پخش مصرف کند. تغییر کیفیت، موقعیت
-                    پخش را حفظ می‌کند.
-                </p>
+                <p>{tr("m396d33ce21")}</p>
             </Dialog>
             {(player.error || player.syncError) && (
                 <div className="player-error" role="alert">
-                    {player.error || player.syncError}
+                    {localizeText(player.error || player.syncError || "")}
                     {player.syncError && (
                         <button onClick={() => window.location.reload()}>
-                            تازه‌سازی
+                            {tr("mb98662b701")}
                         </button>
                     )}
                 </div>
@@ -620,8 +651,8 @@ export function PlayerBar() {
             <Dialog
                 open={queueOpen}
                 onOpenChange={setQueueOpen}
-                title="صف پخش شما"
-                description="آهنگ‌های این نوبت، به ترتیب پخش"
+                title={tr("m10b59aa75d")}
+                description={tr("md8d0a792f9")}
             >
                 <QueueContent />
             </Dialog>

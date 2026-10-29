@@ -15,22 +15,22 @@ class EnsureAccountActive
             Auth::logout();
             $request->session()->invalidate();
             $request->session()->regenerateToken();
-            abort(403, 'این حساب غیرفعال است.');
+            abort(403, __('این حساب غیرفعال است.'));
         }
 
         if ((int) $request->session()->get('auth.access_version', -1) !== $request->user()->access_version) {
             Auth::logout();
             $request->session()->invalidate();
             $request->session()->regenerateToken();
-            abort(401, 'دسترسی حساب تغییر کرده است؛ دوباره وارد شوید.');
+            abort(401, __('دسترسی حساب تغییر کرده است؛ دوباره وارد شوید.'));
         }
 
         $context = $request->header('X-Session-Context');
         if (! $request->isMethodSafe() && ($context === null || $context === '')) {
-            return response()->json(['message' => 'صفحه را تازه کنید؛ زمینهٔ نشست لازم است.', 'code' => 'session_context_required'], 428);
+            return response()->json(['message' => __('صفحه را تازه کنید؛ زمینهٔ نشست لازم است.'), 'code' => 'session_context_required'], 428);
         }
         if ($context !== null && ! hash_equals($request->user()->id.':'.$request->user()->access_version, $context)) {
-            return response()->json(['message' => 'هویت یا دسترسی نشست تغییر کرده است.', 'code' => 'session_context_changed'], 409);
+            return response()->json(['message' => __('هویت یا دسترسی نشست تغییر کرده است.'), 'code' => 'session_context_changed'], 409);
         }
 
         return $next($request);

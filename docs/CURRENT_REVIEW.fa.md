@@ -1,3 +1,5 @@
+> F09 پیاده‌سازی شده و در مرحلهٔ بررسی CI است. [قرارداد F09](F09_LOCALE_AND_ACCESSIBILITY.fa.md) مرجع جاری زبان، جهت، تنظیمات و محافظ فرم است؛ بندهای پایین سابقهٔ پایان F08 را نیز حفظ می‌کنند.
+
 > تأیید F01 تا F08 پس از اصلاح F08-B10 و ارتقای امنیتی F08-B11 روی commit `e9e5c6a3ca2a34f0fe11f226600aa445856d0b2b` با [CI موفق همان کد](https://github.com/Parsa-Emami/ahang-khatkesh/actions/runs/40824157871) بسته شد: ۱۲۸ تست PHP روی هر دو DB، ۳۰ تست فرانت، ۱۲ سناریوی مرورگر و ۹ تست چندپردازهٔ MySQL. symfony/mime از 8.1.7 به 8.1.10 برای CVE-2026-45070 ارتقا یافت و composer audit در هر دو job پاس شد. چهار تست batch همچنان مقیدبودن آپلود به actor/epoch آغازین را پوشش می‌دهند. [قرارداد F08](F08_AUDIO_CONVERSION.fa.md) و [شواهد جاری](verification/foundation-through-f08-2026-10-29-security.json) مقدم‌اند؛ گام بعدی F09 است.
 
 # وضعیت اجرایی و نقص‌های باقی‌مانده
@@ -46,7 +48,7 @@
 | N02 / R07 | بسته در دامنهٔ F07 | blob مستقل، backfill و integrity checker با آزمون dedup هم‌زمان پاس شد | evidence F07 |
 | N03 / بخشی از R09 | بسته در دامنهٔ F07 | quota، reservation، cleanup و GC با retention پاس شدند؛ load/offload باقی است | F15 |
 | N04 / R12 | بسته در دامنهٔ F08 | تبدیل واقعی، guard، سهمیه، recovery، پنل و کیفیت با تست واقعی پاس شدند | evidence F08 |
-| N05 / R11 | P1 | فارسی/RTL هست؛ ترجمه و LTR سراسریِ همه فرم‌ها و تمام themeها کامل نیست | F09 |
+| N05 / R11 | بررسی CI | کاتالوگ fa/en و جهت مستقل، ترجیحات حساب و ماتریس مرورگر اضافه شده‌اند | F09 |
 | N06 / R11 | P2 | shader 21st.dev فقط منبع pin شده دارد؛ ورود runtime، GPU budget و visual matrix باقی است | F10 |
 | N07 | P2 | تاریخچه، private session و پیشنهاد توضیح‌پذیر هنوز ساخته نشده‌اند | F11 |
 | N08 | P2 | bulk operations، repair/merge و پیشنهاد اعضا workflow کامل ندارند | F12 |
@@ -55,7 +57,7 @@
 | N11 / R08 | P1 | ارتقای نمونهٔ واقعی نسخهٔ قبلی در MySQL و restore هماهنگ DB و رسانه اثبات نشده | F15 |
 | N12 / R09 | P1 | X-Accel مجاز و ده stream هم‌زمان با import/conversion بارسنجی نشده‌اند | F15 |
 | N13 / R10 | P1 | schema response برای مسیرهای منتخب است؛ تمام APIها و type generation کامل نشده‌اند | F09، F16 |
-| N14 | P1 | guard ناوبری و حفظ draft همه فرم‌ها نیست؛ فعلاً PlaylistTracksEditor پوشش دارد | F09 |
+| N14 | بررسی CI | محافظ مشترک route/back/unload و بستن dialog به فرم‌های ویرایش متصل شده است | F09 |
 | N15 | P1 | ASVS mapping کامل، pentest مستقل، Safari/Firefox، دستگاه فیزیکی و صفحه‌خوان آزمون نشده‌اند | F16 |
 | N16 | P2 | تایمر خواب فقط در تب فعلی است؛ زمان دقیق در suspend سیستم تضمین ندارد | F14، F16 |
 

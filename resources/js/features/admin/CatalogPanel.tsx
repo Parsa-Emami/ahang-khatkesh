@@ -1,3 +1,6 @@
+import { useDraftGuard, useDraftValue } from "../drafts/DraftNavigation";
+import { tr } from "../../i18n/runtime";
+import { useLocale } from "../../i18n/LocaleProvider";
 import { useDeferredValue, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Plus, Pencil, X } from "lucide-react";
@@ -10,12 +13,19 @@ import { adminApi, adminKeys } from "./api";
 import { TrashButton } from "./TrashPanel";
 import { ArtistPicker, TrackPicker } from "./Pickers";
 const releaseTypes = {
-    album: "آلبوم",
-    single: "تک‌آهنگ",
+    get album() {
+        return tr("m7cd289235e");
+    },
+    get single() {
+        return tr("mb25f61389c");
+    },
     ep: "EP",
-    compilation: "گردآوری",
+    get compilation() {
+        return tr("mf4d6a3ee65");
+    },
 };
 export function CatalogPanel() {
+    useLocale();
     const [kind, setKind] = useState("artists"),
         [q, setQ] = useState(""),
         [page, setPage] = useState(1),
@@ -34,11 +44,11 @@ export function CatalogPanel() {
     });
     return (
         <>
-            <div className="filter-chips" aria-label="نوع موجودیت">
+            <div className="filter-chips" aria-label={tr("mab60b85b01")}>
                 {[
-                    ["artists", "هنرمندان"],
-                    ["releases", "انتشارها"],
-                    ["tracks", "آهنگ‌ها"],
+                    ["artists", tr("mb36164f96b")],
+                    ["releases", tr("ma3ae686a13")],
+                    ["tracks", tr("mfc7b9f1ff7")],
                 ].map(([value, label]) => (
                     <button
                         key={value}
@@ -56,10 +66,12 @@ export function CatalogPanel() {
             </div>
             <div className="admin-toolbar">
                 <label>
-                    جستجو در کاتالوگ
+                    {tr("m1c320d8d2c")}
                     <input
+                        dir="auto"
+                        name="q"
                         maxLength={120}
-                        placeholder="نام یا عنوان…"
+                        placeholder={tr("m7b95f59cb8")}
                         value={q}
                         onChange={(e) => {
                             setQ(e.target.value);
@@ -70,15 +82,13 @@ export function CatalogPanel() {
                 {kind !== "tracks" && (
                     <button className="button" onClick={() => setEditor("new")}>
                         <Plus size={16} />
-                        {kind === "artists" ? "هنرمند تازه" : "انتشار تازه"}
+                        {kind === "artists"
+                            ? tr("mec1731180c")
+                            : tr("m6a273403d6")}
                     </button>
                 )}
             </div>
-            <p className="muted admin-footnote">
-                نام، شناسهٔ هویت نیست. هنرمندان هم‌نام جدا می‌مانند؛ رابطهٔ
-                آهنگ‌ها را آگاهانه انتخاب کن. موارد بازیابی‌شده از متن ایمپورت
-                نیاز به بازبینی دارند.
-            </p>
+            <p className="muted admin-footnote">{tr("mf7b40c37ec")}</p>
             {query.isPending ? (
                 <Loading />
             ) : query.error ? (
@@ -104,12 +114,24 @@ export function CatalogPanel() {
                                         {"artist" in item
                                             ? item.artist
                                             : "type" in item
-                                              ? `${releaseTypes[item.type]} · ${item.artists.map((a) => a.name).join("، ")}`
-                                              : `${digits(item.tracks_count || 0)} اعتبار هنری${item.needs_review ? " · نیاز به بازبینی هویت" : ""}`}
+                                              ? `${releaseTypes[item.type]} · ${item.artists.map((a) => a.name).join(tr("m8715d7bc59"))}`
+                                              : tr("m079a4eccd7", {
+                                                    v0: digits(
+                                                        item.tracks_count || 0,
+                                                    ),
+                                                    v1: item.needs_review
+                                                        ? tr("m33874082fa")
+                                                        : "",
+                                                })}
                                     </small>
                                 </div>
                                 <IconButton
-                                    label={`ویرایش ${"name" in item ? item.name : item.title}`}
+                                    label={tr("m54a609b1a4", {
+                                        v0:
+                                            "name" in item
+                                                ? item.name
+                                                : item.title,
+                                    })}
                                     onClick={() => setEditor(item)}
                                 >
                                     <Pencil size={17} />
@@ -126,11 +148,11 @@ export function CatalogPanel() {
                         ))}
                         {!query.data.data.length && (
                             <div className="empty-state">
-                                <h3>هنوز موردی اینجا نیست.</h3>
+                                <h3>{tr("m3a486027fa")}</h3>
                                 <p>
                                     {kind === "tracks"
-                                        ? "آهنگ‌ها پس از ایمپورت موفق در کاتالوگ قرار می‌گیرند."
-                                        : "یک مورد تازه بساز یا فیلتر جستجو را تغییر بده."}
+                                        ? tr("m0ff737e557")
+                                        : tr("m65848d6a13")}
                                 </p>
                             </div>
                         )}
@@ -142,18 +164,20 @@ export function CatalogPanel() {
                                 disabled={page === 1}
                                 onClick={() => setPage(page - 1)}
                             >
-                                قبلی
+                                {tr("m1a592f6b2d")}
                             </button>
                             <span>
-                                {digits(page)} از{" "}
-                                {digits(query.data.meta.last_page)}
+                                {tr("m3dadd024d7", {
+                                    v0: digits(page),
+                                    v1: digits(query.data.meta.last_page),
+                                })}
                             </span>
                             <button
                                 className="button secondary"
                                 disabled={page === query.data.meta.last_page}
                                 onClick={() => setPage(page + 1)}
                             >
-                                بعدی
+                                {tr("m54ee927e96")}
                             </button>
                         </div>
                     )}
@@ -167,12 +191,12 @@ export function CatalogPanel() {
                     }}
                     title={
                         kind === "artists"
-                            ? "هویت هنرمند"
+                            ? tr("mbe89a2f1e0")
                             : kind === "releases"
-                              ? "مشخصات انتشار"
-                              : "اطلاعات آهنگ"
+                              ? tr("m71d5b1dbdc")
+                              : tr("m6b5543e817")
                     }
-                    description="این اطلاعات مشترک است و در همهٔ پلی‌لیست‌ها نمایش داده می‌شود."
+                    description={tr("m67b086f5a2")}
                 >
                     {kind === "artists" ? (
                         <ArtistEditor
@@ -207,7 +231,7 @@ function useCatalogSave(close: () => void) {
             void client.invalidateQueries({ queryKey: adminKeys.root });
             void client.invalidateQueries({ queryKey: ["tracks"] });
             void client.invalidateQueries({ queryKey: ["playlist"] });
-            notify("تغییرات کاتالوگ ذخیره شد.");
+            notify(tr("md9998764b8"));
             close();
         },
         onError: (e: Error) => notify(e.message, true),
@@ -220,12 +244,14 @@ function ArtistEditor({
     artist: Artist | null;
     close: () => void;
 }) {
+    useLocale();
     const [form, setForm] = useState({
         name: artist?.name || "",
         sort_name: artist?.sort_name || "",
         description: artist?.description || "",
         country_code: artist?.country_code || "",
     });
+    useDraftValue(form, () => {});
     const callbacks = useCatalogSave(close);
     const save = useMutation({
         mutationFn: () =>
@@ -244,8 +270,10 @@ function ArtistEditor({
             }}
         >
             <label>
-                نام نمایشی
+                {tr("m4c2b280afc")}
                 <input
+                    dir="auto"
+                    name="name"
                     required
                     maxLength={255}
                     value={form.name}
@@ -253,8 +281,10 @@ function ArtistEditor({
                 />
             </label>
             <label>
-                نام برای مرتب‌سازی
+                {tr("m24d6f9bb85")}
                 <input
+                    dir="auto"
+                    name="sort_name"
                     maxLength={255}
                     value={form.sort_name}
                     onChange={(e) =>
@@ -263,8 +293,10 @@ function ArtistEditor({
                 />
             </label>
             <label>
-                معرفی
+                {tr("m37eb44417c")}
                 <textarea
+                    dir="auto"
+                    name="description"
                     rows={3}
                     maxLength={3000}
                     value={form.description}
@@ -274,8 +306,9 @@ function ArtistEditor({
                 />
             </label>
             <label>
-                کد دوحرفی کشور، اختیاری
+                {tr("m35e07cd7e5")}
                 <input
+                    name="country_code"
                     dir="ltr"
                     maxLength={2}
                     pattern="[A-Z]{2}"
@@ -290,7 +323,7 @@ function ArtistEditor({
                 />
             </label>
             <button className="button" disabled={save.isPending}>
-                ذخیرهٔ هنرمند
+                {tr("mb8a4d4ad81")}
             </button>
         </form>
     );
@@ -302,6 +335,7 @@ function ReleaseEditor({
     release: Release | null;
     close: () => void;
 }) {
+    useLocale();
     const [form, setForm] = useState({
         title: release?.title || "",
         type: release?.type || "album",
@@ -309,6 +343,7 @@ function ReleaseEditor({
     });
     const [artists, setArtists] = useState<Artist[]>(release?.artists || []);
     const [arrange, setArrange] = useState(false);
+    useDraftValue({ form, artists }, () => {});
     const callbacks = useCatalogSave(close);
     const save = useMutation({
         mutationFn: () =>
@@ -332,8 +367,10 @@ function ReleaseEditor({
                 }}
             >
                 <label>
-                    عنوان انتشار
+                    {tr("me4b6ad8394")}
                     <input
+                        dir="auto"
+                        name="title"
                         required
                         maxLength={255}
                         value={form.title}
@@ -343,8 +380,10 @@ function ReleaseEditor({
                     />
                 </label>
                 <label>
-                    نوع انتشار
+                    {tr("m17d8cbdd76")}
                     <select
+                        dir="auto"
+                        name="type"
                         value={form.type}
                         onChange={(e) =>
                             setForm({
@@ -361,8 +400,10 @@ function ReleaseEditor({
                     </select>
                 </label>
                 <label>
-                    تاریخ میلادی، اختیاری
+                    {tr("m8b3c35e781")}
                     <input
+                        dir="auto"
+                        name="released_on"
                         type="date"
                         value={form.released_on}
                         onChange={(e) =>
@@ -384,7 +425,7 @@ function ReleaseEditor({
                         <span key={a.id}>
                             {a.name}{" "}
                             <IconButton
-                                label={`برداشتن ${a.name}`}
+                                label={tr("mbb4d3d0725", { v0: a.name })}
                                 onClick={() =>
                                     setArtists((old) =>
                                         old.filter((x) => x.id !== a.id),
@@ -400,7 +441,7 @@ function ReleaseEditor({
                     className="button"
                     disabled={save.isPending || !artists.length}
                 >
-                    ذخیرهٔ مشخصات انتشار
+                    {tr("me1aca3b14d")}
                 </button>
             </form>
             {release && (
@@ -409,7 +450,7 @@ function ReleaseEditor({
                         className="button secondary"
                         onClick={() => setArrange(!arrange)}
                     >
-                        مدیریت آهنگ‌های انتشار
+                        {tr("m7a2a9f8ba9")}
                     </button>
                     {arrange && (
                         <ReleaseTracks release={release} close={close} />
@@ -426,9 +467,11 @@ function ReleaseTracks({
     release: Release;
     close: () => void;
 }) {
+    useLocale();
     const [rows, setRows] = useState<NonNullable<Release["tracks"]> | null>(
         null,
     );
+    useDraftGuard(rows !== null, () => setRows(null));
     const callbacks = useCatalogSave(close);
     const query = useQuery({
         queryKey: ["admin", "release", release.id],
@@ -490,10 +533,12 @@ function ReleaseTracks({
             <div className="release-tracks">
                 {selected.map((track, i) => (
                     <div key={track.id}>
-                        <strong>{track.title}</strong>
+                        <strong dir="auto">{track.title}</strong>
                         <label>
-                            دیسک
+                            {tr("m22ed8cceaf")}
                             <input
+                                dir="auto"
+                                name="disc_number"
                                 type="number"
                                 min={1}
                                 max={999}
@@ -515,8 +560,10 @@ function ReleaseTracks({
                             />
                         </label>
                         <label>
-                            شماره
+                            {tr("m987584a338")}
                             <input
+                                dir="auto"
+                                name="track_number"
                                 type="number"
                                 min={1}
                                 max={999}
@@ -538,7 +585,7 @@ function ReleaseTracks({
                             />
                         </label>
                         <IconButton
-                            label={`حذف ${track.title} از انتشار`}
+                            label={tr("m164c47422b", { v0: track.title })}
                             onClick={() =>
                                 setRows(
                                     selected.filter((t) => t.id !== track.id),
@@ -555,17 +602,19 @@ function ReleaseTracks({
                 disabled={save.isPending}
                 onClick={() => save.mutate()}
             >
-                ذخیرهٔ فهرست انتشار
+                {tr("m8cfcf334b6")}
             </button>
         </>
     );
 }
 function TrackEditor({ track, close }: { track: Track; close: () => void }) {
+    useLocale();
     const [title, setTitle] = useState(track.title),
         [credits, setCredits] = useState(track.artists || []),
         [primary, setPrimary] = useState(
             track.primary_release_id?.toString() || "",
         );
+    useDraftValue({ title, credits, primary }, () => {});
     const callbacks = useCatalogSave(close);
     const save = useMutation({
         mutationFn: () =>
@@ -592,8 +641,10 @@ function TrackEditor({ track, close }: { track: Track; close: () => void }) {
             }}
         >
             <label>
-                عنوان آهنگ
+                {tr("mfedab857ca")}
                 <input
+                    dir="auto"
+                    name="title"
                     required
                     maxLength={255}
                     value={title}
@@ -627,9 +678,11 @@ function TrackEditor({ track, close }: { track: Track; close: () => void }) {
                         </span>
                         <label>
                             <span className="visually-hidden">
-                                نقش {credit.name}
+                                {tr("m7d2b1dd01b", { v0: credit.name })}
                             </span>
                             <select
+                                dir="auto"
+                                name="role"
                                 value={credit.role}
                                 onChange={(e) =>
                                     setCredits((old) =>
@@ -642,10 +695,10 @@ function TrackEditor({ track, close }: { track: Track; close: () => void }) {
                                 }
                             >
                                 {[
-                                    ["primary", "هنرمند اصلی"],
-                                    ["featured", "همراه"],
-                                    ["composer", "آهنگ‌ساز"],
-                                    ["producer", "تهیه‌کننده"],
+                                    ["primary", tr("mb360d9b48a")],
+                                    ["featured", tr("mc70b859e1b")],
+                                    ["composer", tr("m74ece0f96d")],
+                                    ["producer", tr("m0648dfd258")],
                                 ].map(([v, l]) => (
                                     <option key={v} value={v}>
                                         {l}
@@ -654,7 +707,7 @@ function TrackEditor({ track, close }: { track: Track; close: () => void }) {
                             </select>
                         </label>
                         <IconButton
-                            label={`برداشتن نقش ${credit.name}`}
+                            label={tr("m1c8815724b", { v0: credit.name })}
                             onClick={() =>
                                 setCredits((old) =>
                                     old.filter((_, j) => j !== i),
@@ -667,32 +720,28 @@ function TrackEditor({ track, close }: { track: Track; close: () => void }) {
                 ))}
             </div>
             <label>
-                انتشار اصلی
+                {tr("m94b1d6f558")}
                 <select
+                    dir="auto"
+                    name="primary"
                     value={primary}
                     onChange={(e) => setPrimary(e.target.value)}
                 >
-                    <option value="">بدون انتشار اصلی</option>
+                    <option value="">{tr("me8a8814899")}</option>
                     {track.releases?.map((r) => (
                         <option key={r.id} value={r.id}>
                             {r.title} · #{r.id}
                         </option>
                     ))}
                 </select>
-                <small>
-                    برای افزودن انتشار دیگر، ابتدا از بخش انتشارها این آهنگ را
-                    به فهرستش اضافه کن.
-                </small>
+                <small>{tr("mb8ccc57a22")}</small>
             </label>
-            <p className="muted">
-                ویرایش متادیتا فایل صوتی، شناسهٔ آهنگ و علاقه‌مندی‌ها را عوض
-                نمی‌کند.
-            </p>
+            <p className="muted">{tr("m5b5d1a7a47")}</p>
             <button
                 className="button"
                 disabled={save.isPending || !credits.length}
             >
-                ذخیرهٔ اطلاعات آهنگ
+                {tr("m2d2b494fda")}
             </button>
         </form>
     );

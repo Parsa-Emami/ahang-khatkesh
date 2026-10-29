@@ -12,11 +12,11 @@ class JsonManifestParser implements ManifestParser
         try {
             $decoded = json_decode(ltrim($contents, "\xEF\xBB\xBF"), true, 32, JSON_THROW_ON_ERROR);
         } catch (JsonException) {
-            throw ValidationException::withMessages(['manifest' => 'فایل JSON معتبر نیست.']);
+            throw ValidationException::withMessages(['manifest' => __('فایل JSON معتبر نیست.')]);
         }
         $rows = is_array($decoded) && array_key_exists('tracks', $decoded) ? $decoded['tracks'] : $decoded;
         if (! is_array($rows) || ! array_is_list($rows)) {
-            throw ValidationException::withMessages(['manifest' => 'JSON باید آرایهٔ آهنگ‌ها یا شیء دارای tracks باشد.']);
+            throw ValidationException::withMessages(['manifest' => __('JSON باید آرایهٔ آهنگ‌ها یا شیء دارای tracks باشد.')]);
         }
 
         return $rows;

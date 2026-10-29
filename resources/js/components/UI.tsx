@@ -1,8 +1,17 @@
 import {
+    DraftScope,
+    useDraftGuard,
+    useDraftNavigation,
+} from "../features/drafts/DraftNavigation";
+import { tr } from "../i18n/runtime";
+import { useLocale } from "../i18n/LocaleProvider";
+import {
     useEffect,
     useState,
     useRef,
+    useId,
     type ButtonHTMLAttributes,
+    type Ref,
     type CSSProperties,
     type PropsWithChildren,
 } from "react";
@@ -11,11 +20,12 @@ import { ArrowLeft, Disc3, LoaderCircle, X } from "lucide-react";
 import { Link } from "react-router-dom";
 
 export function Brand({ small = false }: { small?: boolean }) {
+    useLocale();
     return (
         <Link
             to="/"
             className={`brand ${small ? "brand-small" : ""}`}
-            aria-label="آهنگ خط‌کش، خانه"
+            aria-label={tr("m652478c975")}
         >
             <span className="brand-mark" aria-hidden="true">
                 <i />
@@ -24,7 +34,7 @@ export function Brand({ small = false }: { small?: boolean }) {
                 <i />
             </span>
             <span>
-                آهنگ خط‌کش
+                {tr("mb39fa3f0f8")}
                 <small lang="en" dir="ltr">
                     AHANG KHATKESH
                 </small>
@@ -37,7 +47,11 @@ export function IconButton({
     children,
     className = "",
     ...props
-}: ButtonHTMLAttributes<HTMLButtonElement> & { label: string }) {
+}: ButtonHTMLAttributes<HTMLButtonElement> & {
+    label: string;
+    ref?: Ref<HTMLButtonElement>;
+}) {
+    useLocale();
     return (
         <button
             type="button"
@@ -56,6 +70,9 @@ export function Dialog({
     title,
     description,
     priority = false,
+    guard = true,
+    dirty = false,
+    onDiscard,
     children,
 }: PropsWithChildren<{
     open: boolean;
@@ -63,10 +80,28 @@ export function Dialog({
     title: string;
     description: string;
     priority?: boolean;
+    guard?: boolean;
+    dirty?: boolean;
+    onDiscard?: () => void;
 }>) {
+    useLocale();
+    const { dir } = useLocale();
+    const scope = useId();
+    const navigation = useDraftNavigation();
+    useDraftGuard(open && dirty, onDiscard, scope);
+    const changeOpen = (value: boolean) => {
+        if (value || !guard) onOpenChange(value);
+        else
+            navigation.request({
+                scope,
+                proceed: () => onOpenChange(false),
+                cancel: () => {},
+            });
+    };
     const content = useRef<HTMLDivElement>(null);
+    const opener = useRef<HTMLElement | null>(null);
     return (
-        <DialogPrimitive.Root open={open} onOpenChange={onOpenChange}>
+        <DialogPrimitive.Root open={open} onOpenChange={changeOpen}>
             <DialogPrimitive.Portal>
                 <DialogPrimitive.Overlay
                     className={`dialog-overlay ${priority ? "dialog-priority" : ""}`}
@@ -74,8 +109,12 @@ export function Dialog({
                 <DialogPrimitive.Content
                     ref={content}
                     className={`dialog-content ${priority ? "dialog-priority" : ""}`}
-                    dir="rtl"
+                    dir={dir}
                     onCloseAutoFocus={(event) => {
+                        if (!priority && opener.current?.isConnected) {
+                            event.preventDefault();
+                            opener.current.focus();
+                        }
                         if (priority) {
                             const underlying =
                                 document.querySelector<HTMLInputElement>(
@@ -88,6 +127,10 @@ export function Dialog({
                         }
                     }}
                     onOpenAutoFocus={(event) => {
+                        opener.current =
+                            document.activeElement instanceof HTMLElement
+                                ? document.activeElement
+                                : null;
                         const field =
                             content.current?.querySelector<HTMLInputElement>(
                                 "input:not([disabled]), textarea:not([disabled]), select:not([disabled])",
@@ -103,11 +146,16 @@ export function Dialog({
                         {description}
                     </DialogPrimitive.Description>
                     <DialogPrimitive.Close asChild>
-                        <IconButton className="dialog-close" label="بستن پنجره">
+                        <IconButton
+                            className="dialog-close"
+                            label={tr("m188901d16c")}
+                        >
                             <X size={18} />
                         </IconButton>
                     </DialogPrimitive.Close>
-                    {children}
+                    <DraftScope.Provider value={scope}>
+                        {children}
+                    </DraftScope.Provider>
                 </DialogPrimitive.Content>
             </DialogPrimitive.Portal>
         </DialogPrimitive.Root>
@@ -132,6 +180,7 @@ export function Artwork({
     className?: string;
     label?: string;
 }) {
+    useLocale();
     const [failed, setFailed] = useState(false);
     useEffect(() => setFailed(false), [url]);
     const variant = Math.abs(seed) % palettes.length;
@@ -228,7 +277,8 @@ export function Artwork({
         </div>
     );
 }
-export function Loading({ label = "در حال دریافت…" }: { label?: string }) {
+export function Loading({ label = tr("m441def3dc4") }: { label?: string }) {
+    useLocale();
     return (
         <div className="loading" role="status">
             <LoaderCircle className="spin" size={22} />
@@ -243,14 +293,15 @@ export function ErrorState({
     error: Error;
     retry?: () => void;
 }) {
+    useLocale();
     return (
         <div className="empty-state" role="alert">
             <Disc3 size={32} />
-            <h2>دریافت اطلاعات انجام نشد</h2>
+            <h2>{tr("mf4a3ad1e66")}</h2>
             <p>{error.message}</p>
             {retry && (
                 <button className="button secondary" onClick={retry}>
-                    تلاش دوباره
+                    {tr("med6ee8fe9d")}
                 </button>
             )}
         </div>
@@ -265,6 +316,7 @@ export function EmptyState({
     text: string;
     admin?: boolean;
 }) {
+    useLocale();
     return (
         <div className="empty-state">
             <Disc3 size={42} strokeWidth={1} />
@@ -272,7 +324,8 @@ export function EmptyState({
             <p>{text}</p>
             {admin && (
                 <Link to="/admin" className="button">
-                    ورود اولین پلی‌لیست <ArrowLeft size={16} />
+                    {tr("m74de17b78f")}
+                    <ArrowLeft size={16} />
                 </Link>
             )}
         </div>

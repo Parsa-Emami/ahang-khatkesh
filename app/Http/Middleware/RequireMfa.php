@@ -11,10 +11,10 @@ class RequireMfa
     public function handle(Request $request, Closure $next): Response
     {
         if (! $request->user()->hasEnabledTwoFactorAuthentication()) {
-            return response()->json(['message' => 'برای استفاده از پنل مدیریت، تأیید دومرحله‌ای را فعال کنید.', 'code' => 'mfa_enrollment_required'], 428);
+            return response()->json(['message' => __('برای استفاده از پنل مدیریت، تأیید دومرحله‌ای را فعال کنید.'), 'code' => 'mfa_enrollment_required'], 428);
         }
         if (! $request->session()->get('auth.mfa_authenticated', false)) {
-            return response()->json(['message' => 'ورود دومرحله‌ای را تکمیل کنید.', 'code' => 'mfa_authentication_required'], 401);
+            return response()->json(['message' => __('ورود دومرحله‌ای را تکمیل کنید.'), 'code' => 'mfa_authentication_required'], 401);
         }
 
         return $next($request);

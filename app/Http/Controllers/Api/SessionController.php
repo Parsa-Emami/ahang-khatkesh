@@ -39,7 +39,13 @@ class SessionController extends Controller
 
     public function update(Request $request): UserResource
     {
-        $data = $request->validate(['theme' => ['required', Rule::in(['light', 'dark', 'system'])]]);
+        $data = $request->validate([
+            'theme' => ['sometimes', 'required', Rule::in(['light', 'dark', 'system'])],
+            'locale' => ['sometimes', 'required', Rule::in(['fa-IR', 'en-US'])],
+            'direction' => ['sometimes', 'required', Rule::in(['auto', 'rtl', 'ltr'])],
+            'motion' => ['sometimes', 'required', Rule::in(['system', 'full', 'reduced'])],
+            'time_zone' => ['sometimes', 'required', 'string', 'max:64', 'timezone:all'],
+        ]);
         $request->user()->update($data);
 
         return new UserResource($request->user());
@@ -57,6 +63,6 @@ class SessionController extends Controller
         $request->session()->put('auth.access_version', $user->access_version);
         $request->session()->passwordConfirmed();
 
-        return response()->json(['data' => ['csrf_token' => csrf_token(), 'message' => 'رمز عبور تغییر کرد.', 'user' => new UserResource($user)]]);
+        return response()->json(['data' => ['csrf_token' => csrf_token(), 'message' => __('رمز عبور تغییر کرد.'), 'user' => new UserResource($user)]]);
     }
 }

@@ -23,7 +23,7 @@ class ResetMemberPassword
             $subject = User::whereKey($subject->id)->lockForUpdate()->firstOrFail();
             abort_unless($actor->hasPermission(Permission::UsersManage), 403);
             abort_if($subject->role->isPrivileged() && ! $actor->hasPermission(Permission::RolesManage), 403);
-            abort_if($actor->id === $subject->id, 422, 'برای تغییر رمز خودتان از تنظیمات حساب استفاده کنید.');
+            abort_if($actor->id === $subject->id, 422, __('برای تغییر رمز خودتان از تنظیمات حساب استفاده کنید.'));
             $subject->forceFill(['password' => $encoded, 'access_version' => $subject->access_version + 1, 'remember_token' => Str::random(60)])->save();
             if (config('session.driver') === 'database') {
                 DB::table('sessions')->where('user_id', $subject->id)->delete();

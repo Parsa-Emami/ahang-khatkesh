@@ -8,6 +8,7 @@ use App\Http\Middleware\RequireMfa;
 use App\Http\Middleware\RequireRecentPassword;
 use App\Http\Middleware\SecurityHeaders;
 use App\Http\Middleware\SerializeMfaChallenge;
+use App\Http\Middleware\SetLocale;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -18,6 +19,7 @@ use Symfony\Component\HttpFoundation\Response;
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(web: __DIR__.'/../routes/web.php', commands: __DIR__.'/../routes/console.php', health: '/up')
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->append(SetLocale::class);
         $middleware->append(SecurityHeaders::class);
         $middleware->alias(['guest-session' => RequireGuestSession::class, 'active' => EnsureAccountActive::class, 'recent-password' => RequireRecentPassword::class, 'mfa' => RequireMfa::class, 'serialized-mfa' => SerializeMfaChallenge::class]);
     })
@@ -30,6 +32,8 @@ return Application::configure(basePath: dirname(__DIR__))
             $response->headers->set('X-Content-Type-Options', 'nosniff');
             if (request()->is('api/*')) {
                 $response->headers->set('Cache-Control', 'private, no-store');
+                $response->headers->set('Content-Language', app()->getLocale() === 'en' ? 'en-US' : 'fa-IR');
+                $response->setVary('Accept-Language', false);
             }
 
             return $response;

@@ -1,3 +1,4 @@
+import { tr } from "../../i18n/runtime";
 import { api, json, sessionHeaders } from "../../lib/api";
 export async function uploadWithReservation<T>(
     file: File,
@@ -10,7 +11,7 @@ export async function uploadWithReservation<T>(
     const context = expectedContext;
     const assertContext = () => {
         if (!context || context !== sessionHeaders()["X-Session-Context"])
-            throw new Error("نشست تغییر کرد؛ آپلود این انتخاب متوقف شد.");
+            throw new Error(tr("mb220616729"));
     };
     assertContext();
     const reserved = await api<{ data: { id: string } }>(

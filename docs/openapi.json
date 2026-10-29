@@ -88,7 +88,12 @@
             "$ref": "#/components/responses/RateLimited"
           }
         },
-        "security": []
+        "security": [],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
+          }
+        ]
       }
     },
     "/login": {
@@ -164,7 +169,12 @@
               }
             }
           }
-        }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
+          }
+        ]
       }
     },
     "/logout": {
@@ -263,6 +273,9 @@
               "type": "string",
               "pattern": "^[1-9][0-9]*:[0-9]+$"
             }
+          },
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
           }
         ]
       }
@@ -270,7 +283,7 @@
     "/me": {
       "patch": {
         "operationId": "patch_me",
-        "summary": "Change own theme",
+        "summary": "Change own interface preferences",
         "tags": [
           "Library"
         ],
@@ -358,11 +371,35 @@
                       "dark",
                       "system"
                     ]
+                  },
+                  "locale": {
+                    "type": "string",
+                    "enum": [
+                      "fa-IR",
+                      "en-US"
+                    ]
+                  },
+                  "direction": {
+                    "type": "string",
+                    "enum": [
+                      "auto",
+                      "rtl",
+                      "ltr"
+                    ]
+                  },
+                  "motion": {
+                    "type": "string",
+                    "enum": [
+                      "system",
+                      "full",
+                      "reduced"
+                    ]
+                  },
+                  "time_zone": {
+                    "type": "string",
+                    "maxLength": 64
                   }
-                },
-                "required": [
-                  "theme"
-                ]
+                }
               }
             }
           }
@@ -377,6 +414,9 @@
               "type": "string",
               "pattern": "^[1-9][0-9]*:[0-9]+$"
             }
+          },
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
           }
         ]
       }
@@ -512,6 +552,9 @@
               "type": "string",
               "pattern": "^[1-9][0-9]*:[0-9]+$"
             }
+          },
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
           }
         ]
       }
@@ -617,6 +660,9 @@
               "type": "string",
               "pattern": "^[1-9][0-9]*:[0-9]+$"
             }
+          },
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
           }
         ]
       }
@@ -772,6 +818,9 @@
               "type": "string",
               "pattern": "^[1-9][0-9]*:[0-9]+$"
             }
+          },
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
           }
         ]
       }
@@ -874,6 +923,9 @@
               "type": "string",
               "pattern": "^[1-9][0-9]*:[0-9]+$"
             }
+          },
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
           }
         ]
       }
@@ -1016,6 +1068,9 @@
               "type": "string",
               "pattern": "^[1-9][0-9]*:[0-9]+$"
             }
+          },
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
           }
         ]
       }
@@ -1159,6 +1214,9 @@
                 "mp3-320"
               ]
             }
+          },
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
           }
         ]
       },
@@ -1250,6 +1308,9 @@
                 "mp3-320"
               ]
             }
+          },
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
           }
         ]
       }
@@ -1348,6 +1409,9 @@
               "type": "string",
               "pattern": "^[1-9][0-9]*:[0-9]+$"
             }
+          },
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
           }
         ]
       },
@@ -1394,6 +1458,9 @@
               "type": "integer",
               "minimum": 1
             }
+          },
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
           }
         ]
       }
@@ -1503,6 +1570,9 @@
               "type": "string",
               "pattern": "^[1-9][0-9]*:[0-9]+$"
             }
+          },
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
           }
         ]
       },
@@ -1610,6 +1680,9 @@
               "type": "string",
               "pattern": "^[1-9][0-9]*:[0-9]+$"
             }
+          },
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
           }
         ]
       }
@@ -1719,6 +1792,9 @@
               "type": "string",
               "pattern": "^[1-9][0-9]*:[0-9]+$"
             }
+          },
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
           }
         ]
       },
@@ -1826,6 +1902,9 @@
               "type": "string",
               "pattern": "^[1-9][0-9]*:[0-9]+$"
             }
+          },
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
           }
         ]
       }
@@ -1966,6 +2045,9 @@
               "type": "string",
               "pattern": "^[1-9][0-9]*:[0-9]+$"
             }
+          },
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
           }
         ]
       },
@@ -2067,6 +2149,9 @@
               "type": "string",
               "pattern": "^[1-9][0-9]*:[0-9]+$"
             }
+          },
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
           }
         ]
       }
@@ -2162,6 +2247,9 @@
               "type": "string",
               "pattern": "^[1-9][0-9]*:[0-9]+$"
             }
+          },
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
           }
         ]
       },
@@ -2280,6 +2368,9 @@
               "type": "string",
               "pattern": "^[1-9][0-9]*:[0-9]+$"
             }
+          },
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
           }
         ]
       }
@@ -2367,6 +2458,9 @@
               "type": "string",
               "pattern": "^[1-9][0-9]*:[0-9]+$"
             }
+          },
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
           }
         ],
         "requestBody": {
@@ -2490,6 +2584,9 @@
               "type": "string",
               "pattern": "^[1-9][0-9]*:[0-9]+$"
             }
+          },
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
           }
         ]
       },
@@ -2621,6 +2718,9 @@
               "type": "string",
               "pattern": "^[1-9][0-9]*:[0-9]+$"
             }
+          },
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
           }
         ],
         "description": "FLAC max 512 MiB; other audio max 100 MiB. FLAC conversion, reservation and media admission share the SQL transaction. Source retained."
@@ -2731,6 +2831,9 @@
               "type": "string",
               "pattern": "^[1-9][0-9]*:[0-9]+$"
             }
+          },
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
           }
         ]
       },
@@ -2827,6 +2930,9 @@
               "type": "string",
               "pattern": "^[1-9][0-9]*:[0-9]+$"
             }
+          },
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
           }
         ],
         "requestBody": {
@@ -2953,6 +3059,9 @@
               "type": "string",
               "pattern": "^[1-9][0-9]*:[0-9]+$"
             }
+          },
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
           }
         ]
       }
@@ -3040,6 +3149,9 @@
               "type": "string",
               "pattern": "^[1-9][0-9]*:[0-9]+$"
             }
+          },
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
           }
         ],
         "requestBody": {
@@ -3093,6 +3205,9 @@
               "type": "string",
               "pattern": "^[1-9][0-9]*:[0-9]+$"
             }
+          },
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
           }
         ],
         "requestBody": {
@@ -3280,6 +3395,9 @@
               "type": "string",
               "pattern": "^[1-9][0-9]*:[0-9]+$"
             }
+          },
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
           }
         ],
         "requestBody": {
@@ -3412,6 +3530,9 @@
               "type": "string",
               "pattern": "^[1-9][0-9]*:[0-9]+$"
             }
+          },
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
           }
         ],
         "requestBody": {
@@ -3507,7 +3628,12 @@
               }
             }
           }
-        }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
+          }
+        ]
       }
     },
     "/me/password/confirm": {
@@ -3613,6 +3739,9 @@
               "type": "string",
               "pattern": "^[1-9][0-9]*:[0-9]+$"
             }
+          },
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
           }
         ]
       }
@@ -3700,6 +3829,9 @@
               "type": "string",
               "pattern": "^[1-9][0-9]*:[0-9]+$"
             }
+          },
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
           }
         ]
       },
@@ -3788,6 +3920,9 @@
               "type": "string",
               "pattern": "^[1-9][0-9]*:[0-9]+$"
             }
+          },
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
           }
         ]
       },
@@ -3869,6 +4004,9 @@
               "type": "string",
               "pattern": "^[1-9][0-9]*:[0-9]+$"
             }
+          },
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
           }
         ]
       }
@@ -3977,6 +4115,9 @@
               "type": "string",
               "pattern": "^[1-9][0-9]*:[0-9]+$"
             }
+          },
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
           }
         ]
       }
@@ -4064,6 +4205,9 @@
               "type": "string",
               "pattern": "^[1-9][0-9]*:[0-9]+$"
             }
+          },
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
           }
         ]
       },
@@ -4148,6 +4292,9 @@
               "type": "string",
               "pattern": "^[1-9][0-9]*:[0-9]+$"
             }
+          },
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
           }
         ]
       }
@@ -4272,6 +4419,9 @@
               "type": "string",
               "pattern": "^[1-9][0-9]*:[0-9]+$"
             }
+          },
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
           }
         ]
       }
@@ -4380,6 +4530,9 @@
               "type": "string",
               "pattern": "^[1-9][0-9]*:[0-9]+$"
             }
+          },
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
           }
         ]
       }
@@ -4521,6 +4674,9 @@
               "type": "string",
               "pattern": "^[1-9][0-9]*:[0-9]+$"
             }
+          },
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
           }
         ]
       }
@@ -4626,6 +4782,9 @@
               "type": "string",
               "pattern": "^[1-9][0-9]*:[0-9]+$"
             }
+          },
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
           }
         ]
       },
@@ -4764,6 +4923,9 @@
               "type": "string",
               "pattern": "^[1-9][0-9]*:[0-9]+$"
             }
+          },
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
           }
         ]
       }
@@ -4838,6 +5000,9 @@
               "type": "string",
               "pattern": "^[1-9][0-9]*:[0-9]+$"
             }
+          },
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
           }
         ],
         "security": [
@@ -4994,6 +5159,9 @@
               "type": "string",
               "pattern": "^[1-9][0-9]*:[0-9]+$"
             }
+          },
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
           }
         ]
       },
@@ -5137,6 +5305,9 @@
               "type": "string",
               "pattern": "^[1-9][0-9]*:[0-9]+$"
             }
+          },
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
           }
         ]
       }
@@ -5211,6 +5382,9 @@
               "type": "string",
               "pattern": "^[1-9][0-9]*:[0-9]+$"
             }
+          },
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
           }
         ],
         "security": [
@@ -5353,6 +5527,9 @@
               "type": "string",
               "pattern": "^[1-9][0-9]*:[0-9]+$"
             }
+          },
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
           }
         ]
       }
@@ -5427,6 +5604,9 @@
               "type": "string",
               "pattern": "^[1-9][0-9]*:[0-9]+$"
             }
+          },
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
           }
         ],
         "security": [
@@ -5586,6 +5766,9 @@
               "type": "string",
               "pattern": "^[1-9][0-9]*:[0-9]+$"
             }
+          },
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
           }
         ]
       }
@@ -5621,6 +5804,9 @@
               "type": "string",
               "pattern": "^[1-9][0-9]*:[0-9]+$"
             }
+          },
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
           }
         ],
         "requestBody": {
@@ -5802,6 +5988,9 @@
               "type": "string",
               "pattern": "^[1-9][0-9]*:[0-9]+$"
             }
+          },
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
           }
         ],
         "security": [
@@ -5975,6 +6164,9 @@
               "type": "string",
               "pattern": "^[1-9][0-9]*:[0-9]+$"
             }
+          },
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
           }
         ],
         "security": [
@@ -6137,6 +6329,9 @@
               "type": "string",
               "pattern": "^[1-9][0-9]*:[0-9]+$"
             }
+          },
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
           }
         ]
       }
@@ -6218,6 +6413,9 @@
               "type": "string",
               "pattern": "^[1-9][0-9]*:[0-9]+$"
             }
+          },
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
           }
         ],
         "security": [
@@ -6339,6 +6537,9 @@
               "type": "string",
               "pattern": "^[1-9][0-9]*:[0-9]+$"
             }
+          },
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
           }
         ],
         "security": [
@@ -6405,6 +6606,9 @@
               "type": "string",
               "pattern": "^[1-9][0-9]*:[0-9]+$"
             }
+          },
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
           }
         ],
         "requestBody": {
@@ -6550,6 +6754,9 @@
               "type": "string",
               "pattern": "^[1-9][0-9]*:[0-9]+$"
             }
+          },
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
           }
         ],
         "requestBody": {
@@ -6700,6 +6907,9 @@
               "type": "string",
               "pattern": "^[1-9][0-9]*:[0-9]+$"
             }
+          },
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
           }
         ],
         "responses": {
@@ -6821,6 +7031,9 @@
               "type": "string",
               "pattern": "^[1-9][0-9]*:[0-9]+$"
             }
+          },
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
           }
         ],
         "security": [
@@ -6967,6 +7180,9 @@
               "type": "string",
               "pattern": "^[1-9][0-9]*:[0-9]+$"
             }
+          },
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
           }
         ],
         "security": [
@@ -7148,6 +7364,9 @@
               "type": "string",
               "format": "uuid"
             }
+          },
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
           }
         ],
         "security": [
@@ -7293,7 +7512,11 @@
         "tags": [
           "Administration"
         ],
-        "parameters": [],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
+          }
+        ],
         "responses": {
           "200": {
             "description": "Success",
@@ -7461,6 +7684,9 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
           }
         ],
         "responses": {
@@ -7626,6 +7852,9 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
           }
         ],
         "responses": {
@@ -7797,6 +8026,9 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
           }
         ],
         "responses": {
@@ -8004,6 +8236,9 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
           }
         ],
         "responses": {
@@ -8193,6 +8428,9 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
           }
         ],
         "responses": {
@@ -8387,7 +8625,11 @@
           "role_label",
           "permissions",
           "mfa_enabled",
-          "access_version"
+          "access_version",
+          "locale",
+          "direction",
+          "motion",
+          "time_zone"
         ],
         "properties": {
           "id": {
@@ -8448,6 +8690,33 @@
           "access_version": {
             "type": "integer",
             "minimum": 0
+          },
+          "locale": {
+            "type": "string",
+            "enum": [
+              "fa-IR",
+              "en-US"
+            ]
+          },
+          "direction": {
+            "type": "string",
+            "enum": [
+              "auto",
+              "rtl",
+              "ltr"
+            ]
+          },
+          "motion": {
+            "type": "string",
+            "enum": [
+              "system",
+              "full",
+              "reduced"
+            ]
+          },
+          "time_zone": {
+            "type": "string",
+            "maxLength": 64
           }
         },
         "additionalProperties": false
@@ -9744,6 +10013,21 @@
               "$ref": "#/components/schemas/Error"
             }
           }
+        }
+      }
+    },
+    "parameters": {
+      "AcceptLanguage": {
+        "name": "Accept-Language",
+        "in": "header",
+        "required": false,
+        "description": "Supported locales: fa-IR and en-US. Unsupported language preferences fall back to fa-IR. Does not change authorization or metadata.",
+        "schema": {
+          "type": "string",
+          "examples": [
+            "fa-IR",
+            "en-US"
+          ]
         }
       }
     }

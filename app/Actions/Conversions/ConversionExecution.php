@@ -175,13 +175,13 @@ class ConversionExecution
         return DB::transaction(function () use ($actor, $conversion, $revision, $generation, $retry): MediaConversion {
             $actor = $this->authorize->handle($actor);
             $c = MediaConversion::whereKey($conversion->id)->lockForUpdate()->firstOrFail();
-            abort_unless($c->revision === $revision && $c->generation === $generation, 409, 'این تبدیل تغییر کرده است؛ وضعیت تازه را بارگذاری کنید.');
+            abort_unless($c->revision === $revision && $c->generation === $generation, 409, __('این تبدیل تغییر کرده است؛ وضعیت تازه را بارگذاری کنید.'));
             if ($retry) {
-                abort_unless(in_array($c->status, ['failed', 'needs_review', 'cancelled'], true), 409, 'این تبدیل قابل شروع دوباره نیست.');
+                abort_unless(in_array($c->status, ['failed', 'needs_review', 'cancelled'], true), 409, __('این تبدیل قابل شروع دوباره نیست.'));
                 $c->update(['automatic_retries' => 0]);
                 $this->requests->enqueue($actor, $c->source->fresh('blob'), $c);
             } else {
-                abort_unless(in_array($c->status, MediaConversion::ACTIVE, true) || $c->next_retry_at, 409, 'این تبدیل پایان یافته است.');
+                abort_unless(in_array($c->status, MediaConversion::ACTIVE, true) || $c->next_retry_at, 409, __('این تبدیل پایان یافته است.'));
                 $this->stop($c, 'cancelled', 'cancelled_by_owner');
             }
             AuditEvent::create(['user_id' => $actor->id, 'action' => $retry ? 'media.conversion_retried' : 'media.conversion_cancelled', 'subject_id' => $c->id]);

@@ -1,7 +1,11 @@
+import { currentPreferences } from "../../i18n/runtime";
+import { tr } from "../../i18n/runtime";
+import { useLocale } from "../../i18n/LocaleProvider";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "../../lib/api";
 import { digits } from "../../types";
 export function StorageStatus() {
+    useLocale();
     const query = useQuery({
         queryKey: ["admin", "storage"],
         queryFn: () =>
@@ -21,13 +25,13 @@ export function StorageStatus() {
     if (query.isPending)
         return (
             <p className="muted" role="status">
-                در حال بررسی فضای کتابخانه…
+                {tr("m7bca970158")}
             </p>
         );
     if (query.error)
         return (
             <p className="form-error" role="alert">
-                وضعیت فضا دریافت نشد: {query.error.message}
+                {tr("mc96137ba06", { v0: query.error.message })}
             </p>
         );
     const data = query.data.data;
@@ -37,17 +41,17 @@ export function StorageStatus() {
         const value =
             bytes /
             (unit === "GiB" ? 1073741824 : unit === "MiB" ? 1048576 : 1024);
-        return `${new Intl.NumberFormat("fa-IR", { maximumFractionDigits: 1 }).format(value)} ${unit}`;
+        return `${new Intl.NumberFormat(currentPreferences().locale, { maximumFractionDigits: 1 }).format(value)} ${unit}`;
     };
     return (
-        <div className="storage-status" aria-label="فضای کتابخانه">
-            <strong>فضای کتابخانه</strong>
+        <div className="storage-status" aria-label={tr("m7e4b9ecaee")}>
+            <strong>{tr("m7e4b9ecaee")}</strong>
             <dl className="storage-metrics">
                 {[
-                    ["مصرف‌شده", data.used_bytes],
-                    ["رزرو", data.reserved_bytes],
-                    ["ظرفیت", data.quota_bytes],
-                    ["قابل رزرو", data.available_bytes],
+                    [tr("m5877b032a2"), data.used_bytes],
+                    [tr("m67ae9942a7"), data.reserved_bytes],
+                    [tr("mf953aa629c"), data.quota_bytes],
+                    [tr("m350f53b36a"), data.available_bytes],
                 ].map(([label, value]) => (
                     <div key={label}>
                         <dt>{label}</dt>
@@ -59,14 +63,12 @@ export function StorageStatus() {
             </dl>
             {data.pending_cleanup > 0 && (
                 <p className="muted">
-                    {digits(data.pending_cleanup)} آپلود در انتظار آزادسازی
-                    فضاست.
+                    {tr("m44686987cd", { v0: digits(data.pending_cleanup) })}
                 </p>
             )}
             {data.legacy_assets > 0 && (
                 <p role="alert" className="form-error">
-                    رسانه‌های قدیمی باید پیش از آپلود تازه توسط اپراتور بررسی و
-                    منتقل شوند.
+                    {tr("maa331124c8")}
                 </p>
             )}
         </div>

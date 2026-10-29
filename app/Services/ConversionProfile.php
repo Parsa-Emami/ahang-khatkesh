@@ -26,9 +26,9 @@ class ConversionProfile
 
     public function assertSource(MediaAsset $source): void
     {
-        abort_if($source->source_asset_id !== null || $source->codec !== 'flac' || ! in_array($source->channels, [1, 2], true), 422, 'این پروفایل فقط FLAC اصلی تک‌کاناله یا استریو را می‌پذیرد.');
-        abort_unless($source->duration_seconds > 0 && $source->duration_seconds <= config('music.max_duration_seconds') && $source->blob?->state === 'ready', 409, 'فایل اصلی نیاز به بررسی دارد.');
+        abort_if($source->source_asset_id !== null || $source->codec !== 'flac' || ! in_array($source->channels, [1, 2], true), 422, __('این پروفایل فقط FLAC اصلی تک‌کاناله یا استریو را می‌پذیرد.'));
+        abort_unless($source->duration_seconds > 0 && $source->duration_seconds <= config('music.max_duration_seconds') && $source->blob?->state === 'ready', 409, __('فایل اصلی نیاز به بررسی دارد.'));
         $link = DB::table('track_media')->where('media_asset_id', $source->id)->first();
-        abort_if($link && $link->purpose !== 'original', 409, 'نسخهٔ مشتق نمی‌تواند اصل تبدیل باشد.');
+        abort_if($link && $link->purpose !== 'original', 409, __('نسخهٔ مشتق نمی‌تواند اصل تبدیل باشد.'));
     }
 }

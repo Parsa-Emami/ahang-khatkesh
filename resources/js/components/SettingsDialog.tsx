@@ -1,3 +1,8 @@
+import { PreferenceControls } from "../i18n/PreferenceControls";
+import { useDraftNavigation } from "../features/drafts/DraftNavigation";
+import type { Preferences } from "../i18n/locales";
+import { tr } from "../i18n/runtime";
+import { useLocale } from "../i18n/LocaleProvider";
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { LogOut } from "lucide-react";
@@ -14,6 +19,8 @@ export function SettingsDialog({
     open: boolean;
     onOpenChange: (value: boolean) => void;
 }) {
+    useLocale();
+    const navigation = useDraftNavigation();
     const theme = useTheme(),
         session = useSession(),
         notify = useToast(),
@@ -35,6 +42,13 @@ export function SettingsDialog({
             }),
         onError: (error) => notify(error.message, true),
     });
+    const preferences = useMutation({
+        scope: { id: "interface-preferences" },
+        mutationFn: (value: Partial<Preferences>) =>
+            api<{ data: User }>("/me", { method: "PATCH", body: json(value) }),
+        onSuccess: () => {},
+        onError: (error) => notify(error.message, true),
+    });
     const password = useMutation({
         mutationFn: () =>
             api("/me/password", { method: "PUT", body: json(passwords) }),
@@ -44,7 +58,7 @@ export function SettingsDialog({
                 password: "",
                 password_confirmation: "",
             });
-            notify("رمز عبور با موفقیت تغییر کرد.");
+            notify(tr("m8405c8cc4b"));
         },
         onError: (error) => notify(error.message, true),
     });
@@ -67,6 +81,20 @@ export function SettingsDialog({
     return (
         <Dialog
             open={open}
+            dirty={
+                !!(
+                    passwords.current_password ||
+                    passwords.password ||
+                    passwords.password_confirmation
+                )
+            }
+            onDiscard={() =>
+                setPasswords({
+                    current_password: "",
+                    password: "",
+                    password_confirmation: "",
+                })
+            }
             onOpenChange={(value) => {
                 onOpenChange(value);
                 if (!value)
@@ -76,11 +104,14 @@ export function SettingsDialog({
                         password_confirmation: "",
                     });
             }}
-            title="حساب و تجربهٔ تو"
-            description={session.user?.email || "تنظیمات حساب"}
+            title={tr("m3019e60fe5")}
+            description={session.user?.email || tr("mb9c7f76721")}
         >
+            <PreferenceControls
+                onChange={(value) => preferences.mutate(value)}
+            />
             <div className="settings-theme">
-                <h3>ظاهر برنامه</h3>
+                <h3>{tr("madd184f910")}</h3>
                 <div className="filter-chips">
                     {(["light", "dark", "system"] as Theme[]).map((value) => (
                         <button
@@ -94,10 +125,10 @@ export function SettingsDialog({
                             }}
                         >
                             {value === "light"
-                                ? "روشن"
+                                ? tr("m7bc6e9e17e")
                                 : value === "dark"
-                                  ? "تیره"
-                                  : "هماهنگ با دستگاه"}
+                                  ? tr("m96bdbd3e35")
+                                  : tr("m28f13a01ab")}
                         </button>
                     ))}
                 </div>
@@ -109,10 +140,11 @@ export function SettingsDialog({
                 }}
                 className="stack-form"
             >
-                <h3>تغییر رمز عبور</h3>
+                <h3>{tr("md9cbe1b5f0")}</h3>
                 <label>
-                    رمز فعلی
+                    {tr("m6b87803653")}
                     <input
+                        name="current_password"
                         type="password"
                         autoComplete="current-password"
                         dir="ltr"
@@ -127,8 +159,9 @@ export function SettingsDialog({
                     />
                 </label>
                 <label>
-                    رمز جدید
+                    {tr("m2fdd0ee685")}
                     <input
+                        name="password"
                         type="password"
                         autoComplete="new-password"
                         minLength={12}
@@ -143,11 +176,12 @@ export function SettingsDialog({
                             }))
                         }
                     />
-                    <small>حداقل ۱۲ نویسه، شامل حرف و عدد</small>
+                    <small>{tr("m4f6ac0d22a")}</small>
                 </label>
                 <label>
-                    تکرار رمز جدید
+                    {tr("mafc7aa3dd9")}
                     <input
+                        name="password_confirmation"
                         type="password"
                         autoComplete="new-password"
                         dir="ltr"
@@ -165,17 +199,22 @@ export function SettingsDialog({
                     className="button secondary"
                     disabled={password.isPending}
                 >
-                    ذخیرهٔ رمز عبور
+                    {tr("m1f2a4ae9b9")}
                 </button>
             </form>
             {open && <MfaPanel />}
             <button
                 className="button danger logout-button"
                 disabled={logout.isPending}
-                onClick={() => logout.mutate()}
+                onClick={() =>
+                    navigation.request({
+                        proceed: () => logout.mutate(),
+                        cancel: () => {},
+                    })
+                }
             >
                 <LogOut size={17} />
-                خروج از حساب
+                {tr("m3e6ad2c2f8")}
             </button>
         </Dialog>
     );

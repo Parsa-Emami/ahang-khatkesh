@@ -1,3 +1,7 @@
+import { useDraftGuard } from "../drafts/DraftNavigation";
+import { currentPreferences } from "../../i18n/runtime";
+import { tr } from "../../i18n/runtime";
+import { useLocale } from "../../i18n/LocaleProvider";
 import { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -31,16 +35,31 @@ import { createUploadBatch } from "./uploads";
 import { conversionLabels } from "./media/ConversionPanel";
 import { StorageStatus } from "./StorageStatus";
 const statusLabels: Record<ImportRun["status"], string> = {
-    ready: "آمادهٔ تأیید",
-    processing: "در صف پردازش",
-    running: "در حال ساخت",
-    completed: "انجام‌شده",
-    failed: "خطای پردازش؛ قابل تلاش دوباره",
-    needs_review: "نیاز به پیش‌نمایش تازه",
-    cancelled: "لغو به دلیل تغییر دسترسی",
+    get ready() {
+        return tr("mf0ed39bb79");
+    },
+    get processing() {
+        return tr("madb18ca632");
+    },
+    get running() {
+        return tr("ma61754a579");
+    },
+    get completed() {
+        return tr("mf92b11bb14");
+    },
+    get failed() {
+        return tr("m6876ba004a");
+    },
+    get needs_review() {
+        return tr("m2776b285ad");
+    },
+    get cancelled() {
+        return tr("m2ac08a2b65");
+    },
 };
 
 export function ImportsPanel({ active = true }: { active?: boolean }) {
+    useLocale();
     const client = useQueryClient(),
         notify = useToast();
     const [name, setName] = useState(""),
@@ -55,6 +74,26 @@ export function ImportsPanel({ active = true }: { active?: boolean }) {
         [publish, setPublish] = useState(true),
         [assetPage, setAssetPage] = useState(1),
         [historyPage, setHistoryPage] = useState(1);
+    useDraftGuard(
+        !!(
+            name ||
+            description ||
+            artist ||
+            rows.length ||
+            manifest ||
+            uploading
+        ),
+        () => {
+            setName("");
+            setDescription("");
+            setArtist("");
+            setRows([]);
+            setManifest(null);
+            setRunId(null);
+        },
+        undefined,
+        true,
+    );
     const [dragging, setDragging] = useState(false);
     const key = useRef(crypto.randomUUID());
     useEffect(() => {
@@ -116,7 +155,7 @@ export function ImportsPanel({ active = true }: { active?: boolean }) {
         if (uploading) return;
         const batch = Array.from(files);
         if (batch.length > 20) {
-            notify("در هر نوبت حداکثر ۲۰ فایل انتخاب کن.", true);
+            notify(tr("m514f8f6d14"), true);
             return;
         }
         const uploadSelected = createUploadBatch();
@@ -125,15 +164,17 @@ export function ImportsPanel({ active = true }: { active?: boolean }) {
         for (let index = 0; index < batch.length; index++) {
             const file = batch[index];
             setUploading(
-                `${digits(index + 1)} از ${digits(batch.length)} — ${file.name}`,
+                tr("m0cbba090b2", {
+                    v0: digits(index + 1),
+                    v1: digits(batch.length),
+                    v2: file.name,
+                }),
             );
             if (
                 file.size >
                 (/\.flac$/i.test(file.name) ? 512 : 100) * 1024 * 1024
             ) {
-                errors.push(
-                    `${file.name}: حجم بیشتر از سقف مجاز (FLAC: ۵۱۲، سایر فایل‌ها: ۱۰۰ MiB)`,
-                );
+                errors.push(tr("ma3e43603ed", { v0: file.name }));
                 continue;
             }
             try {
@@ -162,7 +203,7 @@ export function ImportsPanel({ active = true }: { active?: boolean }) {
             }),
         onSuccess: () => {
             void client.invalidateQueries({ queryKey: ["media"] });
-            notify("تبدیل به صف اضافه شد؛ اصل FLAC محفوظ است.");
+            notify(tr("maf7b1df41b"));
         },
         onError: (error) => notify(error.message, true),
     });
@@ -246,11 +287,13 @@ export function ImportsPanel({ active = true }: { active?: boolean }) {
             <StorageStatus />
             <div className="import-steps">
                 <span className={!runId ? "active" : ""}>
-                    <b>۱</b>آماده‌سازی
+                    <b>{tr("m75e6376c7c")}</b>
+                    {tr("m027e69e6af")}
                 </span>
                 <i />
                 <span className={current?.status === "ready" ? "active" : ""}>
-                    <b>۲</b>بررسی
+                    <b>{tr("m2fe45fb9d1")}</b>
+                    {tr("m8255c29747")}
                 </span>
                 <i />
                 <span
@@ -267,7 +310,8 @@ export function ImportsPanel({ active = true }: { active?: boolean }) {
                             : ""
                     }
                 >
-                    <b>۳</b>ساخت مجموعه
+                    <b>{tr("m48d505a52b")}</b>
+                    {tr("m7f803be66a")}
                 </span>
             </div>
             {!runId ? (
@@ -279,25 +323,26 @@ export function ImportsPanel({ active = true }: { active?: boolean }) {
                     }}
                 >
                     <div className="admin-panel">
-                        <h2>یک پلی‌لیست تازه</h2>
-                        <p className="muted">
-                            فایل‌ها را بارگذاری کن، اطلاعات آهنگ‌ها را تنظیم کن
-                            و قبل از ساخت، پیش‌نمایش را ببین.
-                        </p>
+                        <h2>{tr("m8d10560fee")}</h2>
+                        <p className="muted">{tr("mae73dcd3da")}</p>
                         <div className="form-grid">
                             <label>
-                                نام پلی‌لیست
+                                {tr("ma132581369")}
                                 <input
+                                    dir="auto"
+                                    name="name"
                                     required
                                     maxLength={160}
                                     value={name}
                                     onChange={(e) => setName(e.target.value)}
-                                    placeholder="مثلاً: ساعتِ آبی"
+                                    placeholder={tr("m718534747f")}
                                 />
                             </label>
                             <label>
-                                حال‌وهوا
+                                {tr("m7a15be7b2e")}
                                 <select
+                                    dir="auto"
+                                    name="mood"
                                     value={mood}
                                     onChange={(e) =>
                                         setMood(e.target.value as Mood)
@@ -314,22 +359,26 @@ export function ImportsPanel({ active = true }: { active?: boolean }) {
                             </label>
                         </div>
                         <label>
-                            توضیح کوتاه
+                            {tr("m18e24402ec")}
                             <textarea
+                                dir="auto"
+                                name="description"
                                 maxLength={2000}
                                 rows={2}
                                 value={description}
                                 onChange={(e) => setDescription(e.target.value)}
-                                placeholder="این مجموعه برای چه لحظه‌هایی ساخته شده؟"
+                                placeholder={tr("mc9acb3fbe2")}
                             />
                         </label>
                         <label>
-                            هنرمند پیش‌فرض
+                            {tr("m925f2ebfff")}
                             <input
+                                dir="auto"
+                                name="artist"
                                 maxLength={255}
                                 value={artist}
                                 onChange={(e) => setArtist(e.target.value)}
-                                placeholder="برای ردیف‌هایی که هنرمندشان خالی است"
+                                placeholder={tr("m204da9414a")}
                             />
                         </label>
                         <label
@@ -346,19 +395,12 @@ export function ImportsPanel({ active = true }: { active?: boolean }) {
                             }}
                         >
                             <UploadCloud size={29} />
-                            <strong>
-                                {uploading || "آهنگ‌ها را اینجا رها کن"}
-                            </strong>
-                            <span>
-                                یا برای انتخاب فایل بزن · MP3، M4A، WAV، OGG و
-                                FLAC
-                            </span>
-                            <small>
-                                FLAC تا ۵۱۲ MiB · سایر فایل‌ها تا ۱۰۰ MiB · هر
-                                نوبت تا ۲۰ فایل
-                            </small>
+                            <strong>{uploading || tr("me4fb71e4af")}</strong>
+                            <span>{tr("m8792fbb500")}</span>
+                            <small>{tr("m67db005eaa")}</small>
                             <input
-                                aria-label="بارگذاری فایل‌های صوتی"
+                                dir="auto"
+                                aria-label={tr("m0cc6ed7f5c")}
                                 type="file"
                                 accept=".mp3,.m4a,.wav,.ogg,.flac"
                                 multiple
@@ -378,7 +420,7 @@ export function ImportsPanel({ active = true }: { active?: boolean }) {
                             </div>
                         )}
                         <details className="asset-library">
-                            <summary>انتخاب از فایل‌های بارگذاری‌شده</summary>
+                            <summary>{tr("md8903fdcd0")}</summary>
                             {assets.isPending ? (
                                 <Loading />
                             ) : assets.error ? (
@@ -427,17 +469,19 @@ export function ImportsPanel({ active = true }: { active?: boolean }) {
                                                                 )
                                                             }
                                                         >
-                                                            ساخت MP3 320
+                                                            {tr("m2ea5d7fe60")}
                                                         </button>
                                                     )}
                                                 <IconButton
-                                                    label="کپی شناسهٔ فایل"
+                                                    label={tr("m2a67a39b3e")}
                                                     onClick={() =>
                                                         void navigator.clipboard
                                                             .writeText(asset.id)
                                                             .then(() =>
                                                                 notify(
-                                                                    "شناسهٔ فایل کپی شد.",
+                                                                    tr(
+                                                                        "m6b83fd3699",
+                                                                    ),
                                                                 ),
                                                             )
                                                             .catch(() =>
@@ -450,7 +494,7 @@ export function ImportsPanel({ active = true }: { active?: boolean }) {
                                                     <Copy size={16} />
                                                 </IconButton>
                                                 <IconButton
-                                                    label="افزودن فایل به فهرست"
+                                                    label={tr("m5750500ecb")}
                                                     disabled={rows.some(
                                                         (row) =>
                                                             row.asset_id ===
@@ -474,9 +518,13 @@ export function ImportsPanel({ active = true }: { active?: boolean }) {
                                                 setAssetPage((v) => v - 1)
                                             }
                                         >
-                                            قبلی
+                                            {tr("m1a592f6b2d")}
                                         </button>
-                                        <span>صفحهٔ {digits(assetPage)}</span>
+                                        <span>
+                                            {tr("ma69132201d", {
+                                                v0: digits(assetPage),
+                                            })}
+                                        </span>
                                         <button
                                             type="button"
                                             className="button secondary"
@@ -488,7 +536,7 @@ export function ImportsPanel({ active = true }: { active?: boolean }) {
                                                 setAssetPage((v) => v + 1)
                                             }
                                         >
-                                            بعدی
+                                            {tr("m54ee927e96")}
                                         </button>
                                     </div>
                                 </>
@@ -498,14 +546,18 @@ export function ImportsPanel({ active = true }: { active?: boolean }) {
                     {!!rows.length && (
                         <div className="admin-panel">
                             <div className="section-heading">
-                                <h2>اطلاعات {digits(rows.length)} آهنگ</h2>
+                                <h2>
+                                    {tr("m81820db6fe", {
+                                        v0: digits(rows.length),
+                                    })}
+                                </h2>
                                 <button
                                     type="button"
                                     className="text-link"
                                     onClick={exportManifest}
                                 >
                                     <Download size={16} />
-                                    دریافت JSON
+                                    {tr("m1759c8079c")}
                                 </button>
                             </div>
                             <div className="import-rows">
@@ -517,13 +569,17 @@ export function ImportsPanel({ active = true }: { active?: boolean }) {
                                         <span>{digits(index + 1)}</span>
                                         <label>
                                             <span className="visually-hidden">
-                                                عنوان آهنگ {digits(index + 1)}
+                                                {tr("mb7ceca95ca", {
+                                                    v0: digits(index + 1),
+                                                })}
                                             </span>
                                             <input
+                                                dir="auto"
+                                                name="title"
                                                 required={!manifest}
                                                 maxLength={255}
                                                 value={row.title}
-                                                placeholder="عنوان آهنگ"
+                                                placeholder={tr("mfedab857ca")}
                                                 onChange={(e) =>
                                                     setRows((previous) =>
                                                         previous.map(
@@ -543,13 +599,19 @@ export function ImportsPanel({ active = true }: { active?: boolean }) {
                                         </label>
                                         <label>
                                             <span className="visually-hidden">
-                                                هنرمند آهنگ {digits(index + 1)}
+                                                {tr("m77fd9e763e", {
+                                                    v0: digits(index + 1),
+                                                })}
                                             </span>
                                             <input
+                                                dir="auto"
+                                                name="artist"
                                                 required={!manifest && !artist}
                                                 maxLength={255}
                                                 value={row.artist}
-                                                placeholder={artist || "هنرمند"}
+                                                placeholder={
+                                                    artist || tr("mdb806db879")
+                                                }
                                                 onChange={(e) =>
                                                     setRows((previous) =>
                                                         previous.map(
@@ -568,7 +630,9 @@ export function ImportsPanel({ active = true }: { active?: boolean }) {
                                             />
                                         </label>
                                         <IconButton
-                                            label={`حذف ${row.title} از فهرست`}
+                                            label={tr("m4c7462552f", {
+                                                v0: row.title,
+                                            })}
                                             onClick={() =>
                                                 setRows((previous) =>
                                                     previous.filter(
@@ -587,14 +651,11 @@ export function ImportsPanel({ active = true }: { active?: boolean }) {
                     <div className="admin-panel manifest-panel">
                         <FileJson size={26} />
                         <div>
-                            <h2>فهرست آماده داری؟</h2>
-                            <p>
-                                می‌توانی JSON یا CSV با ستون‌های asset_id،
-                                title، artist و album وارد کنی. شناسه‌ها متعلق
-                                به فایل‌های بارگذاری‌شدهٔ همین کتابخانه‌اند.
-                            </p>
+                            <h2>{tr("m5bf3e847cd")}</h2>
+                            <p>{tr("mb051259aa3")}</p>
                             <input
-                                aria-label="انتخاب فایل فهرست JSON یا CSV"
+                                dir="auto"
+                                aria-label={tr("mf4056d12f6")}
                                 type="file"
                                 accept=".json,.csv"
                                 onChange={(e) =>
@@ -607,7 +668,7 @@ export function ImportsPanel({ active = true }: { active?: boolean }) {
                                     type="button"
                                     onClick={() => setManifest(null)}
                                 >
-                                    حذف فهرست انتخاب‌شده
+                                    {tr("m272a09959d")}
                                 </button>
                             )}
                         </div>
@@ -615,8 +676,10 @@ export function ImportsPanel({ active = true }: { active?: boolean }) {
                     <div className="form-actions">
                         <span className="muted">
                             {manifest
-                                ? `منبع: ${manifest.name}`
-                                : `${digits(rows.length)} آهنگ انتخاب شده`}
+                                ? tr("mbe1f34ff41", { v0: manifest.name })
+                                : tr("ma2d075ab3e", {
+                                      v0: digits(rows.length),
+                                  })}
                         </span>
                         <button
                             className="button"
@@ -631,7 +694,7 @@ export function ImportsPanel({ active = true }: { active?: boolean }) {
                             ) : (
                                 <Check size={17} />
                             )}
-                            بررسی و پیش‌نمایش
+                            {tr("m13af74da2a")}
                         </button>
                     </div>
                 </form>
@@ -652,13 +715,13 @@ export function ImportsPanel({ active = true }: { active?: boolean }) {
                                 >
                                     {statusLabels[current.status]}
                                 </span>
-                                <h2>{current.name}</h2>
+                                <h2 dir="auto">{current.name}</h2>
                                 {current.report?.media && (
                                     <div
                                         className="conversion-preview"
                                         role="status"
                                     >
-                                        <h3>آمادگی رسانه برای انتشار</h3>
+                                        <h3>{tr("mb644c46d6d")}</h3>
                                         {Object.entries(
                                             current.report.media,
                                         ).map(([id, media]) => (
@@ -670,27 +733,28 @@ export function ImportsPanel({ active = true }: { active?: boolean }) {
                                                 </bdi>{" "}
                                                 —{" "}
                                                 {media.status === "ready"
-                                                    ? "آمادهٔ پخش"
+                                                    ? tr("m1ca7bcc519")
                                                     : (conversionLabels[
                                                           media.status as keyof typeof conversionLabels
-                                                      ] ?? "در انتظار تبدیل")}
+                                                      ] ?? tr("m7719150abd"))}
                                             </p>
                                         ))}
                                         {waitingForMedia && (
                                             <p>
-                                                انتشار پس از آماده‌شدن MP3 ممکن
-                                                است. وضعیت و خطاها را در{" "}
+                                                {tr("m771352f4d9")}
                                                 <Link to="/admin?tab=conversions">
-                                                    تبدیل صوت
-                                                </Link>{" "}
-                                                ببین.
+                                                    {tr("me45cdd8642")}
+                                                </Link>
+                                                {tr("m94455620cf")}
                                             </p>
                                         )}
                                     </div>
                                 )}
                                 <p className="muted">
-                                    {digits(current.rows.length)} آهنگ بررسی شده
-                                    · {moodLabels[current.mood]}
+                                    {tr("md51707ae7a", {
+                                        v0: digits(current.rows.length),
+                                        v1: moodLabels[current.mood],
+                                    })}
                                 </p>
                                 {["processing", "running"].includes(
                                     current.status,
@@ -699,55 +763,73 @@ export function ImportsPanel({ active = true }: { active?: boolean }) {
                                         <Loading
                                             label={
                                                 current.status === "running"
-                                                    ? "در حال ساخت پلی‌لیست…"
-                                                    : "پلی‌لیست در صف پردازش است؛ وضعیت به‌صورت خودکار به‌روزرسانی می‌شود."
+                                                    ? tr("mce7ca1d4ec")
+                                                    : tr("m026475d2cb")
                                             }
                                         />
                                         {current.execution && (
                                             <p className="muted">
-                                                نسل اجرا:{" "}
-                                                {digits(
-                                                    current.execution
-                                                        .generation,
-                                                )}{" "}
-                                                · بازیابی خودکار:{" "}
-                                                {digits(
-                                                    current.execution
-                                                        .recovery_count,
-                                                )}
-                                                {current.execution
-                                                    .heartbeat_at &&
-                                                    ` · آخرین heartbeat: ${new Intl.DateTimeFormat("fa-IR", { hour: "2-digit", minute: "2-digit" }).format(new Date(current.execution.heartbeat_at))}`}
+                                                {tr("mbbb32b5317", {
+                                                    v0: digits(
+                                                        current.execution
+                                                            .generation,
+                                                    ),
+                                                    v1: digits(
+                                                        current.execution
+                                                            .recovery_count,
+                                                    ),
+                                                    v2:
+                                                        current.execution
+                                                            .heartbeat_at &&
+                                                        tr("mfea207f83b", {
+                                                            v0: new Intl.DateTimeFormat(
+                                                                currentPreferences()
+                                                                    .locale,
+                                                                {
+                                                                    timeZone:
+                                                                        currentPreferences()
+                                                                            .time_zone,
+                                                                    hour: "2-digit",
+                                                                    minute: "2-digit",
+                                                                },
+                                                            ).format(
+                                                                new Date(
+                                                                    current
+                                                                        .execution
+                                                                        .heartbeat_at,
+                                                                ),
+                                                            ),
+                                                        }),
+                                                })}
                                             </p>
                                         )}
                                     </div>
                                 ) : current.status === "completed" ? (
                                     <div className="import-success">
                                         <CheckCircle2 size={46} />
-                                        <h3>یک مجموعهٔ تازه آماده است.</h3>
+                                        <h3>{tr("ma607ed7bf6")}</h3>
                                         <p>
-                                            {digits(
-                                                current.report
-                                                    ?.created_tracks || 0,
-                                            )}{" "}
-                                            آهنگ تازه و{" "}
-                                            {digits(
-                                                current.report?.reused_tracks ||
-                                                    0,
-                                            )}{" "}
-                                            آهنگ موجود در این مجموعه قرار گرفت.
+                                            {tr("m616f7ec8db", {
+                                                v0: digits(
+                                                    current.report
+                                                        ?.created_tracks || 0,
+                                                ),
+                                                v1: digits(
+                                                    current.report
+                                                        ?.reused_tracks || 0,
+                                                ),
+                                            })}
                                         </p>
                                         {!!current.report?.reused_tracks && (
                                             <p className="muted">
-                                                متادیتای آهنگ‌های مشترک موجود
-                                                حفظ شده است.
+                                                {tr("mfa77da851d")}
                                             </p>
                                         )}
                                         <Link
                                             className="button"
                                             to={`/playlists/${current.playlist_id}`}
                                         >
-                                            دیدن پلی‌لیست
+                                            {tr("m4ec73aacfd")}
                                             <ArrowLeft size={17} />
                                         </Link>
                                     </div>
@@ -779,13 +861,14 @@ export function ImportsPanel({ active = true }: { active?: boolean }) {
                                         )}
                                         <label className="checkbox-label">
                                             <input
+                                                dir="auto"
                                                 type="checkbox"
                                                 checked={publish}
                                                 onChange={(e) =>
                                                     setPublish(e.target.checked)
                                                 }
                                             />
-                                            پس از ساخت، برای اعضا منتشر شود
+                                            {tr("m0a93f9fe26")}
                                         </label>
                                         <button
                                             className="button"
@@ -800,10 +883,10 @@ export function ImportsPanel({ active = true }: { active?: boolean }) {
                                             onClick={() => commit.mutate()}
                                         >
                                             {commit.isPending
-                                                ? "در حال ثبت…"
+                                                ? tr("m03e4d57d5a")
                                                 : current.status === "failed"
-                                                  ? "تلاش دوباره"
-                                                  : "تأیید و ساخت پلی‌لیست"}
+                                                  ? tr("med6ee8fe9d")
+                                                  : tr("m2c645a81fc")}
                                         </button>
                                     </>
                                 )}
@@ -822,8 +905,8 @@ export function ImportsPanel({ active = true }: { active?: boolean }) {
                                 >
                                     {" "}
                                     {current.status === "completed"
-                                        ? "ساخت مجموعهٔ بعدی"
-                                        : "بازگشت به آماده‌سازی"}
+                                        ? tr("m1d2dd88282")
+                                        : tr("m83bad639e2")}
                                 </button>
                             </>
                         )
@@ -831,8 +914,8 @@ export function ImportsPanel({ active = true }: { active?: boolean }) {
                 </div>
             )}
             <div className="section-heading history-heading">
-                <h2>سابقهٔ ورود پلی‌لیست</h2>
-                <span>قابل پیگیری، از ابتدا تا انتشار</span>
+                <h2>{tr("m43b8194c18")}</h2>
+                <span>{tr("m9b21b68712")}</span>
             </div>
             {history.error ? (
                 <ErrorState
@@ -851,12 +934,18 @@ export function ImportsPanel({ active = true }: { active?: boolean }) {
                             >
                                 <FileJson size={20} />
                                 <span>
-                                    <strong>{item.name}</strong>
+                                    <strong dir="auto">{item.name}</strong>
                                     <small>
-                                        {new Intl.DateTimeFormat("fa-IR", {
-                                            dateStyle: "medium",
-                                            timeStyle: "short",
-                                        }).format(new Date(item.created_at))}
+                                        {new Intl.DateTimeFormat(
+                                            currentPreferences().locale,
+                                            {
+                                                timeZone:
+                                                    currentPreferences()
+                                                        .time_zone,
+                                                dateStyle: "medium",
+                                                timeStyle: "short",
+                                            },
+                                        ).format(new Date(item.created_at))}
                                     </small>
                                 </span>
                                 <span
@@ -868,9 +957,7 @@ export function ImportsPanel({ active = true }: { active?: boolean }) {
                             </button>
                         ))}
                         {!history.data.data.length && (
-                            <p className="muted">
-                                اولین ورود پلی‌لیست اینجا ثبت می‌شود.
-                            </p>
+                            <p className="muted">{tr("mafd1fd371d")}</p>
                         )}
                     </div>
                     {history.data.meta.last_page > 1 && (
@@ -880,7 +967,7 @@ export function ImportsPanel({ active = true }: { active?: boolean }) {
                                 disabled={historyPage === 1}
                                 onClick={() => setHistoryPage((v) => v - 1)}
                             >
-                                قبلی
+                                {tr("m1a592f6b2d")}
                             </button>
                             <span>{digits(historyPage)}</span>
                             <button
@@ -890,7 +977,7 @@ export function ImportsPanel({ active = true }: { active?: boolean }) {
                                 }
                                 onClick={() => setHistoryPage((v) => v + 1)}
                             >
-                                بعدی
+                                {tr("m54ee927e96")}
                             </button>
                         </div>
                     )}

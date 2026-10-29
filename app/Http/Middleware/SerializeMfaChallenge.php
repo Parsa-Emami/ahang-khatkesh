@@ -20,7 +20,7 @@ class SerializeMfaChallenge
             if (! $user || ! $user->is_active || ! $user->hasEnabledTwoFactorAuthentication() || $age < 0 || $age >= config('security.challenge_seconds') || $user->access_version !== (int) $request->session()->get('login.access_version', -1)) {
                 $request->session()->forget(['login', 'auth']);
 
-                return response()->json(['message' => 'درخواست ورود منقضی شده است؛ دوباره وارد شوید.', 'code' => 'challenge_expired'], 422);
+                return response()->json(['message' => __('درخواست ورود منقضی شده است؛ دوباره وارد شوید.'), 'code' => 'challenge_expired'], 422);
             }
 
             return $next($request);

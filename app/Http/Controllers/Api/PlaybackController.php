@@ -35,14 +35,14 @@ class PlaybackController extends Controller
         $data = $request->validated();
         $tracks = Track::visibleTo($request->user())->with(['mediaAsset.blob', PlaybackMedia::EAGER])->whereIn('id', $data['queue'])->get()->keyBy('id');
         if ($tracks->count() !== count($data['queue']) || ($data['track_id'] !== null && ! in_array($data['track_id'], $data['queue'], true))) {
-            throw ValidationException::withMessages(['queue' => 'صف پخش شامل آهنگ نامعتبر یا منتشرنشده است.']);
+            throw ValidationException::withMessages(['queue' => __('صف پخش شامل آهنگ نامعتبر یا منتشرنشده است.')]);
         }
         $current = $tracks->get($data['track_id']);
         $data['position_seconds'] = $current ? min($data['position_seconds'], $current->mediaAsset->duration_seconds) : 0;
         $state = DB::transaction(function () use ($request, $data): PlaybackState {
             LibrarySetting::whereKey(1)->increment('lock_version');
             $state = PlaybackState::firstOrCreate(['user_id' => $request->user()->id], ['queue' => [], 'revision' => 0]);
-            abort_unless($state->revision === $data['revision'], 409, 'وضعیت پخش در دستگاه دیگری تغییر کرده است. صفحه را تازه کنید.');
+            abort_unless($state->revision === $data['revision'], 409, __('وضعیت پخش در دستگاه دیگری تغییر کرده است. صفحه را تازه کنید.'));
             $state->update(array_replace($data, ['revision' => $state->revision + 1]));
 
             return $state;

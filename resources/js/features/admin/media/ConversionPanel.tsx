@@ -1,3 +1,6 @@
+import { currentPreferences } from "../../../i18n/runtime";
+import { tr } from "../../../i18n/runtime";
+import { useLocale } from "../../../i18n/LocaleProvider";
 import type { CursorPage } from "../contracts";
 import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -9,40 +12,80 @@ import { StorageStatus } from "../StorageStatus";
 import { digits, type AudioConversion } from "../../../types";
 
 export const conversionLabels: Record<AudioConversion["status"], string> = {
-    queued: "در صف تبدیل",
-    processing: "در حال تبدیل",
-    validating: "بررسی کامل خروجی",
-    ready: "آمادهٔ پخش",
-    failed: "تبدیل ناموفق",
-    needs_review: "نیاز به بررسی اصل فایل",
-    cancelled: "لغوشده",
+    get queued() {
+        return tr("m25b3172b3f");
+    },
+    get processing() {
+        return tr("me73778af35");
+    },
+    get validating() {
+        return tr("m6bd54b9c1e");
+    },
+    get ready() {
+        return tr("m1ca7bcc519");
+    },
+    get failed() {
+        return tr("m0fc68fa9b0");
+    },
+    get needs_review() {
+        return tr("mf9013ae011");
+    },
+    get cancelled() {
+        return tr("m57ab5550d8");
+    },
 };
 const reasons: Record<string, string> = {
-    truncated_source:
-        "فایل FLAC ناقص است؛ شمار نمونه‌های decodeشده با اصل اعلام‌شده همخوان نیست.",
-    invalid_source: "ساختار یا STREAMINFO فایل FLAC معتبر نیست.",
-    encoder_unavailable:
-        "ابزار تبدیل در دسترس نیست؛ پیکربندی سرور را بررسی کنید.",
-    encoder_build_changed: "نسخهٔ ابزار تبدیل با نسخهٔ تأییدشده همخوان نیست.",
-    encoder_failed:
-        "تبدیل انجام نشد؛ فایل اصلی و گزارش سلامت سرور را بررسی کنید.",
-    source_changed:
-        "اصل فایل یا مالکیت آن تغییر کرده است؛ پیش از تلاش دوباره بررسی کنید.",
-    invalid_output: "خروجی اعتبارسنجی کامل را نگذرانده و منتشر نشده است.",
-    non_cbr_output: "خروجی با CBR 320kbps همخوان نیست و منتشر نشده است.",
-    access_revoked: "دسترسی درخواست‌کننده تغییر کرده است.",
-    cancelled_by_owner: "تبدیل به درخواست سوپرادمین لغو شد.",
-    capacity_unavailable:
-        "ظرفیت کافی نیست؛ فضای رزروشده و پاک‌سازی را بررسی کنید.",
-    worker_lost: "پردازش متوقف شده و در چرخهٔ بازیابی قرار گرفته است.",
-    timeout: "مهلت پردازش تمام شد؛ فایل اصلی محفوظ است.",
-    output_limit: "خروجی از فضای رزروشده بیشتر شد و منتشر نشد.",
-    storage_unavailable: "نوشتن روی فضای خصوصی ممکن نیست؛ دیسک را بررسی کنید.",
+    get truncated_source() {
+        return tr("m62c510e819");
+    },
+    get invalid_source() {
+        return tr("m8b9b7d0d42");
+    },
+    get encoder_unavailable() {
+        return tr("mbd1bba69af");
+    },
+    get encoder_build_changed() {
+        return tr("ma7284efc22");
+    },
+    get encoder_failed() {
+        return tr("m2d573379a6");
+    },
+    get source_changed() {
+        return tr("mac23641419");
+    },
+    get invalid_output() {
+        return tr("m42c3789178");
+    },
+    get non_cbr_output() {
+        return tr("mdcc4fd2f05");
+    },
+    get access_revoked() {
+        return tr("m977d9bdd97");
+    },
+    get cancelled_by_owner() {
+        return tr("md115fa5848");
+    },
+    get capacity_unavailable() {
+        return tr("mdc95ffa6cc");
+    },
+    get worker_lost() {
+        return tr("me05bcaaaaf");
+    },
+    get timeout() {
+        return tr("m38cbf28ad6");
+    },
+    get output_limit() {
+        return tr("m6f1c69c56e");
+    },
+    get storage_unavailable() {
+        return tr("m6e909c1847");
+    },
 };
 export function mediaSize(bytes: number) {
-    return `${new Intl.NumberFormat("fa-IR", { maximumFractionDigits: 2 }).format(bytes / 1048576)} MiB`;
+    return `${new Intl.NumberFormat(currentPreferences().locale, { maximumFractionDigits: 2 }).format(bytes / 1048576)} MiB`;
 }
 export function ConversionPanel() {
+    useLocale();
     const [status, setStatus] = useState(""),
         [cursor, setCursor] = useState("");
     const client = useQueryClient(),
@@ -92,24 +135,22 @@ export function ConversionPanel() {
             <div className="conversion-intro">
                 <AudioLines aria-hidden="true" size={24} />
                 <div>
-                    <h3>اصل محفوظ، نسخهٔ سبک‌تر برای پخش</h3>
-                    <p>
-                        MP3 با نرخ ثابت 320kbps اتلافی است. اصل FLAC نگه داشته
-                        می‌شود؛ مجموع فضای ذخیره‌سازی ممکن است بیشتر شود. ۱۰۰٪
-                        فقط پس از بررسی فریم‌ها و decode کامل نمایش داده می‌شود.
-                    </p>
+                    <h3>{tr("maf90cd2506")}</h3>
+                    <p>{tr("mfdde907d58")}</p>
                 </div>
             </div>
             <label className="conversion-filter">
-                وضعیت تبدیل
+                {tr("me191ee4a2e")}
                 <select
+                    dir="auto"
+                    name="status"
                     value={status}
                     onChange={(event) => {
                         setStatus(event.target.value);
                         setCursor("");
                     }}
                 >
-                    <option value="">همهٔ وضعیت‌ها</option>
+                    <option value="">{tr("ma3f52a6cb2")}</option>
                     {Object.entries(conversionLabels).map(([key, label]) => (
                         <option key={key} value={key}>
                             {label}
@@ -125,17 +166,16 @@ export function ConversionPanel() {
                     retry={() => void query.refetch()}
                 />
             ) : !query.data.data.length ? (
-                <p role="status">
-                    تبدیلی در این فهرست نیست. FLAC را از بخش ورود موسیقی
-                    بارگذاری کن.
-                </p>
+                <p role="status">{tr("m05586a0a03")}</p>
             ) : (
                 <div className="conversion-list">
                     {query.data.data.map((c) => (
                         <article
                             className="conversion-card"
                             key={c.id}
-                            aria-label={`تبدیل ${c.source_name}`}
+                            aria-label={tr("m87f8650bcc", {
+                                v0: c.source_name,
+                            })}
                         >
                             <div className="conversion-heading">
                                 <div>
@@ -157,17 +197,23 @@ export function ConversionPanel() {
                                 </strong>
                             </div>
                             <label className="conversion-progress-label">
-                                پیشرفت تخمینی تبدیل{" "}
-                                <bdi>{digits(c.progress_percent)}٪</bdi>
+                                {tr("mcde299b648")}
+                                <bdi>
+                                    {tr("m834f2c877b", {
+                                        v0: digits(c.progress_percent),
+                                    })}
+                                </bdi>
                                 <progress
-                                    aria-label={`پیشرفت تبدیل ${c.source_name}`}
+                                    aria-label={tr("mbece9efcc0", {
+                                        v0: c.source_name,
+                                    })}
                                     max={100}
                                     value={c.progress_percent}
                                 />
                             </label>
                             <dl className="conversion-metrics">
                                 <div>
-                                    <dt>فایل اصلی</dt>
+                                    <dt>{tr("m194b94dcbb")}</dt>
                                     <dd>
                                         <bdi dir="ltr">
                                             {mediaSize(c.source_bytes)}
@@ -177,8 +223,8 @@ export function ConversionPanel() {
                                 <div>
                                     <dt>
                                         {c.output_bytes
-                                            ? "MP3 واقعی"
-                                            : "رزرو موقت"}
+                                            ? tr("ma045f6ffba")
+                                            : tr("mb49c0ad12b")}
                                     </dt>
                                     <dd>
                                         <bdi dir="ltr">
@@ -190,50 +236,44 @@ export function ConversionPanel() {
                                     </dd>
                                 </div>
                                 <div>
-                                    <dt>نسل پردازش</dt>
+                                    <dt>{tr("m7e1620b34f")}</dt>
                                     <dd>{digits(c.generation)}</dd>
                                 </div>
                             </dl>
                             {c.report?.full_decode && (
                                 <p className="conversion-validated">
-                                    بررسی فریم CBR و decode کامل موفق · اصل FLAC
-                                    محفوظ
+                                    {tr("m8724a3b7fe")}
                                 </p>
                             )}
                             {c.output_bytes !== null &&
                                 c.output_bytes >= c.source_bytes && (
-                                    <p>
-                                        برای این فایل، MP3 از FLAC کوچک‌تر نشده
-                                        است؛ اندازهٔ واقعی هر دو نسخه بالا مشخص
-                                        است.
-                                    </p>
+                                    <p>{tr("m90fb1fc91f")}</p>
                                 )}
                             {c.report && (
                                 <details>
-                                    <summary>جزئیات بررسی</summary>
+                                    <summary>{tr("mf714c49732")}</summary>
                                     <p>
                                         <bdi dir="ltr">
                                             {c.report.encoder_version}
                                         </bdi>
                                     </p>
                                     <p>
-                                        فریم‌های CBR بررسی‌شده:{" "}
-                                        {digits(c.report.validated_frames)} ·
-                                        پروفایل {digits(c.profile_version)}
+                                        {tr("m6d0ae23a98", {
+                                            v0: digits(
+                                                c.report.validated_frames,
+                                            ),
+                                            v1: digits(c.profile_version),
+                                        })}
                                     </p>
                                 </details>
                             )}
                             {c.error_code && (
                                 <p role="status">
-                                    {reasons[c.error_code] ??
-                                        "تبدیل کامل نشد؛ فایل اصلی محفوظ است. وضعیت سرور و فایل را بررسی کنید."}
+                                    {reasons[c.error_code] ?? tr("md8d7b3ca50")}
                                 </p>
                             )}
                             {c.next_retry_at && (
-                                <p role="status">
-                                    تلاش خودکار پس از مهلت کوتاه انجام می‌شود؛
-                                    حداکثر سه تلاش.
-                                </p>
+                                <p role="status">{tr("m9644c21dec")}</p>
                             )}
                             <div className="conversion-actions">
                                 {[
@@ -253,7 +293,7 @@ export function ConversionPanel() {
                                             }
                                         >
                                             <RefreshCw size={16} />
-                                            تلاش دوباره
+                                            {tr("med6ee8fe9d")}
                                         </button>
                                     )}
                                 {([
@@ -273,7 +313,7 @@ export function ConversionPanel() {
                                         }
                                     >
                                         <X size={16} />
-                                        لغو تبدیل
+                                        {tr("m9f10f608f0")}
                                     </button>
                                 )}
                             </div>
@@ -287,14 +327,14 @@ export function ConversionPanel() {
                     disabled={!cursor}
                     onClick={() => setCursor("")}
                 >
-                    ابتدای فهرست
+                    {tr("m60685db411")}
                 </button>
                 <button
                     className="button button-secondary"
                     disabled={!query.data?.meta.next_cursor}
                     onClick={() => setCursor(query.data!.meta.next_cursor!)}
                 >
-                    صفحهٔ بعد
+                    {tr("mce199fd6f9")}
                 </button>
             </div>
         </div>

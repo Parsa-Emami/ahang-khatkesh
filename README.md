@@ -4,7 +4,7 @@
 
 این مخزن شامل نسخهٔ 0.2 و پایهٔ اجرایی برای ادامهٔ توسعه است: Laravel 13، PHP 8.5، React 19، TypeScript و Vite؛ رابط فارسی، RTL و تم روشن/تیره؛ مدیریت اعضا و ورود پلی‌لیست از پنل ادمین؛ پخش فایل خصوصی، جستجو، علاقه‌مندی، ذخیرهٔ پلی‌لیست و بازگرداندن صف پخش. اتصال‌های زمان اجرای برنامه از API همان Laravel عبور می‌کنند. فایل صوت در فضای خصوصی فایل ذخیره می‌شود و متادیتا و رابطهٔ پلی‌لیست‌ها در دیتابیس قرار می‌گیرد.
 
-**وضعیت فعلی:** اصلاح runtime مالکیت ایمپورت، epoch رمز و cleanup کاور، دسترسی انحصاری سوپرادمین، سطل بازیافت، حفظ draft، retry وابسته به نشست، صف قابل ویرایش و تایمر خواب اضافه شده‌اند. [رودمپ ۱۶ فازی](docs/ROADMAP.fa.md) وضعیت implementation و verification را جدا نگه می‌دارد؛ F01 تا F08 همراه با اصلاح batch آپلود و ارتقای امنیتی symfony/mime با CI همان کد تأیید شده‌اند؛ ۸ فاز از ۱۶ فاز verified هستند. F09 تا F16 هنوز اجرا نشده‌اند. سهمیهٔ ذخیره‌سازی، جداسازی blob، بازیابی job و GC کنترل‌شده نیز اجرا شده‌اند. نتیجه و محدودیت‌ها در [evidence F08](docs/verification/foundation-through-f08-2026-10-29-security.json) ثبت‌اند. این پروژه هنوز production یا هم‌تراز Spotify/Apple Music تأیید نشده است. [نقص‌های باقی‌مانده](docs/CURRENT_REVIEW.fa.md) و [مقایسهٔ محصول](docs/PRODUCT_BENCHMARK.fa.md) مرجع ادامه‌اند.
+**وضعیت فعلی:** F01 تا F08 پیش‌تر تأیید شده‌اند. F09 زبان‌های فارسی/انگلیسی، جهت مستقل RTL/LTR، ترجیحات حساب، پیام‌های محلی سرور، قالب‌بندی زمان/عدد، محافظ خروج از فرم و دسترس‌پذیری پایه را اضافه می‌کند. CI همین تغییر در حال بررسی است؛ وضعیت تیک‌ها از [رودمپ](docs/ROADMAP.fa.md) و evidence خوانده شود. F10 تا F16 باقی‌اند و production تأیید نشده است. [قرارداد F09](docs/F09_LOCALE_AND_ACCESSIBILITY.fa.md) و [راهنمای ارتقا](docs/AFTER_F09.fa.md) مرجع این تغییرند.
 
 ## شروع توسعه
 
@@ -44,6 +44,9 @@ php artisan app:demo
 هر manifest حداکثر ۵۰۰ آهنگ و ۲ MiB دارد. ترتیب ردیف‌ها همان ترتیب پلی‌لیست است. نمونه‌های ساختار در [examples](examples) قرار دارند؛ شناسه‌های مثال باید با شناسهٔ واقعی حاصل از آپلود جایگزین شوند. URL موسیقی یک سرویس دیگر، فایل صوتی این برنامه محسوب نمی‌شود.
 
 ## سندهای توسعه
+
+- [زبان، جهت و دسترس‌پذیری F09](docs/F09_LOCALE_AND_ACCESSIBILITY.fa.md)
+- [پس از F09: ارتقا و گام بعد](docs/AFTER_F09.fa.md)
 
 - [تبدیل FLAC، MP3 و انتخاب کیفیت در F08](docs/F08_AUDIO_CONVERSION.fa.md)
 - [پس از F08: ارتقا و گام بعد](docs/AFTER_F08.fa.md)
@@ -90,7 +93,7 @@ php artisan media:doctor
 composer audit
 php vendor/bin/pint --test
 npm run format:check
-npm audit
+npm run audit:offline
 php artisan optimize
 php artisan optimize:clear
 ```
@@ -108,3 +111,6 @@ php artisan optimize:clear
 ## ارتقای این تغییر
 
 پیش از اجرا، [قرارداد ارتقا و محدودیت‌ها](docs/CURRENT_REVIEW.fa.md) را بخوانید: backup، maintenance و توقف worker؛ migration جدید و build تازه، سپس worker و smoke test. role=owner همان سوپرادمین است. administrator/curator دیگر آهنگ یا پلی‌لیست اضافه، ویرایش یا حذف نمی‌کنند. import قدیمی بدون plan_hash باید دوباره preview شود. API نوشتن authenticated به X-Session-Context با actor:access_version نیاز دارد؛ فرانت قدیمی باید تازه‌سازی شود. هیچ‌یک از این مراحل روی سرور کاربر خودکار اجرا نشده است.
+
+
+بررسی npm در این نسخه با OSV-Scanner 2.7.0 و SHA-256 ثابت انجام می‌شود: snapshot عمومی کل npm دریافت و تطبیق با package-lock فقط با `--offline --no-resolve` محلی اجرا می‌شود. `npm ci` ارسال خودکار audit ندارد. هیچ فایل قفل یا درخت وابستگی به سرویس audit ارسال نمی‌شود. خطای دریافت پایگاه یا scanner، بررسی را fail می‌کند؛ gate حذف نشده است. مرجع: https://google.github.io/osv-scanner/offline-mode/ .

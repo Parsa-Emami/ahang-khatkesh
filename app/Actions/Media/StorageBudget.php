@@ -18,16 +18,16 @@ class StorageBudget
     public function assertReady(): void
     {
         abort_unless(config('filesystems.disks.media.driver') === 'local', 503, 'F07 requires a shared local private volume.');
-        abort_if(MediaAsset::whereNull('blob_id')->exists() || Playlist::withTrashed()->whereNotNull('cover_path')->whereNull('cover_blob_id')->exists(), 503, 'ابتدا media:backfill --apply و media:verify را اجرا کنید.');
+        abort_if(MediaAsset::whereNull('blob_id')->exists() || Playlist::withTrashed()->whereNotNull('cover_path')->whereNull('cover_blob_id')->exists(), 503, __('ابتدا media:backfill --apply و media:verify را اجرا کنید.'));
         if (! LibrarySetting::whereKey(1)->value('media_inventory_ready')) {
             $paths = Storage::disk('media')->allFiles();
-            abort_if(count($paths) > 10000, 503, 'ابتدا media:backfill --apply را اجرا کنید.');
+            abort_if(count($paths) > 10000, 503, __('ابتدا media:backfill --apply را اجرا کنید.'));
             foreach ($paths as $path) {
                 if (str_starts_with($path, '.locks/')) {
                     continue;
                 }
                 $known = MediaBlob::where('path', $path)->exists() || MediaGarbageCandidate::where('path', $path)->exists() || StorageReservation::whereIn('status', StorageReservation::CHARGED)->where(fn ($q) => $q->where('candidate_path', $path)->orWhere('staging_path', $path))->exists();
-                abort_unless($known, 503, 'ابتدا media:backfill --apply و media:verify را اجرا کنید.');
+                abort_unless($known, 503, __('ابتدا media:backfill --apply و media:verify را اجرا کنید.'));
             }
             LibrarySetting::whereKey(1)->update(['media_inventory_ready' => true]);
         }

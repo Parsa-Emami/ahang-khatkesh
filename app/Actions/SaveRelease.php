@@ -17,7 +17,7 @@ class SaveRelease
             $actor = $this->authorize->handle($actor);
             $model = $release?->exists ? Release::whereKey($release->id)->lockForUpdate()->firstOrFail() : new Release;
             if ($model->exists) {
-                abort_unless((int) $model->revision === (int) $data['revision'], 409, 'اطلاعات انتشار تغییر کرده است.');
+                abort_unless((int) $model->revision === (int) $data['revision'], 409, __('اطلاعات انتشار تغییر کرده است.'));
             }
             $model->fill(collect($data)->only(['title', 'type', 'released_on'])->all());
             $model->revision = ($model->revision ?? 0) + 1;

@@ -1,3 +1,6 @@
+import { useDraftGuard } from "../drafts/DraftNavigation";
+import { tr } from "../../i18n/runtime";
+import { useLocale } from "../../i18n/LocaleProvider";
 import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowUp, ArrowDown, X } from "lucide-react";
@@ -14,6 +17,7 @@ export function PlaylistTracksEditor({
     playlist: Playlist;
     close: () => void;
 }) {
+    useLocale();
     const client = useQueryClient(),
         notify = useToast();
     const [draft, setDraft] = useState(() =>
@@ -21,6 +25,9 @@ export function PlaylistTracksEditor({
     );
     const [conflict, setConflict] = useState(false);
     const [confirmClose, setConfirmClose] = useState(false);
+    useDraftGuard(draft.dirty, () =>
+        setDraft(freshDraft([], playlist.revision)),
+    );
     const tracks = draft.items,
         revision = draft.revision;
     const setTracks = (change: (items: Track[]) => Track[]) =>
@@ -71,7 +78,7 @@ export function PlaylistTracksEditor({
             void client.invalidateQueries({ queryKey: ["playlists"] });
             void client.invalidateQueries({ queryKey: ["playlist"] });
             void client.invalidateQueries({ queryKey: ["tracks"] });
-            notify("ترتیب آهنگ‌ها ذخیره شد.");
+            notify(tr("m8ec7871359"));
             close();
         },
         onError: (e) => {
@@ -92,6 +99,7 @@ export function PlaylistTracksEditor({
     return (
         <>
             <Dialog
+                guard={false}
                 open
                 onOpenChange={(v) => {
                     if (!v && !save.isPending) {
@@ -99,8 +107,8 @@ export function PlaylistTracksEditor({
                         else close();
                     }
                 }}
-                title={`آهنگ‌های ${playlist.name}`}
-                description="با فلش‌ها ترتیب را تغییر بده. حذف از این فهرست، فایل یا علاقه‌مندی‌ها را حذف نمی‌کند."
+                title={tr("m8c3b5bed96", { v0: playlist.name })}
+                description={tr("m2423a3ab76")}
             >
                 {query.isPending ? (
                     <Loading />
@@ -122,32 +130,39 @@ export function PlaylistTracksEditor({
                             }
                         />
                         <p className="muted">
-                            {digits(tracks.length)} آهنگ · سقف ۵۰۰ آهنگ بدون
-                            تکرار
+                            {tr("m2d17c5b900", { v0: digits(tracks.length) })}
                         </p>
                         <ol className="arrange-list">
                             {tracks.map((track, i) => (
                                 <li key={track.id}>
                                     <span>
-                                        <strong>{track.title}</strong>
-                                        <small>{track.artist}</small>
+                                        <strong dir="auto">
+                                            {track.title}
+                                        </strong>
+                                        <small dir="auto">{track.artist}</small>
                                     </span>
                                     <IconButton
-                                        label={`بالا بردن ${track.title}`}
+                                        label={tr("mfc689a87c8", {
+                                            v0: track.title,
+                                        })}
                                         disabled={i === 0}
                                         onClick={() => move(i, -1)}
                                     >
                                         <ArrowUp size={16} />
                                     </IconButton>
                                     <IconButton
-                                        label={`پایین بردن ${track.title}`}
+                                        label={tr("m9479e7ac62", {
+                                            v0: track.title,
+                                        })}
                                         disabled={i === tracks.length - 1}
                                         onClick={() => move(i, 1)}
                                     >
                                         <ArrowDown size={16} />
                                     </IconButton>
                                     <IconButton
-                                        label={`برداشتن ${track.title} از پلی‌لیست`}
+                                        label={tr("m3a6c4886b7", {
+                                            v0: track.title,
+                                        })}
                                         onClick={() =>
                                             setTracks((old) =>
                                                 old.filter(
@@ -163,12 +178,12 @@ export function PlaylistTracksEditor({
                         </ol>
                         {(conflict || draft.remoteUpdate) && (
                             <div className="form-error" role="alert">
-                                نسخهٔ تازه‌ای در سرور وجود دارد.{" "}
+                                {tr("mf5eb871ae0")}
                                 <button
                                     className="text-link"
                                     onClick={() => void discardAndReload()}
                                 >
-                                    کنار گذاشتن این ترتیب و بارگذاری نسخهٔ تازه
+                                    {tr("m88500d4452")}
                                 </button>
                             </div>
                         )}
@@ -179,7 +194,7 @@ export function PlaylistTracksEditor({
                             }
                             onClick={() => save.mutate()}
                         >
-                            ذخیرهٔ ترتیب و آهنگ‌ها
+                            {tr("m2e4200c259")}
                         </button>
                     </div>
                 )}
@@ -187,17 +202,17 @@ export function PlaylistTracksEditor({
             <Dialog
                 open={confirmClose}
                 onOpenChange={setConfirmClose}
-                title="تغییرهای ذخیره‌نشده"
-                description="ترتیب محلی هنوز ذخیره نشده است."
+                title={tr("m707b70b7c3")}
+                description={tr("m2c01bb9449")}
             >
                 <button
                     className="button"
                     onClick={() => setConfirmClose(false)}
                 >
-                    ادامهٔ ویرایش
+                    {tr("m835821087b")}
                 </button>
                 <button className="button secondary" onClick={close}>
-                    کنار گذاشتن تغییرها و بستن
+                    {tr("m08d8acd5ab")}
                 </button>
             </Dialog>
         </>

@@ -14,11 +14,11 @@ class CsvManifestParser implements ManifestParser
         try {
             $header = fgetcsv($stream, null, ',', '"', '');
             if (! is_array($header)) {
-                throw ValidationException::withMessages(['manifest' => 'فایل CSV خالی است.']);
+                throw ValidationException::withMessages(['manifest' => __('فایل CSV خالی است.')]);
             }
             $header = array_map(fn ($v) => trim((string) $v), $header);
             if (count($header) !== count(array_unique($header)) || array_diff(['asset_id', 'title', 'artist'], $header)) {
-                throw ValidationException::withMessages(['manifest' => 'ستون‌های asset_id,title,artist الزامی و نام ستون‌ها باید یکتا باشند.']);
+                throw ValidationException::withMessages(['manifest' => __('ستون‌های asset_id,title,artist الزامی و نام ستون‌ها باید یکتا باشند.')]);
             }
             $rows = [];
             while (($row = fgetcsv($stream, null, ',', '"', '')) !== false) {
@@ -26,7 +26,7 @@ class CsvManifestParser implements ManifestParser
                     continue;
                 }
                 if (count($row) !== count($header)) {
-                    throw ValidationException::withMessages(['manifest' => 'تعداد ستون‌های ردیف '.(count($rows) + 2).' با سربرگ برابر نیست.']);
+                    throw ValidationException::withMessages(['manifest' => __('تعداد ستون‌های ردیف :row با سربرگ برابر نیست.', ['row' => count($rows) + 2])]);
                 }
                 $rows[] = array_combine($header, $row);
                 if (count($rows) > config('music.max_tracks_per_import')) {

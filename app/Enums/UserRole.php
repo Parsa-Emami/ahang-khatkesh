@@ -32,7 +32,7 @@ enum UserRole: string
     public function label(): string
     {
         return match ($this) {
-            self::Owner => 'سوپرادمین', self::Administrator => 'مدیر اعضا', self::Curator => 'ناظر محتوا', self::Listener => 'شنونده'
+            self::Owner => __('سوپرادمین'), self::Administrator => __('مدیر اعضا'), self::Curator => __('ناظر محتوا'), self::Listener => __('شنونده')
         };
     }
 }

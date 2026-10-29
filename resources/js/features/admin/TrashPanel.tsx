@@ -1,3 +1,6 @@
+import { currentPreferences } from "../../i18n/runtime";
+import { tr } from "../../i18n/runtime";
+import { useLocale } from "../../i18n/LocaleProvider";
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Trash2, RotateCcw } from "lucide-react";
@@ -42,6 +45,7 @@ export function TrashButton({
     title: string;
     revision: number;
 }) {
+    useLocale();
     const [open, setOpen] = useState(false);
     const changed = useTrashChange(),
         notify = useToast();
@@ -54,14 +58,14 @@ export function TrashButton({
         onSuccess: () => {
             setOpen(false);
             changed();
-            notify("به سطل بازیافت منتقل شد.");
+            notify(tr("m70fb563a06"));
         },
         onError: (error) => notify(error.message, true),
     });
     return (
         <>
             <IconButton
-                label={`انتقال ${title} به سطل بازیافت`}
+                label={tr("m548fa0e444", { v0: title })}
                 onClick={() => setOpen(true)}
             >
                 <Trash2 size={17} />
@@ -71,28 +75,29 @@ export function TrashButton({
                 onOpenChange={(value) => {
                     if (!mutation.isPending) setOpen(value);
                 }}
-                title={`حذف ${title}`}
-                description="این مورد از کتابخانه پنهان می‌شود. سوپرادمین می‌تواند آن را از سطل بازیافت برگرداند."
+                title={tr("m10ba866db7", { v0: title })}
+                description={tr("m2a7ee99e92")}
             >
                 <button
                     className="button"
                     disabled={mutation.isPending}
                     onClick={() => mutation.mutate()}
                 >
-                    انتقال به سطل بازیافت
+                    {tr("mc90a9837af")}
                 </button>
                 <button
                     className="button secondary"
                     disabled={mutation.isPending}
                     onClick={() => setOpen(false)}
                 >
-                    انصراف
+                    {tr("m106dfb4e0f")}
                 </button>
             </Dialog>
         </>
     );
 }
 export function TrashPanel() {
+    useLocale();
     const [kind, setKind] = useState<Kind>("track"),
         [page, setPage] = useState(1);
     const changed = useTrashChange(),
@@ -112,17 +117,17 @@ export function TrashPanel() {
             }),
         onSuccess: () => {
             changed();
-            notify("مورد بازیابی شد.");
+            notify(tr("m08cad331bb"));
         },
         onError: (error) => notify(error.message, true),
     });
     return (
         <>
-            <div className="filter-chips" aria-label="نوع موارد حذف‌شده">
+            <div className="filter-chips" aria-label={tr("m11ce827cd0")}>
                 {(
                     [
-                        ["track", "آهنگ‌ها"],
-                        ["playlist", "پلی‌لیست‌ها"],
+                        ["track", tr("mfc7b9f1ff7")],
+                        ["playlist", tr("m810b71a913")],
                     ] as const
                 ).map(([value, label]) => (
                     <button
@@ -138,10 +143,7 @@ export function TrashPanel() {
                     </button>
                 ))}
             </div>
-            <p className="muted">
-                بازیابی با همان شناسه انجام می‌شود و ترتیب و علاقه‌مندی‌های قبلی
-                حفظ می‌شوند.
-            </p>
+            <p className="muted">{tr("m6768dedcdd")}</p>
             {query.isPending ? (
                 <Loading />
             ) : query.error ? (
@@ -158,13 +160,21 @@ export function TrashPanel() {
                                 <div>
                                     <strong dir="auto">{item.title}</strong>
                                     <small>
-                                        {new Intl.DateTimeFormat("fa-IR", {
-                                            dateStyle: "medium",
-                                        }).format(new Date(item.deleted_at))}
+                                        {new Intl.DateTimeFormat(
+                                            currentPreferences().locale,
+                                            {
+                                                timeZone:
+                                                    currentPreferences()
+                                                        .time_zone,
+                                                dateStyle: "medium",
+                                            },
+                                        ).format(new Date(item.deleted_at))}
                                     </small>
                                 </div>
                                 <IconButton
-                                    label={`بازیابی ${item.title}`}
+                                    label={tr("m7f5cbd319c", {
+                                        v0: item.title,
+                                    })}
                                     disabled={restore.isPending}
                                     onClick={() => restore.mutate(item)}
                                 >
@@ -173,9 +183,7 @@ export function TrashPanel() {
                             </article>
                         ))}
                         {!query.data.data.length && (
-                            <p className="muted">
-                                سطل بازیافت این بخش خالی است.
-                            </p>
+                            <p className="muted">{tr("m33f744be8a")}</p>
                         )}
                     </div>
                     {query.data.last_page > 1 && (
@@ -185,7 +193,7 @@ export function TrashPanel() {
                                 disabled={page === 1}
                                 onClick={() => setPage(page - 1)}
                             >
-                                قبلی
+                                {tr("m1a592f6b2d")}
                             </button>
                             <span>{digits(page)}</span>
                             <button
@@ -193,7 +201,7 @@ export function TrashPanel() {
                                 disabled={page >= query.data.last_page}
                                 onClick={() => setPage(page + 1)}
                             >
-                                بعدی
+                                {tr("m54ee927e96")}
                             </button>
                         </div>
                     )}
