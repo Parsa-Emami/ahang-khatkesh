@@ -1,4 +1,4 @@
-> تأیید جاری F01 تا F09 با [CI موفق 40858380705](https://github.com/Parsa-Emami/ahang-khatkesh/actions/runs/40858380705): ۱۳۴ تست PHP روی هر دو SQLite و MySQL، ۳۹ تست فرانت، ۱۸ سناریوی واقعی مرورگر و ۹ تست چندپردازهٔ MySQL؛ fingerprint و محدودیت‌ها در [شواهد F09](verification/foundation-through-f09-2026-10-29.json). بندهای قدیمی این سند سابقه‌اند.
+> F01 تا F10 با [CI موفق 40895855884](https://github.com/Parsa-Emami/ahang-khatkesh/actions/runs/40895855884) و fingerprint همان کد تأیید شده‌اند: ۱۳۴ تست PHP روی هر دو SQLite و MySQL، ۵۰ تست فرانت، ۲۴ سناریوی واقعی Chrome و ۹ تست چندپردازهٔ MySQL؛ بدون failure یا skip آزمون. 174 تصویر ماتریس و ۱۰۴ جفت contrast ثبت و hash تصاویر بازبینی شده است. chunk اختیاری جلوه 2255 بایت gzip است. [شواهد F10](verification/foundation-through-f10-2026-10-29.json) و [قرارداد F10](F10_VISUAL_IDENTITY.fa.md) مرجع‌اند؛ F11 تا F16 و تأیید production باقی‌اند. گام بعد F11 است.
 
 # وضعیت بررسی نسخهٔ 0.2، ۲۷ اکتبر ۲۰۲۶
 

@@ -1,4 +1,4 @@
-> F09 و F01 تا F08 با [CI موفق 40858380705](https://github.com/Parsa-Emami/ahang-khatkesh/actions/runs/40858380705) و ۱۳۴ تست PHP روی هر دو SQLite و MySQL، ۳۹ تست فرانت، ۱۸ سناریوی واقعی مرورگر و ۹ تست چندپردازهٔ MySQL تأیید شده‌اند. [شواهد جاری](verification/foundation-through-f09-2026-10-29.json) و [قرارداد F09](F09_LOCALE_AND_ACCESSIBILITY.fa.md) مقدم‌اند؛ بندهای تاریخی پایین سابقهٔ پایان F08 را نگه می‌دارند. گام بعد F10 است.
+> F01 تا F10 با [CI موفق 40895855884](https://github.com/Parsa-Emami/ahang-khatkesh/actions/runs/40895855884) و fingerprint همان کد تأیید شده‌اند: ۱۳۴ تست PHP روی هر دو SQLite و MySQL، ۵۰ تست فرانت، ۲۴ سناریوی واقعی Chrome و ۹ تست چندپردازهٔ MySQL؛ بدون failure یا skip آزمون. 174 تصویر ماتریس و ۱۰۴ جفت contrast ثبت و hash تصاویر بازبینی شده است. chunk اختیاری جلوه 2255 بایت gzip است. [شواهد F10](verification/foundation-through-f10-2026-10-29.json) و [قرارداد F10](F10_VISUAL_IDENTITY.fa.md) مرجع‌اند؛ F11 تا F16 و تأیید production باقی‌اند. گام بعد F11 است.
 
 > تأیید F01 تا F08 پس از اصلاح F08-B10 و ارتقای امنیتی F08-B11 روی commit `e9e5c6a3ca2a34f0fe11f226600aa445856d0b2b` با [CI موفق همان کد](https://github.com/Parsa-Emami/ahang-khatkesh/actions/runs/40824157871) بسته شد: ۱۲۸ تست PHP روی هر دو DB، ۳۰ تست فرانت، ۱۲ سناریوی مرورگر و ۹ تست چندپردازهٔ MySQL. symfony/mime از 8.1.7 به 8.1.10 برای CVE-2026-45070 ارتقا یافت و composer audit در هر دو job پاس شد. چهار تست batch همچنان مقیدبودن آپلود به actor/epoch آغازین را پوشش می‌دهند. [قرارداد F08](F08_AUDIO_CONVERSION.fa.md) و [شواهد جاری](verification/foundation-through-f08-2026-10-29-security.json) مقدم‌اند؛ گام بعدی F09 است.
 
@@ -49,7 +49,7 @@
 | N03 / بخشی از R09 | بسته در دامنهٔ F07 | quota، reservation، cleanup و GC با retention پاس شدند؛ load/offload باقی است | F15 |
 | N04 / R12 | بسته در دامنهٔ F08 | تبدیل واقعی، guard، سهمیه، recovery، پنل و کیفیت با تست واقعی پاس شدند | evidence F08 |
 | N05 / R11 | بسته در دامنهٔ F09 | کاتالوگ fa/en و جهت مستقل، ترجیحات حساب و ماتریس مرورگر اضافه شده‌اند | F09 |
-| N06 / R11 | اجراشده در F10 | منبع محلی MIT، جلوهٔ محدود و visual/contrast matrix اضافه شده؛ تأیید نهایی تابع CI و دستگاه واقعی F16 است | F10 |
+| N06 / R11 | بسته در دامنهٔ F10 | منبع محلی MIT، lifecycle محدود و ماتریس تصویری/contrast با CI همان source تأیید شدند؛ qualification دستگاه واقعی در F16 باقی است | F10 |
 | N07 | P2 | تاریخچه، private session و پیشنهاد توضیح‌پذیر هنوز ساخته نشده‌اند | F11 |
 | N08 | P2 | bulk operations، repair/merge و پیشنهاد اعضا workflow کامل ندارند | F12 |
 | N09 | P2 | متن همگام، crossfade، gapless و loudness analysis نیستند | F13 |

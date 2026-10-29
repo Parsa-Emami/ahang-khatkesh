@@ -1,5 +1,7 @@
 # پس از F10
 
+F10 با [CI موفق 40895855884](https://github.com/Parsa-Emami/ahang-khatkesh/actions/runs/40895855884) و [شواهد همان source](verification/foundation-through-f10-2026-10-29.json) تأیید شده است.
+
 تغییر F10 ظاهری و فرانت است و migration یا dependency جدید ندارد. اگر F09 هنوز روی سرور نصب نشده، ابتدا مراحل migration راهنمای AFTER_F09 را انجام دهید. استقرار روی سرور شما خودکار اجرا نشده است.
 
 پس از دریافت کد و طبق روال انتشار محیط خود:
