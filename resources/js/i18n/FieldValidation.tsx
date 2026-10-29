@@ -22,7 +22,7 @@ export function FieldValidation() {
     }, [locale]);
     useEffect(() => {
         let sequence = 0;
-        let focusPending = false;
+        let focusTimer: number | undefined;
         const isField = (target: EventTarget | null): target is Field =>
             target instanceof HTMLInputElement ||
             target instanceof HTMLTextAreaElement ||
@@ -70,12 +70,11 @@ export function FieldValidation() {
             const target = event.target;
             if (!isField(target)) return;
             event.preventDefault();
-            if (!focusPending) {
-                focusPending = true;
-                queueMicrotask(() => {
-                    focusPending = false;
+            if (focusTimer === undefined) {
+                focusTimer = window.setTimeout(() => {
+                    focusTimer = undefined;
                     if (target.isConnected) target.focus();
-                });
+                }, 0);
             }
             target.setCustomValidity("");
             show(target, {
@@ -115,6 +114,7 @@ export function FieldValidation() {
         document.addEventListener("change", input);
         window.addEventListener("api-field-errors", server);
         return () => {
+            if (focusTimer !== undefined) window.clearTimeout(focusTimer);
             document.removeEventListener("invalid", invalid, true);
             document.removeEventListener("input", input);
             document.removeEventListener("change", input);
