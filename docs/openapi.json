@@ -2073,6 +2073,9 @@
                       "properties": {
                         "revision": {
                           "type": "integer"
+                        },
+                        "suppressed": {
+                          "type": "boolean"
                         }
                       },
                       "required": [
@@ -8596,6 +8599,808 @@
           }
         }
       }
+    },
+    "/listening/settings": {
+      "get": {
+        "operationId": "get_own_listening_preferences",
+        "summary": "Own listening preferences",
+        "tags": [
+          "Listening"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/ListeningSettings"
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "422": {
+            "$ref": "#/components/responses/Validation"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "419": {
+            "$ref": "#/components/responses/CsrfExpired"
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
+          }
+        ]
+      },
+      "patch": {
+        "operationId": "patch_change_own_listening_privacy",
+        "summary": "Change own listening privacy",
+        "tags": [
+          "Listening"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/ListeningSettings"
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "422": {
+            "$ref": "#/components/responses/Validation"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "419": {
+            "$ref": "#/components/responses/CsrfExpired"
+          }
+        },
+        "parameters": [
+          {
+            "name": "X-Session-Context",
+            "in": "header",
+            "required": true,
+            "description": "Non-secret actor id:access_version from session. Required for authenticated writes. This header never authorizes a request.",
+            "schema": {
+              "type": "string",
+              "pattern": "^[1-9][0-9]*:[0-9]+$"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
+          }
+        ],
+        "security": [
+          {
+            "sessionCookie": [],
+            "csrfToken": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ListeningSettingsWrite"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/listening/plays": {
+      "post": {
+        "operationId": "post_issue_ephemeral_listening_grant",
+        "summary": "Issue ephemeral listening grant",
+        "tags": [
+          "Listening"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "recording": {
+                          "type": "boolean"
+                        },
+                        "token": {
+                          "type": "string"
+                        },
+                        "play_id": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "minimum_seconds": {
+                          "type": "number"
+                        },
+                        "expires_at": {
+                          "type": "string",
+                          "format": "date-time"
+                        }
+                      },
+                      "required": [
+                        "recording"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "422": {
+            "$ref": "#/components/responses/Validation"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "419": {
+            "$ref": "#/components/responses/CsrfExpired"
+          }
+        },
+        "parameters": [
+          {
+            "name": "X-Session-Context",
+            "in": "header",
+            "required": true,
+            "description": "Non-secret actor id:access_version from session. Required for authenticated writes. This header never authorizes a request.",
+            "schema": {
+              "type": "string",
+              "pattern": "^[1-9][0-9]*:[0-9]+$"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
+          }
+        ],
+        "security": [
+          {
+            "sessionCookie": [],
+            "csrfToken": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ListeningGrantWrite"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/listening/events": {
+      "post": {
+        "operationId": "post_record_qualified_listening_event",
+        "summary": "Record qualified listening event",
+        "tags": [
+          "Listening"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "recorded": {
+                          "type": "boolean"
+                        },
+                        "play_id": {
+                          "type": "string",
+                          "format": "uuid"
+                        }
+                      },
+                      "required": [
+                        "recorded"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "422": {
+            "$ref": "#/components/responses/Validation"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "419": {
+            "$ref": "#/components/responses/CsrfExpired"
+          },
+          "410": {
+            "description": "Expired ephemeral grant"
+          }
+        },
+        "parameters": [
+          {
+            "name": "X-Session-Context",
+            "in": "header",
+            "required": true,
+            "description": "Non-secret actor id:access_version from session. Required for authenticated writes. This header never authorizes a request.",
+            "schema": {
+              "type": "string",
+              "pattern": "^[1-9][0-9]*:[0-9]+$"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
+          }
+        ],
+        "security": [
+          {
+            "sessionCookie": [],
+            "csrfToken": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ListeningEventWrite"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/listening/history": {
+      "get": {
+        "operationId": "get_read_own_visible_listening_history",
+        "summary": "Read own visible listening history",
+        "tags": [
+          "Listening"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data",
+                    "meta",
+                    "links"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/ListeningEvent"
+                      }
+                    },
+                    "meta": {
+                      "type": "object"
+                    },
+                    "links": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "422": {
+            "$ref": "#/components/responses/Validation"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "419": {
+            "$ref": "#/components/responses/CsrfExpired"
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10000
+            }
+          }
+        ]
+      },
+      "delete": {
+        "operationId": "delete_erase_own_listening_history",
+        "summary": "Erase own listening history",
+        "tags": [
+          "Listening"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/ListeningSettings"
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "422": {
+            "$ref": "#/components/responses/Validation"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "419": {
+            "$ref": "#/components/responses/CsrfExpired"
+          }
+        },
+        "parameters": [
+          {
+            "name": "X-Session-Context",
+            "in": "header",
+            "required": true,
+            "description": "Non-secret actor id:access_version from session. Required for authenticated writes. This header never authorizes a request.",
+            "schema": {
+              "type": "string",
+              "pattern": "^[1-9][0-9]*:[0-9]+$"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
+          }
+        ],
+        "security": [
+          {
+            "sessionCookie": [],
+            "csrfToken": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ListeningErase"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/listening/history/{eventId}": {
+      "delete": {
+        "operationId": "delete_erase_one_own_listening_event",
+        "summary": "Erase one own listening event",
+        "tags": [
+          "Listening"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/ListeningSettings"
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "422": {
+            "$ref": "#/components/responses/Validation"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "419": {
+            "$ref": "#/components/responses/CsrfExpired"
+          }
+        },
+        "parameters": [
+          {
+            "name": "X-Session-Context",
+            "in": "header",
+            "required": true,
+            "description": "Non-secret actor id:access_version from session. Required for authenticated writes. This header never authorizes a request.",
+            "schema": {
+              "type": "string",
+              "pattern": "^[1-9][0-9]*:[0-9]+$"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
+          },
+          {
+            "name": "eventId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "security": [
+          {
+            "sessionCookie": [],
+            "csrfToken": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ListeningErase"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/listening/export": {
+      "get": {
+        "operationId": "get_export_own_retained_accessible_history",
+        "summary": "Export own retained accessible history",
+        "tags": [
+          "Listening"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "format": {
+                      "const": "ahang-listening-v1"
+                    },
+                    "data": {
+                      "type": "array",
+                      "maxItems": 10000,
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "play_id": {
+                            "type": "string",
+                            "format": "uuid"
+                          },
+                          "track_id": {
+                            "type": "integer"
+                          },
+                          "session_pseudonym": {
+                            "type": "string",
+                            "minLength": 64,
+                            "maxLength": 64
+                          },
+                          "started_at": {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          "ended_at": {
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "format": "date-time"
+                          },
+                          "listened_seconds": {
+                            "type": "number"
+                          },
+                          "outcome": {
+                            "enum": [
+                              "started",
+                              "completed",
+                              "skip"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "play_id",
+                          "track_id",
+                          "session_pseudonym",
+                          "started_at",
+                          "ended_at",
+                          "listened_seconds",
+                          "outcome"
+                        ],
+                        "additionalProperties": false
+                      }
+                    }
+                  },
+                  "required": [
+                    "format",
+                    "data"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "422": {
+            "$ref": "#/components/responses/Validation"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "419": {
+            "$ref": "#/components/responses/CsrfExpired"
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
+          }
+        ]
+      }
+    },
+    "/listening/mix": {
+      "get": {
+        "operationId": "get_get_private_explainable_virtual_mix",
+        "summary": "Get private explainable virtual mix",
+        "tags": [
+          "Listening"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "basis",
+                    "data"
+                  ],
+                  "properties": {
+                    "basis": {
+                      "enum": [
+                        "disabled",
+                        "curated",
+                        "personalized"
+                      ]
+                    },
+                    "data": {
+                      "type": "array",
+                      "maxItems": 50,
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "track": {
+                            "$ref": "#/components/schemas/Track"
+                          },
+                          "score": {
+                            "type": "integer"
+                          },
+                          "reasons": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "code": {
+                                  "enum": [
+                                    "curated",
+                                    "mood",
+                                    "liked",
+                                    "artist",
+                                    "history",
+                                    "recent"
+                                  ]
+                                },
+                                "weight": {
+                                  "type": "integer"
+                                }
+                              },
+                              "required": [
+                                "code",
+                                "weight"
+                              ],
+                              "additionalProperties": false
+                            }
+                          }
+                        },
+                        "required": [
+                          "track",
+                          "score",
+                          "reasons"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "algorithm": {
+                      "const": "explainable-v1"
+                    },
+                    "max_per_artist": {
+                      "const": 2
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "422": {
+            "$ref": "#/components/responses/Validation"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "419": {
+            "$ref": "#/components/responses/CsrfExpired"
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
+          },
+          {
+            "name": "mood",
+            "in": "query",
+            "schema": {
+              "enum": [
+                "focus",
+                "night",
+                "calm",
+                "energy",
+                "other"
+              ]
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50
+            }
+          }
+        ]
+      }
     }
   },
   "components": {
@@ -9272,6 +10077,13 @@
           "revision": {
             "type": "integer",
             "minimum": 0
+          },
+          "listening_revision": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "private_mode": {
+            "type": "boolean"
           }
         }
       },
@@ -9922,6 +10734,177 @@
             "const": true
           }
         }
+      },
+      "ListeningSettings": {
+        "type": "object",
+        "properties": {
+          "history_enabled": {
+            "type": "boolean"
+          },
+          "recommendations_enabled": {
+            "type": "boolean"
+          },
+          "retention_days": {
+            "enum": [
+              7,
+              30,
+              90
+            ]
+          },
+          "private_mode": {
+            "type": "boolean"
+          },
+          "private_until": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "history_enabled",
+          "recommendations_enabled",
+          "retention_days",
+          "private_mode",
+          "private_until",
+          "revision"
+        ],
+        "additionalProperties": false
+      },
+      "ListeningSettingsWrite": {
+        "type": "object",
+        "properties": {
+          "revision": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "history_enabled": {
+            "type": "boolean"
+          },
+          "recommendations_enabled": {
+            "type": "boolean"
+          },
+          "retention_days": {
+            "enum": [
+              7,
+              30,
+              90
+            ]
+          },
+          "private_session": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "revision"
+        ],
+        "additionalProperties": false
+      },
+      "ListeningGrantWrite": {
+        "type": "object",
+        "properties": {
+          "track_id": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "privacy_revision": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "track_id",
+          "privacy_revision"
+        ],
+        "additionalProperties": false
+      },
+      "ListeningEventWrite": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string",
+            "maxLength": 2048
+          },
+          "kind": {
+            "enum": [
+              "progress",
+              "completed",
+              "skip"
+            ]
+          },
+          "listened_seconds": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 28800
+          }
+        },
+        "required": [
+          "token",
+          "kind",
+          "listened_seconds"
+        ],
+        "additionalProperties": false
+      },
+      "ListeningEvent": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "track": {
+            "$ref": "#/components/schemas/Track"
+          },
+          "started_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "ended_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "listened_seconds": {
+            "type": "number",
+            "minimum": 0
+          },
+          "outcome": {
+            "enum": [
+              "started",
+              "completed",
+              "skip"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "track",
+          "started_at",
+          "ended_at",
+          "listened_seconds",
+          "outcome"
+        ],
+        "additionalProperties": false
+      },
+      "ListeningErase": {
+        "type": "object",
+        "properties": {
+          "revision": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "revision"
+        ],
+        "additionalProperties": false
       }
     },
     "responses": {

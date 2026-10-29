@@ -14,7 +14,7 @@ class User extends Authenticatable
 {
     use HasFactory, Notifiable, TwoFactorAuthenticatable;
 
-    protected $attributes = ['is_active' => true, 'is_admin' => false, 'role' => 'listener', 'theme' => 'system', 'access_version' => 0];
+    protected $attributes = ['is_active' => true, 'is_admin' => false, 'role' => 'listener', 'theme' => 'system', 'access_version' => 0, 'listening_history_enabled' => false, 'listening_recommendations_enabled' => true, 'listening_retention_days' => 30, 'listening_revision' => 0];
 
     protected $fillable = ['name', 'email', 'password', 'role', 'is_active', 'theme', 'locale', 'direction', 'motion', 'time_zone'];
 
@@ -22,7 +22,7 @@ class User extends Authenticatable
 
     protected function casts(): array
     {
-        return ['password' => 'hashed', 'role' => UserRole::class, 'is_admin' => 'boolean', 'is_active' => 'boolean', 'email_verified_at' => 'datetime', 'two_factor_confirmed_at' => 'datetime', 'access_version' => 'integer'];
+        return ['password' => 'hashed', 'role' => UserRole::class, 'is_admin' => 'boolean', 'is_active' => 'boolean', 'email_verified_at' => 'datetime', 'two_factor_confirmed_at' => 'datetime', 'access_version' => 'integer', 'listening_history_enabled' => 'boolean', 'listening_recommendations_enabled' => 'boolean', 'listening_retention_days' => 'integer', 'listening_revision' => 'integer', 'listening_private_until' => 'immutable_datetime', 'listening_consent_at' => 'immutable_datetime'];
     }
 
     protected static function booted(): void
@@ -30,6 +30,16 @@ class User extends Authenticatable
         static::saving(function (User $user): void {
             $user->is_admin = $user->role->isPrivileged();
         });
+    }
+
+    public function privateListening(): bool
+    {
+        return $this->listening_private_until?->isFuture() ?? false;
+    }
+
+    public function listeningPreferences(): array
+    {
+        return ['history_enabled' => $this->listening_history_enabled, 'recommendations_enabled' => $this->listening_recommendations_enabled, 'retention_days' => $this->listening_retention_days, 'private_mode' => $this->privateListening(), 'private_until' => $this->listening_private_until?->toISOString(), 'revision' => $this->listening_revision];
     }
 
     public function hasPermission(Permission $permission): bool

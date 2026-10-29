@@ -6,6 +6,10 @@ use App\Http\Controllers\Api\Admin\OperationsController;
 use App\Http\Controllers\Api\Admin\OverviewController;
 use App\Http\Controllers\Api\CatalogController;
 use App\Http\Controllers\Api\LibraryController;
+use App\Http\Controllers\Api\ListeningEventController;
+use App\Http\Controllers\Api\ListeningHistoryController;
+use App\Http\Controllers\Api\ListeningMixController;
+use App\Http\Controllers\Api\ListeningSettingsController;
 use App\Http\Controllers\Api\MfaController;
 use App\Http\Controllers\Api\PlaybackController;
 use App\Http\Controllers\Api\SessionController;
@@ -34,6 +38,15 @@ Route::prefix('api/v1')->group(function (): void {
         Route::get('tracks/{track}/stream', StreamController::class)->name('api.tracks.stream');
         Route::get('playlists/{playlist}/cover', [CatalogController::class, 'cover'])->name('api.playlists.cover');
         Route::middleware('throttle:catalog')->group(function (): void {
+            Route::get('listening/settings', [ListeningSettingsController::class, 'show']);
+            Route::patch('listening/settings', [ListeningSettingsController::class, 'update']);
+            Route::post('listening/plays', [ListeningEventController::class, 'grant']);
+            Route::post('listening/events', [ListeningEventController::class, 'store']);
+            Route::get('listening/history', [ListeningHistoryController::class, 'index']);
+            Route::get('listening/export', [ListeningHistoryController::class, 'export']);
+            Route::delete('listening/history', [ListeningHistoryController::class, 'destroy']);
+            Route::delete('listening/history/{eventId}', [ListeningHistoryController::class, 'destroy'])->whereUuid('eventId');
+            Route::get('listening/mix', ListeningMixController::class);
             Route::get('stats', [CatalogController::class, 'stats']);
             Route::get('playlists', [CatalogController::class, 'playlists']);
             Route::get('playlists/{playlist}', [CatalogController::class, 'show']);
