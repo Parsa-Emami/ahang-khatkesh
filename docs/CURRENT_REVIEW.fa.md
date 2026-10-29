@@ -1,6 +1,4 @@
-> CI تازهٔ 40823717136، CVE-2026-45070 در symfony/mime 8.1.7 را گزارش کرد. F08-B11 وابستگی را به 8.1.10 ارتقا می‌دهد؛ تأیید جاری تا CI همان source fingerprint تازه به implemented بازگشته است. بند بعدی شواهد تاریخی پیش از این ارتقاست.
-
-> تأیید F01 تا F08 پس از اصلاح F08-B10 روی commit `d90121542eafd938759880dcfdb0f74c848530d1` با [CI موفق همان کد](https://github.com/Parsa-Emami/ahang-khatkesh/actions/runs/40702936058) بسته شد: ۱۲۸ تست PHP روی هر دو DB، ۳۰ تست فرانت، ۱۲ سناریوی مرورگر و ۹ تست چندپردازهٔ MySQL. چهار تست تازه، مقیدبودن کل batch آپلود به actor/epoch آغازین را پوشش می‌دهند. [قرارداد F08](F08_AUDIO_CONVERSION.fa.md) و [شواهد جاری](verification/foundation-through-f08-2026-10-29.json) مقدم‌اند؛ گام بعدی F09 است.
+> تأیید F01 تا F08 پس از اصلاح F08-B10 و ارتقای امنیتی F08-B11 روی commit `e9e5c6a3ca2a34f0fe11f226600aa445856d0b2b` با [CI موفق همان کد](https://github.com/Parsa-Emami/ahang-khatkesh/actions/runs/40824157871) بسته شد: ۱۲۸ تست PHP روی هر دو DB، ۳۰ تست فرانت، ۱۲ سناریوی مرورگر و ۹ تست چندپردازهٔ MySQL. symfony/mime از 8.1.7 به 8.1.10 برای CVE-2026-45070 ارتقا یافت و composer audit در هر دو job پاس شد. چهار تست batch همچنان مقیدبودن آپلود به actor/epoch آغازین را پوشش می‌دهند. [قرارداد F08](F08_AUDIO_CONVERSION.fa.md) و [شواهد جاری](verification/foundation-through-f08-2026-10-29-security.json) مقدم‌اند؛ گام بعدی F09 است.
 
 # وضعیت اجرایی و نقص‌های باقی‌مانده
 
