@@ -93,6 +93,7 @@ async function capture(page: Page, info: TestInfo, state: string) {
     await mkdir("reports/f11-privacy", { recursive: true });
     await page.screenshot({
         path: `reports/f11-privacy/${info.project.name}-${state}.png`,
+        animations: "disabled",
     });
 }
 test("ListeningPrivacyTest native audio consent private broadcast export erase and cross-user query cache isolation", async ({
