@@ -2,12 +2,15 @@
 
 namespace Tests\Feature;
 
+use App\Http\Resources\UserResource;
 use App\Models\ListeningEvent;
 use App\Models\MediaAsset;
 use App\Models\Playlist;
 use App\Models\Track;
 use App\Models\User;
+use App\Services\Listening\ListeningLedger;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Tests\TestCase;
 
 class ListeningPrivacyTest extends TestCase
@@ -31,7 +34,11 @@ class ListeningPrivacyTest extends TestCase
 
     private function grant(Track $track, int $revision): string
     {
-        return $this->postJson('/api/v1/listening/plays', ['track_id' => $track->id, 'privacy_revision' => $revision])->assertOk()->json('data.token');
+        $this->withCredentials();
+        $response = $this->postJson('/api/v1/listening/plays', ['track_id' => $track->id, 'privacy_revision' => $revision])->assertOk();
+        $this->withCookie(config('session.cookie'), session()->getId());
+
+        return $response->json('data.token');
     }
 
     public function test_history_requires_explicit_consent_and_does_not_store_unqualified_starts(): void
@@ -85,6 +92,7 @@ class ListeningPrivacyTest extends TestCase
         $this->assertDatabaseCount('listening_events', 0);
         $this->assertDatabaseCount('playback_states', 0);
         $this->travel(7)->hours();
+        $this->withSession(['auth.access_version' => $user->access_version]);
         $this->postJson('/api/v1/listening/plays', ['track_id' => $track->id, 'privacy_revision' => $revision + 1])->assertOk()->assertJsonPath('data.recording', true);
     }
 
@@ -152,6 +160,7 @@ class ListeningPrivacyTest extends TestCase
         $this->patchJson('/api/v1/listening/settings', ['revision' => 0, 'retention_days' => 90])->assertConflict();
         $this->patchJson('/api/v1/listening/settings', ['revision' => $revision, 'retention_days' => 999])->assertUnprocessable();
         $this->travel(7)->hours();
+        $this->withSession(['auth.access_version' => $user->access_version]);
         $this->postJson('/api/v1/listening/events', ['token' => $token, 'kind' => 'progress', 'listened_seconds' => 35])->assertGone();
         $this->assertDatabaseCount('listening_events', 0);
     }
@@ -162,5 +171,54 @@ class ListeningPrivacyTest extends TestCase
             $this->getJson('/api/v1/listening/'.$path)->assertUnauthorized();
         }
         $this->postJson('/api/v1/listening/plays', [])->assertUnauthorized();
+    }
+
+    public function test_short_tracks_use_half_duration_but_seeking_does_not_imply_completion(): void
+    {
+        $user = User::factory()->create();
+        $track = $this->track($user);
+        $track->mediaAsset->update(['duration_seconds' => 20]);
+        $token = $this->grant($track, $this->enable($user));
+        $this->travel(12)->seconds();
+        $this->postJson('/api/v1/listening/events', ['token' => $token, 'kind' => 'completed', 'listened_seconds' => 10])->assertOk()->assertJsonPath('data.recorded', true);
+        $this->assertSame('skip', ListeningEvent::first()->outcome);
+    }
+
+    public function test_retention_changes_and_the_per_account_cap_physically_remove_old_data(): void
+    {
+        config(['listening.max_events_per_user' => 2]);
+        $user = User::factory()->create();
+        $track = $this->track($user);
+        $revision = $this->enable($user);
+        $ids = [];
+        for ($i = 0; $i < 3; $i++) {
+            $token = $this->grant($track, $revision);
+            $this->travel(40)->seconds();
+            $ids[] = $this->postJson('/api/v1/listening/events', ['token' => $token, 'kind' => 'skip', 'listened_seconds' => 35])->assertOk()->json('data.play_id');
+        }
+        $this->assertDatabaseCount('listening_events', 2);
+        $this->assertDatabaseMissing('listening_events', ['id' => $ids[0]]);
+        ListeningEvent::whereKey($ids[1])->update(['started_at' => now()->subDays(8)]);
+        $this->patchJson('/api/v1/listening/settings', ['revision' => $revision, 'retention_days' => 7])->assertOk()->assertJsonPath('data.retention_days', 7);
+        $this->assertDatabaseCount('listening_events', 1);
+        $this->assertDatabaseMissing('listening_events', ['id' => $ids[1]]);
+    }
+
+    public function test_session_replay_is_rejected_and_user_serialization_keeps_privacy_settings_hidden(): void
+    {
+        $user = User::factory()->create();
+        $track = $this->track($user);
+        $token = $this->grant($track, $this->enable($user));
+        $this->travel(40)->seconds();
+        try {
+            app(ListeningLedger::class)->record($user, 'another-valid-session', ['token' => $token, 'kind' => 'skip', 'listened_seconds' => 35]);
+            $this->fail('A grant must be bound to its original session.');
+        } catch (HttpException $error) {
+            $this->assertSame(403, $error->getStatusCode());
+        }
+        foreach ([$user->fresh()->toArray(), (new UserResource($user->fresh()))->resolve()] as $data) {
+            $this->assertSame([], array_filter(array_keys($data), fn ($key) => str_starts_with($key, 'listening_')));
+        }
+        $this->assertDatabaseCount('listening_events', 0);
     }
 }

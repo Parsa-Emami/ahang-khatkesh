@@ -236,3 +236,40 @@ test("F10 cannot be verified without measured visual matrix and optional effect 
         /F10 requires measured visual matrix and optional effect budget/,
     );
 });
+
+test("F11 cannot be verified with the earlier process suite alone", () => {
+    const result = run((input) => {
+        const phase = input.data.phases[10];
+        phase.status = "verified";
+        phase.depends_on = [];
+        phase.required_tests = ["fixture"];
+        phase.evidence = "docs/verification/test.json";
+        input.text = input.text.replace("- [ ] F11", "- [x] F11");
+        const suite = { tests: 1, passed: 1, failed: 0, skipped: 0 };
+        writeFileSync(
+            join(input.root, "docs/verification/test.json"),
+            JSON.stringify({
+                source_fingerprint: createHash("sha256")
+                    .update("[]")
+                    .digest("hex"),
+                commit: "a".repeat(40),
+                ci: {
+                    head_sha: "a".repeat(40),
+                    run_id: 1,
+                    conclusion: "success",
+                },
+                phases: ["F11"],
+                php: { sqlite: suite, mysql: suite },
+                frontend: suite,
+                browser: suite,
+                concurrency: { tests: 9, passed: 9, failed: 0, skipped: 0 },
+                test_inventory: ["fixture"],
+            }),
+        );
+    });
+    assert.notEqual(result.status, 0);
+    assert.match(
+        result.stderr,
+        /F11 requires real privacy erase and ingest process evidence/,
+    );
+});

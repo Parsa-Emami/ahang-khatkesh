@@ -1,3 +1,5 @@
+import { playbackPrivacy } from "../features/listening/runtime";
+import { useListeningEvents } from "../features/listening/useListeningEvents";
 import { tr } from "../i18n/runtime";
 import { useLocale } from "../i18n/LocaleProvider";
 import {
@@ -99,6 +101,7 @@ export function PlayerProvider({ children }: PropsWithChildren) {
         pendingSeek = useRef(0);
     const current = state.queue[state.index] || null;
     const streamUrl = playbackUrl(current, state.quality);
+    useListeningEvents(audio, current?.id);
     const changed = () => {
         interacted.current = true;
         sequence.current++;
@@ -222,6 +225,7 @@ export function PlayerProvider({ children }: PropsWithChildren) {
                 {
                     method: "PUT",
                     body: json({
+                        ...playbackPrivacy(),
                         track_id: snapshot.queue[snapshot.index]?.id || null,
                         queue: snapshot.order.map((i) => snapshot.queue[i].id),
                         position_seconds: snapshot.position,
@@ -491,6 +495,7 @@ export function PlayerProvider({ children }: PropsWithChildren) {
                     ...sessionHeaders(),
                 },
                 body: json({
+                    ...playbackPrivacy(),
                     track_id: s.queue[s.index]?.id || null,
                     queue: s.order.map((i) => s.queue[i].id),
                     position_seconds: s.position,

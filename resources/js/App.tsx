@@ -1,3 +1,5 @@
+import { ListeningProvider } from "./features/listening/ListeningProvider";
+import { HistoryPage, MixPage } from "./features/listening/ListeningPages";
 import { tr } from "./i18n/runtime";
 import { useLocale } from "./i18n/LocaleProvider";
 import { Navigate, Route, Routes } from "react-router-dom";
@@ -30,36 +32,48 @@ export function App() {
     if (!user) return <LoginPage />;
     return (
         <SessionConfirmation>
-            <PlayerProvider key={user.id}>
-                <a className="skip-link" href="#main-content">
-                    {tr("m71db9ed488")}
-                </a>
-                <Routes>
-                    <Route element={<AppLayout />}>
-                        <Route index element={<LibraryPage />} />
-                        <Route path="library" element={<LibraryPage saved />} />
-                        <Route path="liked" element={<LikedPage />} />
-                        <Route path="search" element={<SearchPage />} />
-                        <Route
-                            path="playlists/:id"
-                            element={<PlaylistPage />}
-                        />
-                        <Route
-                            path="admin"
-                            element={
-                                user.permissions.includes("admin.access") ? (
-                                    <Suspense fallback={<Loading />}>
-                                        <AdminPage />
-                                    </Suspense>
-                                ) : (
-                                    <Navigate to="/" replace />
-                                )
-                            }
-                        />
-                        <Route path="*" element={<Navigate to="/" replace />} />
-                    </Route>
-                </Routes>
-            </PlayerProvider>
+            <ListeningProvider key={`${user.id}:${user.access_version}`}>
+                <PlayerProvider key={user.id}>
+                    <a className="skip-link" href="#main-content">
+                        {tr("m71db9ed488")}
+                    </a>
+                    <Routes>
+                        <Route element={<AppLayout />}>
+                            <Route index element={<LibraryPage />} />
+                            <Route
+                                path="library"
+                                element={<LibraryPage saved />}
+                            />
+                            <Route path="liked" element={<LikedPage />} />
+                            <Route path="history" element={<HistoryPage />} />
+                            <Route path="mix" element={<MixPage />} />
+                            <Route path="search" element={<SearchPage />} />
+                            <Route
+                                path="playlists/:id"
+                                element={<PlaylistPage />}
+                            />
+                            <Route
+                                path="admin"
+                                element={
+                                    user.permissions.includes(
+                                        "admin.access",
+                                    ) ? (
+                                        <Suspense fallback={<Loading />}>
+                                            <AdminPage />
+                                        </Suspense>
+                                    ) : (
+                                        <Navigate to="/" replace />
+                                    )
+                                }
+                            />
+                            <Route
+                                path="*"
+                                element={<Navigate to="/" replace />}
+                            />
+                        </Route>
+                    </Routes>
+                </PlayerProvider>
+            </ListeningProvider>
         </SessionConfirmation>
     );
 }

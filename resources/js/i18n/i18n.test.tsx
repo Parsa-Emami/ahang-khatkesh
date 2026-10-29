@@ -33,7 +33,14 @@ describe("locale direction theme matrix", () => {
             expect(() => parse(value)).not.toThrow();
         for (const key of Object.keys(fa) as MessageKey[]) {
             setRuntimePreferences({ ...defaults, locale: "en-US" });
-            const output = tr(key, { v0: 3, v1: "Example", v2: "", count: 3 });
+            const output = tr(key, {
+                v0: 3,
+                v1: "Example",
+                v2: "",
+                count: 3,
+                time: "12:00",
+                title: "Example",
+            });
             expect(output).not.toBe(key);
             expect(output).not.toMatch(/\{v\d+\}/);
         }

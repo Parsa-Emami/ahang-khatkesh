@@ -30,7 +30,7 @@ class ExplainableMix
         $artists = $liked->map(fn ($track) => $this->artist($track))->all();
         $query = $this->catalog->query($user)->whereHas('playlists', fn (Builder $query) => $query->where('status', Playlist::PUBLISHED)->when($mood, fn (Builder $query) => $query->where('mood', $mood)));
         $seeds = (clone $query)->orderBy('tracks.id')->limit(config('listening.candidate_limit'))->pluck('tracks.id')->merge($likedIds)->merge($recent->pluck('track_id'))->unique();
-        $tracks = $query->whereIn('tracks.id', $seeds)->with(['artists', 'mediaAsset.blob', PlaybackMedia::EAGER, 'playlists' => fn (Builder $query) => $query->where('status', Playlist::PUBLISHED)])->withExists(['likedBy as is_liked' => fn (Builder $query) => $query->where('users.id', $user->id)])->get();
+        $tracks = $query->whereIn('tracks.id', $seeds)->with(['artists', 'mediaAsset.blob', PlaybackMedia::EAGER, 'playlists' => fn ($query) => $query->where('status', Playlist::PUBLISHED)])->withExists(['likedBy as is_liked' => fn (Builder $query) => $query->where('users.id', $user->id)])->get();
         $scored = [];
         foreach ($tracks as $track) {
             $reasons = [['code' => 'curated', 'weight' => 5]];

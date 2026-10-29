@@ -117,6 +117,30 @@ for (const phase of roadmap.phases) {
             "F10 requires measured visual matrix and optional effect budget",
         );
     }
+    if (phase.id === "F11") {
+        assert(
+            record.concurrency?.tests >= 11 &&
+                record.concurrency.passed === record.concurrency.tests &&
+                record.concurrency.failed === 0 &&
+                record.concurrency.skipped === 0,
+            "F11 requires real privacy erase and ingest process evidence",
+        );
+        for (const project of ["desktop", "mobile"])
+            for (const journey of [
+                "ListeningPrivacyTest native audio",
+                "ExplainableMixTest curated reasons",
+            ])
+                assert(
+                    record.test_inventory.some((name) =>
+                        name.startsWith(`${project}: ${journey}`),
+                    ),
+                    "F11 requires native audio privacy and explainable mix browser evidence",
+                );
+        assert(
+            record.privacy?.screenshot_count === 4,
+            "F11 requires synthetic history and opt-out screenshots",
+        );
+    }
     for (const gate of [
         "build",
         "format",

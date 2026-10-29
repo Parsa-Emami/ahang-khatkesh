@@ -36,7 +36,8 @@ if (process.env.AHANG_DATABASE === "mysql") {
         (test) => `${attr(test[1], "classname")}::${attr(test[1], "name")}`,
     );
 }
-let visual = null;
+let visual = null,
+    privacy = null;
 let browser = null,
     browserTests = [];
 if (process.env.AHANG_DATABASE === "sqlite") {
@@ -99,6 +100,26 @@ if (process.env.AHANG_DATABASE === "sqlite") {
         failed: 0,
         skipped: 0,
     };
+    const privacyImages = readdirSync("reports/f11-privacy")
+        .filter((name) => name.endsWith(".png"))
+        .sort()
+        .map((name) => ({
+            name,
+            sha256: createHash("sha256")
+                .update(readFileSync(`reports/f11-privacy/${name}`))
+                .digest("hex"),
+        }));
+    assert.equal(privacyImages.length, 4);
+    writeFileSync(
+        "reports/f11-privacy/inventory.json",
+        JSON.stringify(privacyImages, null, 2),
+    );
+    privacy = {
+        screenshot_count: privacyImages.length,
+        screenshot_inventory_sha256: createHash("sha256")
+            .update(JSON.stringify(privacyImages))
+            .digest("hex"),
+    };
 }
 console.log(
     "AHANG_VERIFICATION_RECORD=" +
@@ -120,6 +141,7 @@ console.log(
             },
             browser,
             visual,
+            privacy,
             concurrency,
             test_inventory: [
                 ...cases.map(

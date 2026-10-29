@@ -3439,3 +3439,121 @@ select:disabled {
 .feature-meta {
     flex-wrap: wrap;
 }
+
+.listening-page {
+    max-inline-size: 1080px;
+    margin-inline: auto;
+}
+.listening-controls {
+    display: grid;
+    gap: 18px;
+    padding: 24px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+}
+.listening-controls h2 {
+    font-size: 19px;
+}
+.listening-controls > label:not(.checkbox-label) {
+    max-inline-size: 320px;
+}
+.listening-private {
+    display: flex;
+    gap: 14px;
+    align-items: start;
+    padding: 16px;
+    border: 1px solid var(--control-border);
+    border-radius: var(--radius-small);
+}
+.listening-private > svg {
+    flex-shrink: 0;
+    color: var(--active);
+}
+.listening-private > div {
+    flex: 1;
+    min-inline-size: 0;
+}
+.listening-private > .button {
+    flex-shrink: 0;
+}
+.listening-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-block: 24px;
+}
+.listening-list {
+    list-style: none;
+    padding: 0;
+    margin: 20px 0;
+}
+.listening-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding-block: 18px;
+    border-block-end: 1px solid var(--border);
+}
+.listening-row > .artwork {
+    inline-size: 54px;
+    flex: 0 0 54px;
+    border-radius: 8px;
+}
+.listening-row .art-caption,
+.listening-row .art-number {
+    display: none;
+}
+.listening-track {
+    flex: 1;
+    min-inline-size: 0;
+    overflow-wrap: anywhere;
+}
+.listening-track > p,
+.listening-track > small {
+    color: var(--muted);
+    font-size: 12px;
+}
+.listening-track details {
+    font-size: 12px;
+    margin-block-start: 6px;
+}
+.listening-track summary {
+    cursor: pointer;
+    color: var(--active);
+    padding-block: 6px;
+}
+.listening-track details ul {
+    padding-inline-start: 20px;
+    color: var(--muted);
+}
+.privacy-toggle[aria-pressed="true"] {
+    color: var(--success);
+    background: var(--success-surface);
+}
+@media (max-width: 620px) {
+    .listening-controls {
+        padding: 16px;
+    }
+    .listening-private {
+        flex-wrap: wrap;
+    }
+    .listening-private > .button {
+        flex-basis: 100%;
+    }
+    .listening-row {
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+    .listening-row > .artwork {
+        inline-size: 42px;
+        flex-basis: 42px;
+    }
+    .listening-row .icon-button {
+        min-inline-size: 44px;
+        min-block-size: 44px;
+    }
+    .listening-track {
+        flex-basis: calc(100% - 60px);
+    }
+}

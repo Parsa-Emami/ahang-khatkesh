@@ -18,7 +18,7 @@ class User extends Authenticatable
 
     protected $fillable = ['name', 'email', 'password', 'role', 'is_active', 'theme', 'locale', 'direction', 'motion', 'time_zone'];
 
-    protected $hidden = ['password', 'remember_token', 'two_factor_secret', 'two_factor_recovery_codes'];
+    protected $hidden = ['password', 'remember_token', 'two_factor_secret', 'two_factor_recovery_codes', 'listening_history_enabled', 'listening_recommendations_enabled', 'listening_retention_days', 'listening_revision', 'listening_private_until', 'listening_consent_at'];
 
     protected function casts(): array
     {

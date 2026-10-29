@@ -293,11 +293,19 @@
         "app/Services/Listening/ExplainableMix.php",
         "app/Actions/Listening/ChangeListeningPrivacy.php",
         "tests/Feature/ListeningPrivacyTest.php",
-        "tests/Feature/ExplainableMixTest.php"
+        "tests/Feature/ExplainableMixTest.php",
+        "resources/js/features/listening/ListeningProvider.tsx",
+        "resources/js/features/listening/ListeningPages.tsx",
+        "resources/js/features/listening/useListeningEvents.ts",
+        "tests/Browser/f11.e2e.ts",
+        "tests/Concurrency/ListeningPrivacyProcessTest.php"
       ],
       "required_tests": [
         "ListeningPrivacyTest",
-        "ExplainableMixTest"
+        "ExplainableMixTest",
+        "ListeningPrivacyProcessTest",
+        "ListeningPrivacyTest native audio",
+        "ExplainableMixTest curated reasons"
       ],
       "acceptance": [
         "history با consent، retention و پاک‌کردن واقعی ساخته شود؛ private session ذخیره نشود.",

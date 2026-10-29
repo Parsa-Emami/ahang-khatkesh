@@ -1,9 +1,12 @@
+import { PrivateListeningToggle } from "../features/listening/ListeningPages";
 import { captureSessionIntent, type SessionIntent } from "../lib/api";
 import { tr } from "../i18n/runtime";
 import { useLocale } from "../i18n/LocaleProvider";
 import { useEffect, useState, useRef } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import {
+    History,
+    Sparkles,
     Bookmark,
     ChevronDown,
     Heart,
@@ -180,6 +183,14 @@ export function AppLayout() {
                         <Heart size={20} />
                         {tr("m75f44e8bed")}
                     </NavLink>
+                    <NavLink to="/history">
+                        <History size={20} />
+                        {tr("listening.history")}
+                    </NavLink>
+                    <NavLink to="/mix">
+                        <Sparkles size={20} />
+                        {tr("listening.mix")}
+                    </NavLink>
                 </nav>
                 <div className="sidebar-divider" />
                 <div className="sidebar-section-title">
@@ -284,6 +295,7 @@ export function AppLayout() {
                         />
                         <kbd aria-hidden="true">↵</kbd>
                     </form>
+                    <PrivateListeningToggle />
                     <div className="header-actions">
                         <IconButton
                             label={

@@ -2,11 +2,13 @@
 
 namespace Tests\Feature;
 
+use App\Models\ListeningEvent;
 use App\Models\MediaAsset;
 use App\Models\Playlist;
 use App\Models\Track;
 use App\Models\User;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
+use Illuminate\Support\Str;
 use Tests\TestCase;
 
 class ExplainableMixTest extends TestCase
@@ -91,5 +93,29 @@ class ExplainableMixTest extends TestCase
         }
         $this->getJson('/api/v1/listening/mix?mood=night')->assertOk()->assertJsonCount(0, 'data');
         $this->getJson('/api/v1/listening/mix?mood=invalid')->assertUnprocessable();
+    }
+
+    public function test_retained_own_history_recency_and_mood_have_explainable_weights(): void
+    {
+        $user = User::factory()->create();
+        $other = User::factory()->create();
+        $tracks = $this->catalog($user);
+        $user->forceFill(['listening_history_enabled' => true])->save();
+        foreach ([[$user, $tracks[7], now()], [$user, $tracks[6], now()->subDays(31)], [$other, $tracks[0], now()]] as [$actor, $track, $at]) {
+            ListeningEvent::create(['id' => (string) Str::uuid(), 'user_id' => $actor->id, 'track_id' => $track->id, 'session_pseudonym' => str_repeat('a', 64), 'started_at' => $at, 'last_event_at' => $at, 'ended_at' => $at, 'listened_seconds' => 100, 'outcome' => 'completed']);
+        }
+        $rows = $this->actingAs($user)->getJson('/api/v1/listening/mix?mood=focus')->assertOk()->assertJsonPath('basis', 'personalized')->json('data');
+        $this->assertNotEmpty($rows);
+        foreach ($rows as $row) {
+            $reasons = array_column($row['reasons'], 'weight', 'code');
+            $this->assertSame(20, $reasons['mood']);
+            if ($row['track']['id'] === $tracks[7]->id) {
+                $this->assertSame(8, $reasons['history']);
+                $this->assertSame(-20, $reasons['recent']);
+            } else {
+                $this->assertArrayNotHasKey('history', $reasons);
+            }
+        }
+        $this->assertContains($tracks[7]->id, array_column(array_column($rows, 'track'), 'id'));
     }
 }

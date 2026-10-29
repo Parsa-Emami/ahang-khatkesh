@@ -117,3 +117,11 @@ jobs:
           path: reports/f10-visual/
           if-no-files-found: error
           retention-days: 14
+      - name: Retain synthetic F11 privacy screens
+        if: always() && matrix.database == 'sqlite'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: f11-privacy
+          path: reports/f11-privacy/
+          if-no-files-found: error
+          retention-days: 14
