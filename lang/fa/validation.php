@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'exists' => ':attribute انتخاب‌شده معتبر نیست.',
     'timezone' => 'منطقهٔ زمانی معتبر انتخاب کنید.',
     'date' => 'تاریخ معتبر وارد کنید.',
     'list' => 'ساختار :attribute باید یک فهرست باشد.',
@@ -20,5 +21,5 @@ return [
     'min' => ['string' => ':attribute حداقل :min نویسه باشد.', 'array' => ':attribute حداقل :min مورد داشته باشد.', 'numeric' => ':attribute حداقل :min باشد.'],
     'between' => ['numeric' => ':attribute باید بین :min و :max باشد.'],
     'password' => ['letters' => 'رمز عبور باید حرف داشته باشد.', 'numbers' => 'رمز عبور باید عدد داشته باشد.'],
-    'attributes' => ['locale' => 'زبان', 'direction' => 'جهت', 'motion' => 'حرکت رابط', 'time_zone' => 'منطقهٔ زمانی', 'theme' => 'تم', 'code' => 'کد رمزساز', 'recovery_code' => 'کد بازیابی', 'role' => 'نقش', 'revision' => 'نسخهٔ اطلاعات', 'title' => 'عنوان', 'artist_ids' => 'هنرمندان', 'credits' => 'اعتبار هنری', 'track_ids' => 'آهنگ‌ها', 'name' => 'نام', 'email' => 'ایمیل', 'password' => 'رمز عبور', 'current_password' => 'رمز فعلی', 'manifest' => 'فهرست پلی‌لیست', 'audio' => 'صوت', 'mood' => 'حال‌وهوا', 'queue' => 'صف پخش', 'cover' => 'کاور'],
+    'attributes' => ['sort_name' => 'نام مرتب‌سازی', 'country_code' => 'کد کشور', 'description' => 'توضیح', 'type' => 'نوع انتشار', 'released_on' => 'تاریخ انتشار', 'status' => 'وضعیت', 'primary_release_id' => 'انتشار اصلی', 'disc_number' => 'شمارهٔ دیسک', 'track_number' => 'شمارهٔ آهنگ', 'artist_ids.*' => 'هنرمند', 'credits.*.artist_id' => 'هنرمند', 'credits.*.role' => 'نقش هنری', 'tracks.*.track_id' => 'آهنگ', 'tracks.*.disc_number' => 'شمارهٔ دیسک', 'tracks.*.track_number' => 'شمارهٔ آهنگ', 'asset_id' => 'فایل صوتی', 'reservation_id' => 'رزرو فضا', 'purpose' => 'نوع رسانه', 'file_size' => 'اندازهٔ فایل', 'position_seconds' => 'موقعیت پخش', 'volume' => 'بلندی صدا', 'repeat_mode' => 'تکرار', 'shuffle' => 'پخش تصادفی', 'locale' => 'زبان', 'direction' => 'جهت', 'motion' => 'حرکت رابط', 'time_zone' => 'منطقهٔ زمانی', 'theme' => 'تم', 'code' => 'کد رمزساز', 'recovery_code' => 'کد بازیابی', 'role' => 'نقش', 'revision' => 'نسخهٔ اطلاعات', 'title' => 'عنوان', 'artist_ids' => 'هنرمندان', 'credits' => 'اعتبار هنری', 'track_ids' => 'آهنگ‌ها', 'name' => 'نام', 'email' => 'ایمیل', 'password' => 'رمز عبور', 'current_password' => 'رمز فعلی', 'manifest' => 'فهرست پلی‌لیست', 'audio' => 'صوت', 'mood' => 'حال‌وهوا', 'queue' => 'صف پخش', 'cover' => 'کاور'],
 ];

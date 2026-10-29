@@ -49,4 +49,17 @@ class LocalePreferencesTest extends TestCase
         $this->withHeader('Accept-Language', 'fa-IR')->getJson('/api/v1/playlists')->assertUnauthorized()->assertJsonPath('message', 'برای ادامه وارد حساب شوید.');
         $this->withHeader('Accept-Language', 'en-US')->getJson('/api/v1/playlists')->assertUnauthorized()->assertJsonPath('message', 'Unauthenticated.');
     }
+
+    public function test_persian_catalog_validation_uses_readable_field_names_and_messages(): void
+    {
+        $owner = User::factory()->create(['is_admin' => true]);
+        $this->actingAs($owner)->withSession(['auth.password_confirmed_at' => now()->timestamp, 'auth.mfa_confirmed_at' => now()->timestamp, 'auth.mfa_authenticated' => true])->withHeader('Accept-Language', 'fa-IR');
+
+        $this->postJson('/api/v1/admin/artists', ['name' => 'Artist', 'country_code' => 'invalid'])->assertUnprocessable()->assertJsonPath('errors.country_code.0', 'قالب کد کشور معتبر نیست.');
+        $invalidRelease = $this->postJson('/api/v1/admin/releases', ['title' => 'Release', 'type' => 'album', 'artist_ids' => [999999999]])->assertUnprocessable()->assertJsonValidationErrors('artist_ids.0');
+        $this->assertSame('هنرمند انتخاب‌شده معتبر نیست.', $invalidRelease->json('errors')['artist_ids.0'][0]);
+
+        $this->assertDatabaseCount('artists', 0);
+        $this->assertDatabaseCount('releases', 0);
+    }
 }
