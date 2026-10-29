@@ -12,10 +12,10 @@ class LocalePreferencesTest extends TestCase
 
     public function test_listener_can_save_only_own_interface_preferences_without_changing_access(): void
     {
-        $member = User::factory()->create();
+        $member = User::factory()->create(['name' => 'شنونده']);
         $other = User::factory()->create();
 
-        $this->actingAs($member)->withHeader('Accept-Language', 'en-US')->patchJson('/api/v1/me', ['locale' => 'en-US', 'direction' => 'rtl', 'motion' => 'reduced', 'time_zone' => 'Europe/Berlin', 'theme' => 'light', 'role' => 'owner', 'is_active' => false])->assertOk()->assertJsonPath('data.locale', 'en-US')->assertJsonPath('data.direction', 'rtl')->assertJsonPath('data.motion', 'reduced')->assertJsonPath('data.time_zone', 'Europe/Berlin')->assertJsonPath('data.role', 'listener')->assertJsonPath('data.role_label', 'Listener')->assertJsonPath('data.access_version', $member->access_version)->assertJsonPath('data.is_active', true)->assertHeader('Content-Language', 'en-US');
+        $this->actingAs($member)->withHeader('Accept-Language', 'en-US')->patchJson('/api/v1/me', ['locale' => 'en-US', 'direction' => 'rtl', 'motion' => 'reduced', 'time_zone' => 'Europe/Berlin', 'theme' => 'light', 'role' => 'owner', 'is_active' => false])->assertOk()->assertJsonPath('data.locale', 'en-US')->assertJsonPath('data.direction', 'rtl')->assertJsonPath('data.motion', 'reduced')->assertJsonPath('data.time_zone', 'Europe/Berlin')->assertJsonPath('data.name', 'شنونده')->assertJsonPath('data.role', 'listener')->assertJsonPath('data.role_label', 'Listener')->assertJsonPath('data.access_version', $member->access_version)->assertJsonPath('data.is_active', true)->assertHeader('Content-Language', 'en-US');
 
         $this->assertDatabaseHas('users', ['id' => $member->id, 'locale' => 'en-US', 'direction' => 'rtl', 'theme' => 'light']);
         $this->assertDatabaseHas('users', ['id' => $other->id, 'locale' => 'fa-IR', 'direction' => 'auto']);
@@ -42,5 +42,11 @@ class LocalePreferencesTest extends TestCase
         $member = User::factory()->create(['is_active' => false]);
 
         $this->actingAs($member)->withHeader('Accept-Language', 'en-US')->getJson('/api/v1/stats')->assertForbidden()->assertJsonPath('message', 'This account is inactive.')->assertHeader('Content-Language', 'en-US');
+    }
+
+    public function test_framework_authentication_errors_follow_the_selected_locale(): void
+    {
+        $this->withHeader('Accept-Language', 'fa-IR')->getJson('/api/v1/playlists')->assertUnauthorized()->assertJsonPath('message', 'برای ادامه وارد حساب شوید.');
+        $this->withHeader('Accept-Language', 'en-US')->getJson('/api/v1/playlists')->assertUnauthorized()->assertJsonPath('message', 'Unauthenticated.');
     }
 }

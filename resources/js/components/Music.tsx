@@ -530,7 +530,19 @@ export function PlayerBar() {
                             {duration(player.position)}
                         </span>
                         <input
-                            dir="auto"
+                            dir="ltr"
+                            onKeyDown={(event) => {
+                                if (
+                                    event.key !== "ArrowRight" &&
+                                    event.key !== "ArrowLeft"
+                                )
+                                    return;
+                                event.preventDefault();
+                                player.seek(
+                                    player.position +
+                                        (event.key === "ArrowRight" ? 5 : -5),
+                                );
+                            }}
                             aria-label={tr("m6546753d1d")}
                             type="range"
                             aria-valuetext={`${duration(player.position)} / ${duration(current?.duration_seconds || 0)}`}

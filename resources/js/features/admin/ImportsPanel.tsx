@@ -1,3 +1,4 @@
+import { localizeText } from "../../i18n/runtime";
 import { useDraftGuard } from "../drafts/DraftNavigation";
 import { currentPreferences } from "../../i18n/runtime";
 import { tr } from "../../i18n/runtime";
@@ -76,11 +77,8 @@ export function ImportsPanel({ active = true }: { active?: boolean }) {
         [historyPage, setHistoryPage] = useState(1);
     useDraftGuard(
         !!(
-            name ||
-            description ||
-            artist ||
-            rows.length ||
-            manifest ||
+            (!runId &&
+                (name || description || artist || rows.length || manifest)) ||
             uploading
         ),
         () => {
@@ -856,7 +854,7 @@ export function ImportsPanel({ active = true }: { active?: boolean }) {
                                                 className="form-error"
                                                 role="alert"
                                             >
-                                                {current.error}
+                                                {localizeText(current.error)}
                                             </p>
                                         )}
                                         <label className="checkbox-label">

@@ -1,3 +1,4 @@
+import { localizeText } from "../../i18n/runtime";
 import { tr } from "../../i18n/runtime";
 import { useLocale } from "../../i18n/LocaleProvider";
 import { useState } from "react";
@@ -84,7 +85,7 @@ export function MemberPasswordResetDialog({
                 </label>
                 {error && (
                     <p role="alert" className="form-error">
-                        {error}
+                        {localizeText(error)}
                     </p>
                 )}
                 <button className="button" disabled={pending}>

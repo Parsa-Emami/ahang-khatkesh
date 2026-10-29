@@ -123,6 +123,9 @@ export function Dialog({
                             if (underlying) {
                                 event.preventDefault();
                                 underlying.focus();
+                            } else if (opener.current?.isConnected) {
+                                event.preventDefault();
+                                opener.current.focus();
                             }
                         }
                     }}

@@ -15,8 +15,16 @@ let intl = createIntl(
     { locale: preferences.locale, messages: messages[preferences.locale] },
     cache,
 );
+const listeners = new Set<() => void>();
 export const currentPreferences = () => preferences;
+export function subscribePreferences(listener: () => void) {
+    listeners.add(listener);
+    return () => {
+        listeners.delete(listener);
+    };
+}
 export function setRuntimePreferences(value: Preferences) {
+    if (value === preferences) return;
     preferences = value;
     intl = createIntl(
         {
@@ -26,6 +34,7 @@ export function setRuntimePreferences(value: Preferences) {
         },
         cache,
     );
+    for (const listener of listeners) listener();
 }
 export function tr(
     key: MessageKey,

@@ -25,6 +25,21 @@ async function login(page: Page, device: string, owner = false) {
         page.getByRole("button", { name: "نمایش صف پخش", exact: true }),
     ).toBeVisible();
 }
+async function openSettings(page: Page) {
+    const quick = page
+        .locator(".header-actions")
+        .getByRole("button", { name: "تنظیمات حساب", exact: true });
+    if (await quick.isVisible()) {
+        await quick.click();
+        return quick;
+    }
+    await page
+        .getByRole("button", { name: "باز کردن منو", exact: true })
+        .click();
+    const account = page.locator(".sidebar .user-button");
+    await account.click();
+    return account;
+}
 async function headers(page: Page) {
     const { data } = await (await page.request.get("/api/v1/session")).json();
     return {
@@ -63,9 +78,7 @@ test("locale direction theme matrix supports reflow system theme reduced motion 
     test.setTimeout(120000);
     await page.emulateMedia({ colorScheme: "dark", reducedMotion: "reduce" });
     await login(page, info.project.name);
-    await page
-        .getByRole("button", { name: "تنظیمات حساب", exact: true })
-        .click();
+    const settingsTrigger = await openSettings(page);
     for (const locale of ["fa-IR", "en-US"]) {
         await selectPreference(page, "locale", locale);
         for (const direction of ["rtl", "ltr"]) {
@@ -159,9 +172,7 @@ test("locale direction theme matrix supports reflow system theme reduced motion 
     await page
         .getByRole("button", { name: "Close dialog", exact: true })
         .click();
-    await expect(
-        page.getByRole("button", { name: "Account settings", exact: true }),
-    ).toBeFocused();
+    await expect(settingsTrigger).toBeFocused();
     await resetPreferences(page);
 });
 test("DraftNavigationTest preserves audio and drafts across locale theme dialog close routes back and unload", async ({
@@ -197,9 +208,7 @@ test("DraftNavigationTest preserves audio and drafts across locale theme dialog 
             .__f09Audio;
         return { count: list.length, time: list[0].currentTime };
     });
-    await page
-        .getByRole("button", { name: "تنظیمات حساب", exact: true })
-        .click();
+    await openSettings(page);
     await page.getByLabel("رمز فعلی", { exact: true }).fill("draft-secret");
     await selectPreference(page, "locale", "en-US");
     await selectPreference(page, "direction", "ltr");
@@ -234,6 +243,10 @@ test("DraftNavigationTest preserves audio and drafts across locale theme dialog 
     await page
         .getByRole("button", { name: "Discard changes and leave", exact: true })
         .click();
+    if (info.project.name === "mobile")
+        await page
+            .getByRole("button", { name: "Close menu", exact: true })
+            .click();
     if (info.project.name === "mobile")
         await page
             .getByRole("button", { name: "Open menu", exact: true })

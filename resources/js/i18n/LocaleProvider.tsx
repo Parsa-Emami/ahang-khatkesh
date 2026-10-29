@@ -1,7 +1,7 @@
 import {
     createContext,
     useContext,
-    useState,
+    useSyncExternalStore,
     useLayoutEffect,
     useEffect,
     type PropsWithChildren,
@@ -15,7 +15,11 @@ import {
     resolveDirection,
     type Preferences,
 } from "./locales";
-import { setRuntimePreferences } from "./runtime";
+import {
+    setRuntimePreferences,
+    currentPreferences,
+    subscribePreferences,
+} from "./runtime";
 const initial =
     typeof localStorage === "undefined"
         ? normalizePreferences()
@@ -33,9 +37,15 @@ export function applyPreferences(value: Preferences) {
     setRuntimePreferences(value);
 }
 export function LocaleProvider({ children }: PropsWithChildren) {
-    const [preferences, setValue] = useState(initial);
+    const preferences = useSyncExternalStore(
+        subscribePreferences,
+        currentPreferences,
+        currentPreferences,
+    );
     const setPreferences = (value: Partial<Preferences>) =>
-        setValue((old) => normalizePreferences({ ...old, ...value }));
+        setRuntimePreferences(
+            normalizePreferences({ ...currentPreferences(), ...value }),
+        );
     useLayoutEffect(() => {
         applyPreferences(preferences);
         try {
@@ -44,12 +54,12 @@ export function LocaleProvider({ children }: PropsWithChildren) {
     }, [preferences]);
     useEffect(() => {
         const listener = (event: StorageEvent) => {
-            if (event.key === "ak-preferences") setValue(readPreferences());
+            if (event.key === "ak-preferences")
+                setRuntimePreferences(readPreferences());
         };
         window.addEventListener("storage", listener);
         return () => window.removeEventListener("storage", listener);
     }, []);
-    setRuntimePreferences(preferences);
     return (
         <LocaleContext.Provider
             value={{

@@ -31,6 +31,7 @@ export function SettingsDialog({
         password_confirmation: "",
     });
     const changeTheme = useMutation({
+        scope: { id: "interface-preferences" },
         mutationFn: (value: Theme) =>
             api<{ data: User }>("/me", {
                 method: "PATCH",

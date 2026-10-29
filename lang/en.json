@@ -90,5 +90,15 @@
     "ایمپورت قدیمی نیاز به پیش‌نمایش تازه دارد.": "This legacy import requires a new preview.",
     "بودجهٔ بازیابی خودکار تمام شد؛ وضعیت worker را بررسی کنید.": "The automatic recovery budget is exhausted; check worker health.",
     "فایل صوتی ردیف :row در دسترس نیست؛ فایل اصلی معتبر انتخاب کنید.": "Audio in row :row is unavailable; choose a valid original file.",
-    "تعداد ستون‌های ردیف :row با سربرگ برابر نیست.": "The column count in row :row does not match the header."
+    "تعداد ستون‌های ردیف :row با سربرگ برابر نیست.": "The column count in row :row does not match the header.",
+    "Unauthenticated.": "Unauthenticated.",
+    "This action is unauthorized.": "This action is unauthorized.",
+    "Forbidden": "Forbidden",
+    "Not Found": "Not Found",
+    "Too Many Attempts.": "Too Many Attempts.",
+    "Too Many Requests": "Too Many Requests",
+    "Page Expired": "Page Expired",
+    "CSRF token mismatch.": "CSRF token mismatch.",
+    "Server Error": "Server Error",
+    "The given data was invalid.": "The given data was invalid."
 }

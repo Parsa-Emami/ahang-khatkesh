@@ -102,6 +102,7 @@ export function AppLayout() {
         setMenu(false);
     }, [location.pathname]);
     const saveTheme = useMutation({
+        scope: { id: "interface-preferences" },
         mutationFn: (value: Theme) =>
             api<{ data: User }>("/me", {
                 method: "PATCH",
@@ -206,6 +207,7 @@ export function AppLayout() {
                     )}
                     <button
                         className="user-button"
+                        aria-label={tr("mb9c7f76721")}
                         onClick={() => setSettings(true)}
                     >
                         <span className="avatar">

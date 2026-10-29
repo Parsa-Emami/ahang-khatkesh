@@ -1,3 +1,4 @@
+import { currentPreferences, subscribePreferences } from "./runtime";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import { parse } from "@formatjs/icu-messageformat-parser";
@@ -35,6 +36,20 @@ describe("locale direction theme matrix", () => {
             const output = tr(key, { v0: 3, v1: "Example", v2: "", count: 3 });
             expect(output).not.toBe(key);
             expect(output).not.toMatch(/\{v\d+\}/);
+        }
+    });
+    it("publishes one stable locale snapshot before transport or rendering reads it", () => {
+        const listener = vi.fn();
+        const unsubscribe = subscribePreferences(listener);
+        try {
+            const next = { ...defaults, locale: "en-US" as const };
+            setRuntimePreferences(next);
+            expect(currentPreferences()).toBe(next);
+            expect(tr("settings.language")).toBe("Language");
+            setRuntimePreferences(next);
+            expect(listener).toHaveBeenCalledTimes(1);
+        } finally {
+            unsubscribe();
         }
     });
     it("keeps language and explicit direction independent and rejects unknown stored settings", () => {

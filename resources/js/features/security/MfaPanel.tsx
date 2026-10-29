@@ -1,3 +1,4 @@
+import { localizeText } from "../../i18n/runtime";
 import { useDraftGuard } from "../drafts/DraftNavigation";
 import { asciiDigits } from "../../i18n/runtime";
 import { tr } from "../../i18n/runtime";
@@ -204,7 +205,7 @@ export function MfaPanel({ onReady }: { onReady?: () => void } = {}) {
             )}
             {error && (
                 <p className="form-error" role="alert">
-                    {error}
+                    {localizeText(error)}
                 </p>
             )}
         </section>

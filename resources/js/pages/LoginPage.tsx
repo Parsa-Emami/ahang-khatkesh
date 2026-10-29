@@ -1,3 +1,4 @@
+import { useDraftGuard } from "../features/drafts/DraftNavigation";
 import { PreferenceControls } from "../i18n/PreferenceControls";
 import { asciiDigits } from "../i18n/runtime";
 import { tr } from "../i18n/runtime";
@@ -19,6 +20,10 @@ export function LoginPage() {
         [code, setCode] = useState("");
     const [email, setEmail] = useState(""),
         [password, setPassword] = useState("");
+    useDraftGuard(!!(password || code), () => {
+        setPassword("");
+        setCode("");
+    });
     const login = useMutation({
         mutationFn: () =>
             api<{

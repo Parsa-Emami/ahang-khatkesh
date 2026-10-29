@@ -1,3 +1,4 @@
+import { localizeText } from "../../i18n/runtime";
 import { asciiDigits } from "../../i18n/runtime";
 import { tr } from "../../i18n/runtime";
 import { useLocale } from "../../i18n/LocaleProvider";
@@ -56,7 +57,10 @@ export function SessionConfirmation({ children }: PropsWithChildren) {
                         try {
                             await api("/me/password/confirm", {
                                 method: "POST",
-                                body: json({ password, code: code || null }),
+                                body: json({
+                                    password,
+                                    code: code ? asciiDigits(code) : null,
+                                }),
                             });
                             finish(true);
                         } catch (e) {
@@ -105,7 +109,7 @@ export function SessionConfirmation({ children }: PropsWithChildren) {
                     )}
                     {error && (
                         <p className="form-error" role="alert">
-                            {error}
+                            {localizeText(error)}
                         </p>
                     )}
                     <button className="button" disabled={pending}>

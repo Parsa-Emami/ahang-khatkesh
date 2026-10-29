@@ -58,7 +58,10 @@ export function FieldValidation() {
                 "aria-describedby",
                 [previous, node.id].filter(Boolean).join(" "),
             );
-            target.insertAdjacentElement("afterend", node);
+            (target.closest("label") || target).insertAdjacentElement(
+                "afterend",
+                node,
+            );
             fields.current.set(target, { node, previous, ...source });
         };
         const invalid = (event: Event) => {
