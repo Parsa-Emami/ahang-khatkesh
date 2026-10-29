@@ -4,7 +4,7 @@
 
 این مخزن شامل نسخهٔ 0.2 و پایهٔ اجرایی برای ادامهٔ توسعه است: Laravel 13، PHP 8.5، React 19، TypeScript و Vite؛ رابط فارسی، RTL و تم روشن/تیره؛ مدیریت اعضا و ورود پلی‌لیست از پنل ادمین؛ پخش فایل خصوصی، جستجو، علاقه‌مندی، ذخیرهٔ پلی‌لیست و بازگرداندن صف پخش. اتصال‌های زمان اجرای برنامه از API همان Laravel عبور می‌کنند. فایل صوت در فضای خصوصی فایل ذخیره می‌شود و متادیتا و رابطهٔ پلی‌لیست‌ها در دیتابیس قرار می‌گیرد.
 
-**وضعیت فعلی:** F01 تا F10 با [CI موفق 40895855884](https://github.com/Parsa-Emami/ahang-khatkesh/actions/runs/40895855884) و fingerprint همان کد تأیید شده‌اند؛ ۱۰ فاز از ۱۶ فاز verified هستند. F10 هویت بصری و stateهای مشترک، منبع محلی MIT برای Dither Flow، جلوهٔ محدود با fallback و نمای گسترش‌یافتهٔ پلیر را اضافه کرده است. ۱۳۴ تست PHP روی هر دو SQLite و MySQL، ۵۰ تست فرانت، ۲۴ سناریوی واقعی Chrome و ۹ تست چندپردازهٔ MySQL؛ بدون failure یا skip آزمون. 174 تصویر ماتریس، ۱۰۴ جفت contrast و chunk اختیاری 2255 بایت gzip ثبت شده‌اند. [شواهد F10](docs/verification/foundation-through-f10-2026-10-29.json)، [قرارداد F10](docs/F10_VISUAL_IDENTITY.fa.md) و [راهنمای ارتقا](docs/AFTER_F10.fa.md) مرجع‌اند. F11 تا F16 باقی‌اند و production تأیید نشده است.
+**وضعیت فعلی:** F01 تا F11 با [CI موفق 40947021977](https://github.com/Parsa-Emami/ahang-khatkesh/actions/runs/40947021977) و fingerprint همان کد تأیید شده‌اند؛ ۱۱ فاز از ۱۶ فاز verified هستند. F11 تاریخچه با رضایت صریح، نگهداری/خروجی/حذف واقعی، حالت خصوصی شش‌ساعته و میکس مجازی با دلیل هر انتخاب را اضافه کرده است. 151 تست PHP روی هر دو SQLite و MySQL، 54 تست فرانت، 28 سناریوی واقعی Chrome و 11 تست چندپردازهٔ MySQL؛ بدون failure یا skip آزمون. [شواهد F11](docs/verification/foundation-through-f11-2026-10-29.json)، [قرارداد F11](docs/F11_LISTENING_PRIVACY.fa.md) و [راهنمای ارتقا](docs/AFTER_F11.fa.md) مرجع‌اند. F12 تا F16 باقی‌اند؛ migration و scheduler F11 لازم‌اند و production تأیید نشده است.
 
 ## شروع توسعه
 
@@ -44,6 +44,9 @@ php artisan app:demo
 هر manifest حداکثر ۵۰۰ آهنگ و ۲ MiB دارد. ترتیب ردیف‌ها همان ترتیب پلی‌لیست است. نمونه‌های ساختار در [examples](examples) قرار دارند؛ شناسه‌های مثال باید با شناسهٔ واقعی حاصل از آپلود جایگزین شوند. URL موسیقی یک سرویس دیگر، فایل صوتی این برنامه محسوب نمی‌شود.
 
 ## سندهای توسعه
+
+- [تاریخچه، حالت خصوصی و میکس F11](docs/F11_LISTENING_PRIVACY.fa.md)
+- [پس از F11: migration، build و scheduler](docs/AFTER_F11.fa.md)
 
 - [هویت بصری و جلوهٔ محلی F10](docs/F10_VISUAL_IDENTITY.fa.md)
 - [پس از F10: دریافت کد و build](docs/AFTER_F10.fa.md)

@@ -257,7 +257,7 @@
         "R11"
       ],
       "runtime_scope": "F10 acceptance verified by exact-source CI; physical-device release G11 remains open",
-      "evidence_file": "docs/verification/foundation-through-f10-2026-10-29.json"
+      "evidence_file": "docs/verification/foundation-through-f11-2026-10-29.json"
     },
     {
       "id": "A08",
@@ -368,7 +368,7 @@
       "package_id": "A07",
       "status": "verified",
       "evidence_required": true,
-      "evidence_file": "docs/verification/foundation-through-f10-2026-10-29.json"
+      "evidence_file": "docs/verification/foundation-through-f11-2026-10-29.json"
     },
     {
       "id": "G08",
@@ -906,7 +906,7 @@
         "G07",
         "G11"
       ],
-      "evidence_file": "docs/verification/foundation-through-f10-2026-10-29.json",
+      "evidence_file": "docs/verification/foundation-through-f11-2026-10-29.json",
       "runtime_scope": "F10 lifecycle and fallbacks verified; broad release qualification remains F16"
     },
     {
@@ -923,7 +923,7 @@
         "G07",
         "G11"
       ],
-      "evidence_file": "docs/verification/foundation-through-f10-2026-10-29.json",
+      "evidence_file": "docs/verification/foundation-through-f11-2026-10-29.json",
       "runtime_scope": "F10 lifecycle and fallbacks verified; broad release qualification remains F16"
     },
     {
@@ -1377,8 +1377,8 @@
     "css_blob_sha": "fc76db8b94623b4e8a1f5fe10822f48500dae6c6",
     "vendored_path": "third_party/dither-flow",
     "max_render_pixels": 320000,
-    "measured_optional_gzip_bytes": 2255,
-    "evidence_file": "docs/verification/foundation-through-f10-2026-10-29.json",
+    "measured_optional_gzip_bytes": 2258,
+    "evidence_file": "docs/verification/foundation-through-f11-2026-10-29.json",
     "measurement_scope": "CI build, deterministic scheduling and Chrome ANGLE/SwiftShader lifecycle; physical GPU benchmarks remain F16"
   },
   "media": {
@@ -1740,6 +1740,8 @@
       "app/Services/Listening/ExplainableMix.php",
       "resources/js/features/listening/ListeningPages.tsx"
     ],
-    "release_qualification": "F16 remains open"
+    "release_qualification": "F16 remains open",
+    "evidence_file": "docs/verification/foundation-through-f11-2026-10-29.json",
+    "status": "verified_within_F11_acceptance"
   }
 }

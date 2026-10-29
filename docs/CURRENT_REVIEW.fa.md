@@ -1,4 +1,4 @@
-> F01 تا F10 با [CI موفق 40895855884](https://github.com/Parsa-Emami/ahang-khatkesh/actions/runs/40895855884) و fingerprint همان کد تأیید شده‌اند: ۱۳۴ تست PHP روی هر دو SQLite و MySQL، ۵۰ تست فرانت، ۲۴ سناریوی واقعی Chrome و ۹ تست چندپردازهٔ MySQL؛ بدون failure یا skip آزمون. 174 تصویر ماتریس و ۱۰۴ جفت contrast ثبت و hash تصاویر بازبینی شده است. chunk اختیاری جلوه 2255 بایت gzip است. [شواهد F10](verification/foundation-through-f10-2026-10-29.json) و [قرارداد F10](F10_VISUAL_IDENTITY.fa.md) مرجع‌اند؛ F11 تا F16 و تأیید production باقی‌اند. گام بعد F11 است.
+> F01 تا F11 با [CI موفق 40947021977](https://github.com/Parsa-Emami/ahang-khatkesh/actions/runs/40947021977) و fingerprint همان کد تأیید شده‌اند: 151 تست PHP روی هر دو SQLite و MySQL، 54 تست فرانت، 28 سناریوی واقعی Chrome و 11 تست چندپردازهٔ MySQL؛ بدون failure یا skip آزمون. 174 تصویر ماتریس F10، ۱۰۴ جفت contrast و هشت تصویر F11 ثبت و hashها بازبینی شدند؛ chunk اختیاری جلوه 2258 بایت gzip است. [شواهد F11](verification/foundation-through-f11-2026-10-29.json)، [قرارداد F11](F11_LISTENING_PRIVACY.fa.md) و [راهنمای ارتقا](AFTER_F11.fa.md) مرجع‌اند. F12 تا F16 و تأیید production باقی‌اند؛ گام بعد F12 است.
 
 > تأیید F01 تا F08 پس از اصلاح F08-B10 و ارتقای امنیتی F08-B11 روی commit `e9e5c6a3ca2a34f0fe11f226600aa445856d0b2b` با [CI موفق همان کد](https://github.com/Parsa-Emami/ahang-khatkesh/actions/runs/40824157871) بسته شد: ۱۲۸ تست PHP روی هر دو DB، ۳۰ تست فرانت، ۱۲ سناریوی مرورگر و ۹ تست چندپردازهٔ MySQL. symfony/mime از 8.1.7 به 8.1.10 برای CVE-2026-45070 ارتقا یافت و composer audit در هر دو job پاس شد. چهار تست batch همچنان مقیدبودن آپلود به actor/epoch آغازین را پوشش می‌دهند. [قرارداد F08](F08_AUDIO_CONVERSION.fa.md) و [شواهد جاری](verification/foundation-through-f08-2026-10-29-security.json) مقدم‌اند؛ گام بعدی F09 است.
 
@@ -50,7 +50,7 @@
 | N04 / R12 | بسته در دامنهٔ F08 | تبدیل واقعی، guard، سهمیه، recovery، پنل و کیفیت با تست واقعی پاس شدند | evidence F08 |
 | N05 / R11 | بسته در دامنهٔ F09 | کاتالوگ fa/en و جهت مستقل، ترجیحات حساب و ماتریس مرورگر اضافه شده‌اند | F09 |
 | N06 / R11 | بسته در دامنهٔ F10 | منبع محلی MIT، lifecycle محدود و ماتریس تصویری/contrast با CI همان source تأیید شدند؛ qualification دستگاه واقعی در F16 باقی است | F10 |
-| N07 | P2 | تاریخچه، private session و پیشنهاد توضیح‌پذیر هنوز ساخته نشده‌اند | F11 |
+| N07 | بسته در دامنهٔ F11 | تاریخچه با رضایت/retention/erase، حالت خصوصی و میکس توضیح‌پذیر با آزمون دو حساب و race واقعی MySQL تأیید شدند؛ qualification انتشار F16 باقی است | evidence F11 |
 | N08 | P2 | bulk operations، repair/merge و پیشنهاد اعضا workflow کامل ندارند | F12 |
 | N09 | P2 | متن همگام، crossfade، gapless و loudness analysis نیستند | F13 |
 | N10 | P2 | کنترل دستگاه فعال و آفلاین اختیاری وجود ندارند؛ تعارض playback فقط revision دارد | F14 |
@@ -69,7 +69,7 @@ MySQL 8.4/InnoDB/utf8mb4، migration افزایشی، کلید خارجی، revi
 
 این نسخه به ارتقای کنترل‌شده نیاز دارد: backup، توقف worker، maintenance، اجرای migration تازه، ساخت bundle تازه، راه‌اندازی worker و smoke test. importهای آماده/failed قدیمی که plan_hash ندارند باید دوباره preview شوند. processingهای نسخهٔ قبلی بدون نسل معتبر نباید با payload قدیمی دوباره queue شوند. مقدار role=owner به‌خاطر سازگاری داده عوض نشده است؛ مجوز کاتالوگ administrator/curator عمداً کاهش یافته است. bundle قدیمی به دلیل context header برای نوشتن پذیرفته نمی‌شود؛ تازه‌سازی کامل رابط لازم است.
 
-حذف فعلی قابل بازیابی است. حذف فیزیکی فایل یا دادهٔ حساب، purge خودکار، وعدهٔ پاک‌شدن آفلاین از راه دور و نگهداری نامحدود تاریخچه ارائه نشده‌اند.
+حذف کاتالوگ از رابط قابل بازیابی است؛ چرخهٔ حذف فایل از قرارداد F07 پیروی می‌کند. ردیف‌های تاریخچهٔ F11 با erase یا لغو رضایت فیزیکی حذف می‌شوند. حذف کامل حساب، پاک‌کردن از راه دورِ خروجی دانلودشده یا backup و نگهداری نامحدود تاریخچه ارائه نشده‌اند.
 
 ## ارزیابی کیفیت
 
