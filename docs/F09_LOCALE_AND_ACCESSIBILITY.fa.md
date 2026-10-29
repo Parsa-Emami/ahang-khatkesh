@@ -1,6 +1,6 @@
 # F09 — زبان، جهت و دسترس‌پذیری پایه
 
-مبنای پیاده‌سازی `9b01fe2c30a443af42bcd8a05b28ed2930d1bedc` است. وضعیت تأیید از `roadmap/phases.json` و evidence همان source خوانده می‌شود.
+مبنای پیاده‌سازی `9b01fe2c30a443af42bcd8a05b28ed2930d1bedc` است. وضعیت تأیید از `roadmap/phases.json` و [evidence جاری](verification/foundation-through-f09-2026-10-29.json) خوانده می‌شود. [CI موفق 40858380705](https://github.com/Parsa-Emami/ahang-khatkesh/actions/runs/40858380705) برای commit `9f6f63ec3595b453fcc543e19ab5bc4314750b57` شامل ۱۳۴ تست PHP روی هر دو SQLite و MySQL، ۳۹ تست فرانت، ۱۸ سناریوی واقعی مرورگر و ۹ تست چندپردازهٔ MySQL موفق و بدون skip است.
 
 ## رفتار اجرایی
 
@@ -30,3 +30,17 @@ Dialog جهت جاری، focus trap و بازگشت focus به کنترل آغا
 
 
 بررسی npm در این نسخه با OSV-Scanner 2.7.0 و SHA-256 ثابت انجام می‌شود: snapshot عمومی کل npm دریافت و تطبیق با package-lock فقط با `--offline --no-resolve` محلی اجرا می‌شود. `npm ci` ارسال خودکار audit ندارد. هیچ فایل قفل یا درخت وابستگی به سرویس audit ارسال نمی‌شود. خطای دریافت پایگاه یا scanner، بررسی را fail می‌کند؛ gate حذف نشده است. مرجع: https://google.github.io/osv-scanner/offline-mode/ .
+
+## نقص‌های بسته‌شده در این فاز
+
+| مسئله | اصلاح و شاهد |
+| --- | --- |
+| متن ثابت و جهت RTL پنجره‌ها | catalog تایپ‌شده، dir مستقل و ماتریس واقعی مرورگر |
+| خروج ناخواسته از فرم | registry مشترک و آزمون route، Back، Escape و unload |
+| هشدار کاذب پس از ذخیرهٔ پیش‌نمایش/انتشار import | تشخیص draft محلی از وضعیت بادوام سرور؛ regression تبدیل FLAC |
+| تغییر نام دسترس‌پذیر input پس از خطا | توضیح خطا بیرون label و اتصال aria-describedby؛ آزمون نام دقیق فیلد |
+| نام متفاوت بخش مدیریت در موبایل | aria-label ثابت و توضیح جدا؛ همان selector در هر دو اندازه |
+| قصد خروج قدیمی بعد از تعویض زمینهٔ نشست | لغو callback معلق، بستن پنجره و پاک‌کردن رمز؛ سناریوی واقعی مرورگر |
+| نوشتن ترجیحات در صف پس از تغییر حساب | snapshot نسل/actor/epoch در لحظهٔ انتخاب و رد پیش از fetch؛ سه آزمون منفی |
+| کلید خام validation.exists و نام فنی فیلد | پیام و attribute فارسی، شامل عضوهای آرایه؛ تست API مجاز با owner |
+| جهت آیکون ناوبری | هر دو ArrowLeft/ArrowRight در LTR هماهنگ‌اند؛ نشانه‌های رسانه ثابت‌اند |
