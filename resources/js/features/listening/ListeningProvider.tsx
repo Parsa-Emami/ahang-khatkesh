@@ -3,6 +3,7 @@ import {
     useContext,
     useEffect,
     useLayoutEffect,
+    useRef,
     useState,
     type PropsWithChildren,
 } from "react";
@@ -30,6 +31,7 @@ export function ListeningProvider({ children }: PropsWithChildren) {
         client = useQueryClient(),
         notify = useToast();
     const [blocked, setBlocked] = useState(false);
+    const channelRef = useRef<BroadcastChannel | null>(null);
     const key = ["listening-settings", user!.id, user!.access_version];
     const query = useQuery({
         queryKey: key,
@@ -76,11 +78,15 @@ export function ListeningProvider({ children }: PropsWithChildren) {
             typeof BroadcastChannel === "undefined"
                 ? null
                 : new BroadcastChannel("ak-listening-v1");
+        channelRef.current = channel;
         if (channel)
             channel.onmessage = (event) => {
                 if (event.data === user!.id) refresh();
             };
-        return () => channel?.close();
+        return () => {
+            if (channelRef.current === channel) channelRef.current = null;
+            channel?.close();
+        };
     }, [user!.id, query.data]);
     const mutation = useMutation({
         mutationFn: (
@@ -100,12 +106,7 @@ export function ListeningProvider({ children }: PropsWithChildren) {
         onSuccess: (result) => {
             clear();
             client.setQueryData(key, result);
-            const channel =
-                typeof BroadcastChannel === "undefined"
-                    ? null
-                    : new BroadcastChannel("ak-listening-v1");
-            channel?.postMessage(user!.id);
-            channel?.close();
+            channelRef.current?.postMessage(user!.id);
         },
         onError: (error) => {
             notify(error.message, true);

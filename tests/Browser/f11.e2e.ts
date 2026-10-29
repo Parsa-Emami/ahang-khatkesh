@@ -29,10 +29,16 @@ async function navigate(page: Page, name: string) {
         name: "باز کردن منو",
         exact: true,
     });
-    if (await menu.isVisible()) await menu.click();
-    await page.getByRole("link", { name, exact: true }).click();
+    const mobile = await menu.isVisible();
+    if (mobile) await menu.click();
+    const link = page.getByRole("link", { name, exact: true });
+    const samePath =
+        new URL((await link.getAttribute("href"))!, page.url()).pathname ===
+        new URL(page.url()).pathname;
+    await link.click();
     const close = page.getByRole("button", { name: "بستن منو", exact: true });
-    if (await close.isVisible()) await close.click();
+    if (mobile && samePath) await close.click();
+    else if (mobile) await expect(close).toBeHidden();
 }
 async function headers(page: Page) {
     const { data } = await (await page.request.get("/api/v1/session")).json();
@@ -93,6 +99,7 @@ test("ListeningPrivacyTest native audio consent private broadcast export erase a
     page,
 }, info) => {
     test.setTimeout(120000);
+    page.setDefaultTimeout(15000);
     await page.addInitScript(() => {
         const Original = window.Audio;
         const created: HTMLAudioElement[] = [];
@@ -237,6 +244,7 @@ test("ListeningPrivacyTest native audio consent private broadcast export erase a
 test("ExplainableMixTest curated reasons liked signals opt-out virtual playback and no catalog writes", async ({
     page,
 }, info) => {
+    page.setDefaultTimeout(15000);
     await login(page, info.project.name);
     const before = (await (await page.request.get("/api/v1/playlists")).json())
         .data;
