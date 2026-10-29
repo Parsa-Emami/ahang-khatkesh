@@ -1,6 +1,7 @@
 import { beforeEach, afterEach, describe, expect, it, vi } from "vitest";
 import {
     api,
+    captureSessionIntent,
     ApiError,
     invalidateSessionIdentity,
     setCsrfToken,
@@ -24,6 +25,45 @@ beforeEach(() => {
 });
 afterEach(() => vi.unstubAllGlobals());
 describe("session-bound transport", () => {
+    it.each([
+        { id: 2, access_version: 3 },
+        { id: 1, access_version: 4 },
+    ])(
+        "rejects a serialized preference write captured before actor or epoch changed",
+        async (user) => {
+            const intent = captureSessionIntent({ locale: "en-US" });
+            const fetcher = vi.fn();
+            vi.stubGlobal("fetch", fetcher);
+            setSessionIdentity(user);
+            await expect(
+                api(
+                    "/me",
+                    { method: "PATCH", body: JSON.stringify(intent.value) },
+                    true,
+                    true,
+                    intent,
+                ),
+            ).rejects.toMatchObject({ code: "session_context_changed" });
+            expect(fetcher).not.toHaveBeenCalled();
+        },
+    );
+    it("rejects a queued preference write after the same account signs in to a new session", async () => {
+        const intent = captureSessionIntent({ theme: "dark" });
+        const fetcher = vi.fn();
+        vi.stubGlobal("fetch", fetcher);
+        invalidateSessionIdentity();
+        setSessionIdentity(actor);
+        await expect(
+            api(
+                "/me",
+                { method: "PATCH", body: JSON.stringify(intent.value) },
+                true,
+                true,
+                intent,
+            ),
+        ).rejects.toMatchObject({ code: "session_context_changed" });
+        expect(fetcher).not.toHaveBeenCalled();
+    });
     it("signs business requests and preserves safe error details", async () => {
         const fetcher = vi.fn().mockResolvedValue(
             response(422, {

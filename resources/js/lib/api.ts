@@ -16,6 +16,14 @@ export function invalidateSessionIdentity() {
     generation++;
     identity = null;
 }
+export type SessionIntent<T> = {
+    value: T;
+    generation: number;
+    identity: string | null;
+};
+export function captureSessionIntent<T>(value: T): SessionIntent<T> {
+    return { value, generation, identity: identityKey(identity) };
+}
 export function sessionHeaders(): Record<string, string> {
     const key = identityKey(identity);
     return key ? { "X-Session-Context": key } : {};
@@ -57,9 +65,15 @@ export async function api<T>(
     options: RequestInit = {},
     retryCsrf = true,
     retryConfirmation = true,
+    intent?: SessionIntent<unknown>,
 ): Promise<T> {
     const captured = generation;
     const capturedKey = identityKey(identity);
+    if (
+        intent &&
+        (intent.generation !== captured || intent.identity !== capturedKey)
+    )
+        throw contextError();
     const identityRequest =
         path === "/session" || path === "/login" || path === "/login/challenge";
     const headers = new Headers(options.headers);
@@ -95,7 +109,7 @@ export async function api<T>(
     if (response.status === 419 && retryCsrf && !identityRequest) {
         await api("/session", {}, false, false);
         if (!unchanged()) throw contextError();
-        return api<T>(path, options, false, retryConfirmation);
+        return api<T>(path, options, false, retryConfirmation, intent);
     }
     if (
         response.status === 423 &&
@@ -106,7 +120,7 @@ export async function api<T>(
         if (!(await confirmSession()))
             throw new ApiError(423, tr("mf1a9855d9d"));
         if (!unchanged()) throw contextError();
-        return api<T>(path, options, retryCsrf, false);
+        return api<T>(path, options, retryCsrf, false, intent);
     }
     if (!response.ok) {
         if (response.status === 422 && payload.errors)

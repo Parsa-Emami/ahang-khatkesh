@@ -1,3 +1,4 @@
+import { captureSessionIntent, type SessionIntent } from "../lib/api";
 import { PreferenceControls } from "../i18n/PreferenceControls";
 import { useDraftNavigation } from "../features/drafts/DraftNavigation";
 import type { Preferences } from "../i18n/locales";
@@ -40,11 +41,17 @@ export function SettingsDialog({
     }, [open, session.user?.id, session.user?.access_version]);
     const changeTheme = useMutation({
         scope: { id: "interface-preferences" },
-        mutationFn: (value: Theme) =>
-            api<{ data: User }>("/me", {
-                method: "PATCH",
-                body: json({ theme: value }),
-            }),
+        mutationFn: (intent: SessionIntent<Theme>) =>
+            api<{ data: User }>(
+                "/me",
+                {
+                    method: "PATCH",
+                    body: json({ theme: intent.value }),
+                },
+                true,
+                true,
+                intent,
+            ),
         onSuccess: ({ data }) =>
             session.setSession({
                 data: { user: data, csrf_token: getCsrfToken() },
@@ -53,8 +60,14 @@ export function SettingsDialog({
     });
     const preferences = useMutation({
         scope: { id: "interface-preferences" },
-        mutationFn: (value: Partial<Preferences>) =>
-            api<{ data: User }>("/me", { method: "PATCH", body: json(value) }),
+        mutationFn: (intent: SessionIntent<Partial<Preferences>>) =>
+            api<{ data: User }>(
+                "/me",
+                { method: "PATCH", body: json(intent.value) },
+                true,
+                true,
+                intent,
+            ),
         onSuccess: () => {},
         onError: (error) => notify(error.message, true),
     });
@@ -117,7 +130,9 @@ export function SettingsDialog({
             description={session.user?.email || tr("mb9c7f76721")}
         >
             <PreferenceControls
-                onChange={(value) => preferences.mutate(value)}
+                onChange={(value) =>
+                    preferences.mutate(captureSessionIntent(value))
+                }
             />
             <div className="settings-theme">
                 <h3>{tr("madd184f910")}</h3>
@@ -130,7 +145,7 @@ export function SettingsDialog({
                             disabled={changeTheme.isPending}
                             onClick={() => {
                                 theme.setTheme(value);
-                                changeTheme.mutate(value);
+                                changeTheme.mutate(captureSessionIntent(value));
                             }}
                         >
                             {value === "light"

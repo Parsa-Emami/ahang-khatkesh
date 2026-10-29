@@ -1,3 +1,4 @@
+import { captureSessionIntent, type SessionIntent } from "../lib/api";
 import { tr } from "../i18n/runtime";
 import { useLocale } from "../i18n/LocaleProvider";
 import { useEffect, useState, useRef } from "react";
@@ -118,11 +119,17 @@ export function AppLayout() {
     }, [location.pathname]);
     const saveTheme = useMutation({
         scope: { id: "interface-preferences" },
-        mutationFn: (value: Theme) =>
-            api<{ data: User }>("/me", {
-                method: "PATCH",
-                body: json({ theme: value }),
-            }),
+        mutationFn: (intent: SessionIntent<Theme>) =>
+            api<{ data: User }>(
+                "/me",
+                {
+                    method: "PATCH",
+                    body: json({ theme: intent.value }),
+                },
+                true,
+                true,
+                intent,
+            ),
         onSuccess: ({ data }) =>
             session.setSession({
                 data: { user: data, csrf_token: getCsrfToken() },
@@ -288,7 +295,7 @@ export function AppLayout() {
                             onClick={() => {
                                 const value = theme.dark ? "light" : "dark";
                                 theme.setTheme(value);
-                                saveTheme.mutate(value);
+                                saveTheme.mutate(captureSessionIntent(value));
                             }}
                         >
                             {theme.dark ? (

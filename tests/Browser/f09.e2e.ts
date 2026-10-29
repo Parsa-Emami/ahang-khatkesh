@@ -264,6 +264,16 @@ test("DraftNavigationTest preserves audio and drafts across locale theme dialog 
     await page
         .getByLabel("Display name", { exact: true })
         .fill("Mixed نام 2026");
+    await test.step("Back keeps the dirty artist form in the same SPA document", async () => {
+        await page.evaluate(() => history.back());
+        await page
+            .getByRole("button", { name: "Continue editing", exact: true })
+            .click();
+        await expect(
+            page.getByLabel("Display name", { exact: true }),
+        ).toHaveValue("Mixed نام 2026");
+        await expect(page).toHaveURL(/tab=catalog/);
+    });
     await page.keyboard.press("Escape");
     await page
         .getByRole("button", { name: "Continue editing", exact: true })
@@ -310,22 +320,6 @@ test("DraftNavigationTest preserves audio and drafts across locale theme dialog 
         return event.defaultPrevented;
     });
     expect(prevented).toBe(true);
-    await page.evaluate(() => history.go(-3));
-    await page
-        .getByRole("button", { name: "Continue editing", exact: true })
-        .click();
-    if (
-        info.project.name === "mobile" &&
-        (await page
-            .getByRole("button", { name: "Close menu", exact: true })
-            .isVisible())
-    )
-        await page
-            .getByRole("button", { name: "Close menu", exact: true })
-            .click();
-    await expect(page.getByLabel("Playlist name", { exact: true })).toHaveValue(
-        "Unsaved import",
-    );
     if (info.project.name === "mobile")
         await page
             .getByRole("button", { name: "Open menu", exact: true })
