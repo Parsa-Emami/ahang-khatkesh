@@ -215,6 +215,21 @@ test("visual matrix captures locale direction theme widths and shared empty erro
                 releasePreference();
                 expect((await saved).status()).toBe(200);
                 await page.unrouteAll({ behavior: "wait" });
+                const controlContrast = await page
+                    .locator('input[name="current_password"]')
+                    .evaluate((el) => {
+                        const style = getComputedStyle(el);
+                        return {
+                            foreground: style.borderTopColor,
+                            background: style.backgroundColor,
+                        };
+                    });
+                expect(
+                    contrast(
+                        hex(controlContrast.foreground),
+                        hex(controlContrast.background),
+                    ),
+                ).toBeGreaterThanOrEqual(3);
                 await page
                     .getByRole("button", {
                         name:
@@ -244,6 +259,7 @@ test("visual matrix captures locale direction theme widths and shared empty erro
                         "invalid",
                     ],
                     contrast: pairs,
+                    control_contrast: controlContrast,
                 });
             }
     await page.reload();
@@ -282,11 +298,15 @@ test("shader fallback and reduced motion stop lazy rendering on system preferenc
     test.setTimeout(120000);
     await page.addInitScript(() => {
         const Original = window.Audio,
-            audio: HTMLAudioElement[] = [];
-        Object.assign(window, { __f10Audio: audio });
+            audio: HTMLAudioElement[] = [],
+            loads: number[] = [];
+        Object.assign(window, { __f10Audio: audio, __f10AudioLoads: loads });
         window.Audio = function (src?: string) {
             const item = new Original(src);
+            const index = audio.length;
             audio.push(item);
+            loads.push(0);
+            item.addEventListener("loadstart", () => loads[index]++);
             return item;
         } as unknown as typeof Audio;
         const connection = new EventTarget();
@@ -414,7 +434,12 @@ test("shader fallback and reduced motion stop lazy rendering on system preferenc
     const before = await page.evaluate(() => {
         const list = (window as unknown as { __f10Audio: HTMLAudioElement[] })
             .__f10Audio;
-        return { count: list.length, src: list[0].src };
+        return {
+            count: list.length,
+            src: list[0].src,
+            loads: (window as unknown as { __f10AudioLoads: number[] })
+                .__f10AudioLoads[0],
+        };
     });
     await page
         .getByRole("button", { name: "گسترش همین حالا", exact: true })
@@ -452,10 +477,17 @@ test("shader fallback and reduced motion stop lazy rendering on system preferenc
     const after = await page.evaluate(() => {
         const list = (window as unknown as { __f10Audio: HTMLAudioElement[] })
             .__f10Audio;
-        return { count: list.length, src: list[0].src, paused: list[0].paused };
+        return {
+            count: list.length,
+            src: list[0].src,
+            paused: list[0].paused,
+            loads: (window as unknown as { __f10AudioLoads: number[] })
+                .__f10AudioLoads[0],
+        };
     });
     expect(after.count).toBe(before.count);
     expect(after.src).toBe(before.src);
+    expect(after.loads).toBe(before.loads);
     expect(after.paused).toBe(false);
     await capture(page, info, "context-loss-fallback");
     await preferences(page, { motion: "system", theme: "system" });
