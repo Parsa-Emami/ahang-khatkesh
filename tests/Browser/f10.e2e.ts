@@ -17,14 +17,14 @@ async function login(page: Page, device: string) {
     await page.goto("/");
     await page
         .getByLabel("ایمیل", { exact: true })
-        .fill(`listener-${device}@example.test`);
+        .fill(`visual-${device}@example.test`);
     await page
         .getByLabel("رمز عبور", { exact: true })
         .fill(process.env.AHANG_E2E_PASSWORD!);
     await page
         .getByRole("button", { name: "ورود به خط‌کش", exact: true })
         .click();
-    await expect(page.locator(".player-bar")).toBeVisible();
+    await expect(page.locator(".player-bar")).toBeVisible({ timeout: 15000 });
     await preferences(page, {
         locale: "fa-IR",
         direction: "auto",
@@ -215,7 +215,15 @@ test("visual matrix captures locale direction theme widths and shared empty erro
                 releasePreference();
                 expect((await saved).status()).toBe(200);
                 await page.unrouteAll({ behavior: "wait" });
-                await page.locator(".stack-form > .button").click();
+                await page
+                    .getByRole("button", {
+                        name:
+                            locale === "fa-IR"
+                                ? "ذخیرهٔ رمز عبور"
+                                : "Save password",
+                        exact: true,
+                    })
+                    .click();
                 await expect(
                     page.locator('input[name="current_password"]'),
                 ).toHaveAttribute("aria-invalid", "true");
@@ -387,6 +395,14 @@ test("shader fallback and reduced motion stop lazy rendering on system preferenc
         connection.dispatchEvent(new Event("change"));
     });
     await page.locator(".featured-actions .button").click();
+    const repeat = page.locator(".player-bar .transport > button").last();
+    for (
+        let i = 0;
+        i < 3 && (await repeat.locator(".lucide-repeat-1").count()) === 0;
+        i++
+    )
+        await repeat.click();
+    await expect(repeat.locator(".lucide-repeat-1")).toBeVisible();
     await expect
         .poll(() =>
             page

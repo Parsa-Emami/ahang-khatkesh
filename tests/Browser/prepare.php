@@ -39,6 +39,7 @@ foreach (['desktop', 'mobile'] as $device) {
     $owner = User::create(['name' => 'Browser super administrator', 'email' => 'owner-'.$device.'@example.test', 'password' => getenv('AHANG_E2E_PASSWORD'), 'role' => UserRole::Owner]);
     $owner->forceFill(['two_factor_secret' => Fortify::currentEncrypter()->encrypt('JBSWY3DPEHPK3PXP'), 'two_factor_recovery_codes' => Fortify::currentEncrypter()->encrypt(json_encode(array_map(fn ($i) => 'browser-recovery-'.$i, range(1, 40)))), 'two_factor_confirmed_at' => now()])->save();
     User::create(['name' => 'Browser listener', 'email' => 'listener-'.$device.'@example.test', 'password' => getenv('AHANG_E2E_PASSWORD'), 'role' => UserRole::Listener]);
+    User::create(['name' => 'Visual listener', 'email' => 'visual-'.$device.'@example.test', 'password' => getenv('AHANG_E2E_PASSWORD'), 'role' => UserRole::Listener]);
 }
 if (Artisan::call('app:demo') !== 0 || Playlist::count() !== 6) {
     throw new RuntimeException('Synthetic browser library could not be prepared.');
