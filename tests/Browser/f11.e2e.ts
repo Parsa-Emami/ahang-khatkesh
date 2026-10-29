@@ -32,13 +32,14 @@ async function navigate(page: Page, name: string) {
     const mobile = await menu.isVisible();
     if (mobile) await menu.click();
     const link = page.getByRole("link", { name, exact: true });
-    const samePath =
-        new URL((await link.getAttribute("href"))!, page.url()).pathname ===
-        new URL(page.url()).pathname;
+    const target = new URL((await link.getAttribute("href"))!, page.url());
+    const samePath = target.pathname === new URL(page.url()).pathname;
     await link.click();
+    await expect(page).toHaveURL(target.href);
     const close = page.getByRole("button", { name: "بستن منو", exact: true });
     if (mobile && samePath) await close.click();
-    else if (mobile) await expect(close).toBeHidden();
+    if (mobile)
+        await expect(page.locator(".sidebar")).not.toHaveClass(/is-open/);
 }
 async function headers(page: Page) {
     const { data } = await (await page.request.get("/api/v1/session")).json();
