@@ -22,6 +22,7 @@ export function FieldValidation() {
     }, [locale]);
     useEffect(() => {
         let sequence = 0;
+        let focusPending = false;
         const isField = (target: EventTarget | null): target is Field =>
             target instanceof HTMLInputElement ||
             target instanceof HTMLTextAreaElement ||
@@ -50,6 +51,7 @@ export function FieldValidation() {
             target.setAttribute("aria-invalid", "true");
             const node = document.createElement("span");
             node.className = "field-error";
+            node.dir = "auto";
             node.id = `ak-field-${++sequence}`;
             node.setAttribute("role", "alert");
             node.textContent = message;
@@ -67,6 +69,14 @@ export function FieldValidation() {
         const invalid = (event: Event) => {
             const target = event.target;
             if (!isField(target)) return;
+            event.preventDefault();
+            if (!focusPending) {
+                focusPending = true;
+                queueMicrotask(() => {
+                    focusPending = false;
+                    if (target.isConnected) target.focus();
+                });
+            }
             target.setCustomValidity("");
             show(target, {
                 key: target.validity.valueMissing

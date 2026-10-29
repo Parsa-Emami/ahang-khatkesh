@@ -242,6 +242,12 @@ test("visual matrix captures locale direction theme widths and shared empty erro
                 await expect(
                     page.locator('input[name="current_password"]'),
                 ).toHaveAttribute("aria-invalid", "true");
+                await expect(
+                    page.locator('input[name="current_password"]'),
+                ).toBeFocused();
+                await expect(
+                    page.locator(".dialog-content .field-error"),
+                ).toHaveCount(3);
                 await capture(page, info, `${key}-invalid`);
                 await page.keyboard.press("Escape");
                 matrix.push({

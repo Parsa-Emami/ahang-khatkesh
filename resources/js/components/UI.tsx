@@ -293,7 +293,7 @@ export function Loading({ label = tr("m441def3dc4") }: { label?: string }) {
             <span className="state-symbol" aria-hidden="true">
                 <LoaderCircle className="spin" size={26} />
             </span>
-            <span>{label}</span>
+            <span dir="auto">{label}</span>
         </div>
     );
 }
@@ -311,7 +311,7 @@ export function ErrorState({
                 <TriangleAlert size={28} />
             </span>
             <h2>{tr("mf4a3ad1e66")}</h2>
-            <p>{error.message}</p>
+            <p dir="auto">{error.message}</p>
             {retry && (
                 <button className="button secondary" onClick={retry}>
                     {tr("med6ee8fe9d")}
@@ -336,7 +336,7 @@ export function EmptyState({
                 <Disc3 size={32} strokeWidth={1.5} />
             </span>
             <h2>{title}</h2>
-            <p>{text}</p>
+            <p dir="auto">{text}</p>
             {admin && (
                 <Link to="/admin" className="button">
                     {tr("m74de17b78f")}
