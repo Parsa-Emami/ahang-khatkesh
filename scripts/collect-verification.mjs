@@ -109,7 +109,7 @@ if (process.env.AHANG_DATABASE === "sqlite") {
                 .update(readFileSync(`reports/f11-privacy/${name}`))
                 .digest("hex"),
         }));
-    assert.equal(privacyImages.length, 4);
+    assert.equal(privacyImages.length, 8);
     writeFileSync(
         "reports/f11-privacy/inventory.json",
         JSON.stringify(privacyImages, null, 2),

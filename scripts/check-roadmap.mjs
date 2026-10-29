@@ -137,7 +137,7 @@ for (const phase of roadmap.phases) {
                     "F11 requires native audio privacy and explainable mix browser evidence",
                 );
         assert(
-            record.privacy?.screenshot_count === 4,
+            record.privacy?.screenshot_count === 8,
             "F11 requires synthetic history and opt-out screenshots",
         );
     }

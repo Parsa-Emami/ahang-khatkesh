@@ -619,5 +619,7 @@
     "listening.reason.liked": "You liked this track",
     "listening.reason.artist": "From an artist you like",
     "listening.reason.history": "From your consented listening history",
-    "listening.reason.recent": "Recently played, so given less priority for variety"
+    "listening.reason.recent": "Recently played, so given less priority for variety",
+    "listening.historyEyebrow": "YOUR LISTENING",
+    "listening.mixEyebrow": "IN YOUR OWN MEASURE"
 }

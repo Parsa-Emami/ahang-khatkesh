@@ -99,6 +99,12 @@ jobs:
         env:
           DB_DATABASE: ahang_f07_test
           AHANG_CONCURRENCY: '1'
+      - name: Listening privacy browser preflight
+        if: matrix.database == 'sqlite'
+        run: node scripts/run-browser-tests.mjs tests/Browser/f11.e2e.ts --reporter=list
+        env:
+          AHANG_BROWSER_CHANNEL: chrome
+          AHANG_BROWSER_WEBGL: '1'
       - name: Browser journeys with real CSRF
         if: matrix.database == 'sqlite'
         run: npm run test:browser

@@ -5,9 +5,9 @@ F11 migration جدید `2026_10_29_230000_create_listening_privacy` دارد. hi
 ابتدا از دیتابیس، فایل‌های خصوصی و APP_KEY طبق روال انتشار خود backup معتبر بگیرید. برنامه را maintenance و workerها را با supervisor همان محیط متوقف کنید. پس از دریافت کد:
 
 ```bash
+php artisan down
 git pull --ff-only
 composer install --no-dev --prefer-dist --no-interaction
-php artisan down
 php artisan migrate --force
 npm ci
 npm run build

@@ -1,4 +1,10 @@
-import { expect, test, type Page } from "@playwright/test";
+import {
+    expect,
+    test,
+    type Page,
+    type Locator,
+    type TestInfo,
+} from "@playwright/test";
 import { mkdir, readFile } from "node:fs/promises";
 async function login(
     page: Page,
@@ -25,6 +31,8 @@ async function navigate(page: Page, name: string) {
     });
     if (await menu.isVisible()) await menu.click();
     await page.getByRole("link", { name, exact: true }).click();
+    const close = page.getByRole("button", { name: "بستن منو", exact: true });
+    if (await close.isVisible()) await close.click();
 }
 async function headers(page: Page) {
     const { data } = await (await page.request.get("/api/v1/session")).json();
@@ -35,7 +43,16 @@ async function headers(page: Page) {
     };
 }
 async function logout(page: Page) {
-    await page.locator(".header-actions button").last().click();
+    const quick = page.locator(".header-actions button").last();
+    if (await quick.isVisible()) await quick.click();
+    else {
+        const menu = page.getByRole("button", {
+            name: "باز کردن منو",
+            exact: true,
+        });
+        if (await menu.isVisible()) await menu.click();
+        await page.locator(".sidebar .user-button").click();
+    }
     await page
         .getByRole("button", { name: "خروج از حساب", exact: true })
         .click();
@@ -52,6 +69,25 @@ async function privacy(page: Page, name: string) {
         .getByRole("button", { name, exact: true })
         .click();
     expect((await response).status()).toBe(200);
+}
+async function checkbox(page: Page, control: Locator, checked: boolean) {
+    await expect(control).toBeEnabled();
+    const response = page.waitForResponse(
+        (r) =>
+            r.url().endsWith("/api/v1/listening/settings") &&
+            r.request().method() === "PATCH",
+    );
+    await control.click();
+    expect((await response).status()).toBe(200);
+    if (checked) await expect(control).toBeChecked();
+    else await expect(control).not.toBeChecked();
+    await expect(control).toBeEnabled();
+}
+async function capture(page: Page, info: TestInfo, state: string) {
+    await mkdir("reports/f11-privacy", { recursive: true });
+    await page.screenshot({
+        path: `reports/f11-privacy/${info.project.name}-${state}.png`,
+    });
 }
 test("ListeningPrivacyTest native audio consent private broadcast export erase and cross-user query cache isolation", async ({
     page,
@@ -79,8 +115,7 @@ test("ListeningPrivacyTest native audio consent private broadcast export erase a
         headers: { Accept: "application/json" },
     });
     expect(missingCsrf.status()).toBe(419);
-    await consent.check();
-    await expect(consent).toBeEnabled();
+    await checkbox(page, consent, true);
     const sibling = await page.context().newPage();
     await sibling.goto("/history");
     await privacy(sibling, "شروع حالت خصوصی");
@@ -111,6 +146,7 @@ test("ListeningPrivacyTest native audio consent private broadcast export erase a
     expect(grants).toBe(0);
     const snapshot = await (await page.request.get("/api/v1/playback")).json();
     expect(snapshot.data.queue).toEqual([]);
+    await capture(page, info, "private");
     await privacy(page, "پایان حالت خصوصی");
     await expect.poll(() => grants).toBe(1);
     await expect
@@ -155,6 +191,7 @@ test("ListeningPrivacyTest native audio consent private broadcast export erase a
     expect(exported.format).toBe("ahang-listening-v1");
     expect(exported.data).toHaveLength(1);
     expect(exported.data[0].session_pseudonym).toMatch(/^[a-f0-9]{64}$/);
+    await capture(page, info, "history");
     await logout(page);
     await login(page, info.project.name, "visual", false);
     await navigate(page, "تاریخچهٔ شنیدن");
@@ -182,8 +219,7 @@ test("ListeningPrivacyTest native audio consent private broadcast export erase a
             .data,
     ).toEqual([]);
     await eraser.close();
-    await consent.uncheck();
-    await expect(consent).toBeEnabled();
+    await checkbox(page, consent, false);
     for (const width of [320, 390, 768, 1440]) {
         await page.setViewportSize({ width, height: 1000 });
         for (const direction of ["rtl", "ltr"]) {
@@ -197,10 +233,6 @@ test("ListeningPrivacyTest native audio consent private broadcast export erase a
             ).toBe(true);
         }
     }
-    await mkdir("reports/f11-privacy", { recursive: true });
-    await page.screenshot({
-        path: `reports/f11-privacy/${info.project.name}-history.png`,
-    });
 });
 test("ExplainableMixTest curated reasons liked signals opt-out virtual playback and no catalog writes", async ({
     page,
@@ -227,6 +259,7 @@ test("ExplainableMixTest curated reasons liked signals opt-out virtual playback 
     await expect(page.locator("details[open]")).toContainText(
         "خودت این آهنگ را پسندیده‌ای",
     );
+    await capture(page, info, "mix");
     await page.getByRole("button", { name: "پخش میکس", exact: true }).click();
     await expect(
         page
@@ -243,8 +276,7 @@ test("ExplainableMixTest curated reasons liked signals opt-out virtual playback 
         name: "پیشنهاد موسیقی برای من فعال باشد",
         exact: true,
     });
-    await recommendations.uncheck();
-    await expect(recommendations).toBeEnabled();
+    await checkbox(page, recommendations, false);
     await navigate(page, "میکس برای تو");
     await expect(
         page.getByText("پیشنهاد موسیقی را خاموش کرده‌ای.", { exact: true }),
@@ -253,8 +285,5 @@ test("ExplainableMixTest curated reasons liked signals opt-out virtual playback 
     await expect(
         page.getByRole("button", { name: "پخش میکس", exact: true }),
     ).toBeDisabled();
-    await mkdir("reports/f11-privacy", { recursive: true });
-    await page.screenshot({
-        path: `reports/f11-privacy/${info.project.name}-opt-out.png`,
-    });
+    await capture(page, info, "opt-out");
 });

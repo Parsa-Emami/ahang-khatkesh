@@ -22,6 +22,7 @@ type Visit = {
     minimum: number;
     ready: boolean;
     expires: number;
+    duration: number;
 };
 export function useListeningEvents(audio: HTMLAudioElement, trackId?: number) {
     useEffect(() => {
@@ -49,7 +50,9 @@ export function useListeningEvents(audio: HTMLAudioElement, trackId?: number) {
             kind: "progress" | "skip" | "completed",
             keepalive = false,
         ) => {
-            const seconds = Math.floor(item.clock.seconds * 1000) / 1000;
+            const seconds =
+                Math.floor(Math.min(item.clock.seconds, item.duration) * 1000) /
+                1000;
             item.sending = item.sending
                 .catch(() => {})
                 .then(async () => {
@@ -105,6 +108,9 @@ export function useListeningEvents(audio: HTMLAudioElement, trackId?: number) {
                 minimum: Infinity,
                 ready: false,
                 expires: Infinity,
+                duration: Number.isFinite(audio.duration)
+                    ? audio.duration
+                    : 28800,
             };
             const data = {
                 track_id: trackId,

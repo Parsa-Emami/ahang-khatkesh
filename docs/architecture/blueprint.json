@@ -1625,6 +1625,121 @@
       "recent_verification": true,
       "status": "implemented",
       "implemented": true
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/listening/settings",
+      "mutation": false,
+      "permissions": [],
+      "scope": "current_active_account_only",
+      "recent_verification": false,
+      "status": "implemented",
+      "implemented": true
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/listening/settings",
+      "mutation": true,
+      "permissions": [],
+      "scope": "current_active_account_only",
+      "recent_verification": false,
+      "status": "implemented",
+      "implemented": true
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/listening/plays",
+      "mutation": true,
+      "permissions": [],
+      "scope": "current_active_account_only",
+      "recent_verification": false,
+      "status": "implemented",
+      "implemented": true
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/listening/events",
+      "mutation": true,
+      "permissions": [],
+      "scope": "current_active_account_only",
+      "recent_verification": false,
+      "status": "implemented",
+      "implemented": true
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/listening/history",
+      "mutation": false,
+      "permissions": [],
+      "scope": "current_active_account_only",
+      "recent_verification": false,
+      "status": "implemented",
+      "implemented": true
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/listening/history",
+      "mutation": true,
+      "permissions": [],
+      "scope": "current_active_account_only",
+      "recent_verification": false,
+      "status": "implemented",
+      "implemented": true
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/listening/history/{eventId}",
+      "mutation": true,
+      "permissions": [],
+      "scope": "current_active_account_only",
+      "recent_verification": false,
+      "status": "implemented",
+      "implemented": true
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/listening/export",
+      "mutation": false,
+      "permissions": [],
+      "scope": "current_active_account_only",
+      "recent_verification": false,
+      "status": "implemented",
+      "implemented": true
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/listening/mix",
+      "mutation": false,
+      "permissions": [],
+      "scope": "current_active_account_only",
+      "recent_verification": false,
+      "status": "implemented",
+      "implemented": true
     }
-  ]
+  ],
+  "listening": {
+    "phase": "F11",
+    "scope": "current_user",
+    "history_default": false,
+    "retention_days": [
+      7,
+      30,
+      90
+    ],
+    "retention_default_days": 30,
+    "minimum_seconds": "max(1, min(30, duration / 2))",
+    "private_hours": 6,
+    "max_events_per_account": 10000,
+    "candidate_limit": 500,
+    "max_per_artist": 2,
+    "max_per_primary_release": 2,
+    "catalog_mutation": false,
+    "specification": "docs/F11_LISTENING_PRIVACY.fa.md",
+    "runtime_sources": [
+      "app/Services/Listening/ListeningLedger.php",
+      "app/Services/Listening/ExplainableMix.php",
+      "resources/js/features/listening/ListeningPages.tsx"
+    ],
+    "release_qualification": "F16 remains open"
+  }
 }

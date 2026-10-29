@@ -619,5 +619,7 @@
     "listening.reason.liked": "خودت این آهنگ را پسندیده‌ای",
     "listening.reason.artist": "از هنرمندان پسندیدهٔ تو",
     "listening.reason.history": "بر پایهٔ شنیدن‌های ثبت‌شدهٔ خودت",
-    "listening.reason.recent": "اخیراً شنیده‌ای؛ برای تنوع اولویت کمتری دارد"
+    "listening.reason.recent": "اخیراً شنیده‌ای؛ برای تنوع اولویت کمتری دارد",
+    "listening.historyEyebrow": "شنیدنِ تو",
+    "listening.mixEyebrow": "به اندازهٔ خودت"
 }

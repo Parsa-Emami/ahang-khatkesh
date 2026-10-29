@@ -222,7 +222,9 @@ export function HistoryPage() {
         <div className="page-enter listening-page">
             <div className="page-intro">
                 <div>
-                    <span className="eyebrow">YOUR LISTENING</span>
+                    <span className="eyebrow">
+                        {tr("listening.historyEyebrow")}
+                    </span>
                     <h1>{tr("listening.history")}</h1>
                     <p>{tr("listening.historyHelp")}</p>
                 </div>
@@ -369,7 +371,9 @@ export function MixPage() {
         <div className="page-enter listening-page">
             <div className="page-intro">
                 <div>
-                    <span className="eyebrow">IN YOUR OWN MEASURE</span>
+                    <span className="eyebrow">
+                        {tr("listening.mixEyebrow")}
+                    </span>
                     <h1>{tr("listening.mix")}</h1>
                     <p>{tr("listening.mixHelp")}</p>
                 </div>
