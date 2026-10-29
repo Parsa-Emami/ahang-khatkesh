@@ -104,7 +104,16 @@ jobs:
         run: npm run test:browser
         env:
           AHANG_BROWSER_CHANNEL: chrome
+          AHANG_BROWSER_WEBGL: '1'
       - name: Record tested source and suites
         run: node scripts/collect-verification.mjs
         env:
           AHANG_DATABASE: ${{ matrix.database }}
+      - name: Retain synthetic F10 visual matrix
+        if: always() && matrix.database == 'sqlite'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: f10-visual-matrix
+          path: reports/f10-visual/
+          if-no-files-found: error
+          retention-days: 14

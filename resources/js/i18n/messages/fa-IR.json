@@ -572,5 +572,7 @@
     "editorial.search": "موج خودت را پیدا کن",
     "editorial.login": "هیاهوی کمتر، صدایی نزدیک‌تر به تو",
     "editorial.selects": "انتخاب خط‌کش / ۰۰۱",
-    "editorial.private": "خط‌کش / شنیدن شخصی"
+    "editorial.private": "خط‌کش / شنیدن شخصی",
+    "player.expand": "گسترش همین حالا",
+    "player.expandedDescription": "آهنگ جاری و کنترل‌های پخش"
 }

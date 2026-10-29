@@ -6,7 +6,7 @@
   "scripts": {
     "check:architecture": "node scripts/check-architecture.mjs",
     "dev": "node scripts/dev.mjs",
-    "build": "tsc --noEmit && vite build",
+    "build": "tsc --noEmit && vite build && node scripts/check-effects.mjs",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "format": "prettier --write resources/js resources/css vite.config.ts vitest.config.ts index.html playwright.config.ts tests/Browser/*.ts scripts/*.mjs",

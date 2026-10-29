@@ -1,6 +1,6 @@
 # رابط universal، RTL/LTR و تم‌ها
 
-وضعیت: قرارداد A06 در F09 پیاده‌سازی و با CI همان source تأیید شده است؛ A07 و جلوه‌ها در F10 باقی‌اند. [قرارداد اجرایی F09](F09_LOCALE_AND_ACCESSIBILITY.fa.md) مقدم است. نسخهٔ 0.2 رابط فارسی/RTL دارد؛ کامل‌بودن انگلیسی، LTR و همهٔ حالت‌های این سند ادعا نمی‌شود. universal در این محصول یعنی ساختار مستقل از زبان، جهت، تم، اندازهٔ صفحه و شیوهٔ ورودی، با دامنهٔ پشتیبانی و تست مشخص.
+وضعیت: قرارداد A06 در F09 پیاده‌سازی و با CI همان source تأیید شده است؛ A07 و جلوهٔ محلی در [F10](F10_VISUAL_IDENTITY.fa.md) اجرا شده‌اند. [قرارداد اجرایی F09](F09_LOCALE_AND_ACCESSIBILITY.fa.md) مقدم است. نسخهٔ 0.2 رابط فارسی/RTL دارد؛ کامل‌بودن انگلیسی، LTR و همهٔ حالت‌های این سند ادعا نمی‌شود. universal در این محصول یعنی ساختار مستقل از زبان، جهت، تم، اندازهٔ صفحه و شیوهٔ ورودی، با دامنهٔ پشتیبانی و تست مشخص.
 
 ## دامنه و مالکیت تنظیمات
 
@@ -66,13 +66,13 @@ primitiveها حالت‌های default، hover/focus، disabled، busy، invali
 
 [21st.dev components](https://21st.dev/community/components) منبع انتخاب و ایده است؛ [icons](https://21st.dev/community/icons) چند خانواده با مجوز مستقل دارد. خانوادهٔ اصلی همان Lucide/ISC موجود است؛ مخلوط‌کردن اندازه و stroke خانواده‌های متعدد لازم نیست. رجیستری UiIcon، نام معنایی را به import محلی Lucide وصل می‌کند. runtime هیچ درخواست یا script به 21st.dev نمی‌فرستد.
 
-انتخاب shader برای A07، [Dither Flow از ham7a311](https://21st.dev/@ham7a311/components/dither-flow) است. منبع [Vitrine در commit ثابت](https://github.com/ham7a311/Vitrine/blob/3adb12a6173883561dc40213fa39ae9dc4d0ce20/src/registry/backgrounds/dither-flow/DitherFlow.tsx)، blob کد `eb8273aef893113ead05c4915623d61a68876418` و [مجوز MIT](https://github.com/ham7a311/Vitrine/blob/3adb12a6173883561dc40213fa39ae9dc4d0ce20/LICENSE)، blob مجوز `dc7f5a9b79f500372338ba1287cf67851c2033e3` بررسی شدند. وضعیت فعلی selected_source_verified است؛ vendoring و تطبیق wrapper هنوز اجرا نشده‌اند. کپی از branch متحرک یا ادعای ادغام‌شدنِ صرفاً با ثبت لینک مجاز نیست.
+انتخاب shader برای A07، [Dither Flow از ham7a311](https://21st.dev/@ham7a311/components/dither-flow) است. منبع [Vitrine در commit ثابت](https://github.com/ham7a311/Vitrine/blob/3adb12a6173883561dc40213fa39ae9dc4d0ce20/src/registry/backgrounds/dither-flow/DitherFlow.tsx)، blob کد `eb8273aef893113ead05c4915623d61a68876418` و [مجوز MIT](https://github.com/ham7a311/Vitrine/blob/3adb12a6173883561dc40213fa39ae9dc4d0ce20/LICENSE)، blob مجوز `dc7f5a9b79f500372338ba1287cf67851c2033e3` بررسی شدند. وضعیت فعلی vendored_adapted است؛ snapshot دقیق و MIT در third_party/dither-flow و wrapper محدود محلی در components/effects وارد شده‌اند. کپی از branch متحرک یا ادعای ادغام‌شدنِ صرفاً با ثبت لینک مجاز نیست.
 
 در ادغام، کد و CSS منبع، dependencyها، دسترسی شبکه، innerHTML، lifecycle و license بازبینی شوند. notice کامل مجوز در THIRD_PARTY_NOTICES و فایل license حفظ شود؛ بدون اجرای خودکار CLI ناشناخته. wrapper محصول palette روشن/تیره، reduced motion، visibility، GPU fallback و teardown را اعمال می‌کند. منبعی که این قرارداد را برآورده نکند adapt می‌شود یا جای خود را به fallback کدنویسی‌شدهٔ محلی می‌دهد؛ فرم و player به جلوه وابسته نیستند.
 
 ShaderBackdrop فقط در hero کتابخانه و نمای گسترش‌یافتهٔ NowPlaying، به‌صورت decorative/aria-hidden/pointer-events:none قرار گیرد. در فرم امنیت، import و جدول مدیریت، جلوهٔ متحرک به‌کار نرود. EffectBoundary خطای WebGL، context loss یا compile را به سطح CSS ثابت تبدیل کند؛ text و CTA بیرون canvas باشند. lazy load، لغو requestAnimationFrame، حذف buffer/program/listener، توقف هنگام hidden/offscreen و احترام به save-data در صورت پشتیبانی لازم‌اند. motion کمتر یا خاموش یعنی هیچ loop فعال باقی نماند.
 
-بودجه‌های هدف، هنوز اندازه‌گیری‌نشده: حداکثر یک canvas فعال، DPR≤1.5، سقف 30fps و بارگذاری اختیاری جلوه حداکثر 60KiB gzip افزوده. افت مداوم frame به fallback ثابت منتهی شود؛ shader نباید پخش یا interaction را متوقف کند. پشتیبانی WebGL شرط استفاده از برنامه نیست. کمبود GPU یا APIهای ترجیح باتری نباید باعث حدس‌زدن توان دستگاه یا fingerprinting شود.
+بودجه‌های اجرایی با gate ساخت و آزمون چرخهٔ عمر: حداکثر یک canvas فعال، DPR≤1.5، سقف 30fps و بارگذاری اختیاری جلوه حداکثر 60KiB gzip افزوده. افت مداوم frame به fallback ثابت منتهی شود؛ shader نباید پخش یا interaction را متوقف کند. پشتیبانی WebGL شرط استفاده از برنامه نیست. کمبود GPU یا APIهای ترجیح باتری نباید باعث حدس‌زدن توان دستگاه یا fingerprinting شود.
 
 ## شرط پذیرش همگانی
 

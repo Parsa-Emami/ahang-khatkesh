@@ -24,6 +24,7 @@ import {
     X,
     Timer,
     AudioLines,
+    Maximize2,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { sleepPresets } from "../lib/sleep-timer";
@@ -39,6 +40,7 @@ import {
     type Track,
 } from "../types";
 import { Artwork, Dialog, IconButton } from "./UI";
+import { ShaderBackdrop } from "./effects/ShaderBackdrop";
 
 export function LikeButton({ track }: { track: Track }) {
     useLocale();
@@ -437,6 +439,7 @@ export function PlayerBar() {
     const player = usePlayer(),
         current = player.current;
     const [qualityOpen, setQualityOpen] = useState(false);
+    const [expanded, setExpanded] = useState(false);
     const hasQualityChoice = (current?.audio_qualities?.length ?? 0) > 1;
     const [queueOpen, setQueueOpen] = useState(false),
         [lastVolume, setLastVolume] = useState(0.8);
@@ -447,10 +450,18 @@ export function PlayerBar() {
                 aria-label={tr("m66becb6623")}
             >
                 <div className="player-track">
-                    <Artwork
-                        seed={current?.artwork_seed ?? current?.id ?? 0}
-                        url={current?.cover_url}
-                    />
+                    <button
+                        className="player-artwork"
+                        aria-label={tr("player.expand")}
+                        disabled={!current}
+                        onClick={() => setExpanded(true)}
+                    >
+                        <Artwork
+                            seed={current?.artwork_seed ?? current?.id ?? 0}
+                            url={current?.cover_url}
+                        />
+                        <Maximize2 size={17} aria-hidden="true" />
+                    </button>
                     <div>
                         <strong dir="auto">
                             {current?.title || tr("m9b3b1e10e7")}
@@ -649,6 +660,69 @@ export function PlayerBar() {
                     </select>
                 </label>
                 <p>{tr("m396d33ce21")}</p>
+            </Dialog>
+            <Dialog
+                open={expanded}
+                onOpenChange={setExpanded}
+                guard={false}
+                className="dialog-now-playing"
+                title={tr("m2f6b22ecce")}
+                description={tr("player.expandedDescription")}
+            >
+                <div className="now-stage">
+                    <ShaderBackdrop surface="expanded-now-playing" />
+                    <div className="now-stage-content">
+                        <Artwork
+                            seed={current?.artwork_seed ?? current?.id ?? 0}
+                            url={current?.cover_url}
+                        />
+                        <div className="now-stage-meta">
+                            <h3 dir="auto">
+                                {current?.title || tr("m605b5cc99a")}
+                            </h3>
+                            <p dir="auto">
+                                {current?.artist || tr("m1a6bc1bd66")}
+                            </p>
+                            <div className="transport" dir="ltr">
+                                <IconButton
+                                    label={tr("m4241fd2fd4")}
+                                    disabled={!current}
+                                    onClick={player.previous}
+                                >
+                                    <SkipBack size={20} />
+                                </IconButton>
+                                <IconButton
+                                    label={
+                                        player.playing
+                                            ? tr("m66703b010c")
+                                            : tr("m2260125ca7")
+                                    }
+                                    disabled={!current}
+                                    className="main-play"
+                                    onClick={player.toggle}
+                                >
+                                    {player.loading ? (
+                                        <LoaderCircle
+                                            className="spin"
+                                            size={22}
+                                        />
+                                    ) : player.playing ? (
+                                        <Pause size={22} />
+                                    ) : (
+                                        <Play size={22} />
+                                    )}
+                                </IconButton>
+                                <IconButton
+                                    label={tr("m7eb2f064d0")}
+                                    disabled={!current}
+                                    onClick={player.next}
+                                >
+                                    <SkipForward size={20} />
+                                </IconButton>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </Dialog>
             {(player.error || player.syncError) && (
                 <div className="player-error" role="alert">

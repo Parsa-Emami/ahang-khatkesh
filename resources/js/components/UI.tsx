@@ -16,7 +16,7 @@ import {
     type PropsWithChildren,
 } from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
-import { ArrowLeft, Disc3, LoaderCircle, X } from "lucide-react";
+import { ArrowLeft, Disc3, LoaderCircle, TriangleAlert, X } from "lucide-react";
 import { Link } from "react-router-dom";
 
 export function Brand({ small = false }: { small?: boolean }) {
@@ -73,6 +73,7 @@ export function Dialog({
     guard = true,
     dirty = false,
     onDiscard,
+    className = "",
     children,
 }: PropsWithChildren<{
     open: boolean;
@@ -83,6 +84,7 @@ export function Dialog({
     guard?: boolean;
     dirty?: boolean;
     onDiscard?: () => void;
+    className?: string;
 }>) {
     useLocale();
     const { dir } = useLocale();
@@ -108,7 +110,7 @@ export function Dialog({
                 />
                 <DialogPrimitive.Content
                     ref={content}
-                    className={`dialog-content ${priority ? "dialog-priority" : ""}`}
+                    className={`dialog-content ${className} ${priority ? "dialog-priority" : ""}`}
                     dir={dir}
                     onCloseAutoFocus={(event) => {
                         if (!priority && opener.current?.isConnected) {
@@ -283,8 +285,14 @@ export function Artwork({
 export function Loading({ label = tr("m441def3dc4") }: { label?: string }) {
     useLocale();
     return (
-        <div className="loading" role="status">
-            <LoaderCircle className="spin" size={22} />
+        <div
+            className="loading state-panel state-loading"
+            role="status"
+            aria-busy="true"
+        >
+            <span className="state-symbol" aria-hidden="true">
+                <LoaderCircle className="spin" size={26} />
+            </span>
             <span>{label}</span>
         </div>
     );
@@ -298,8 +306,10 @@ export function ErrorState({
 }) {
     useLocale();
     return (
-        <div className="empty-state" role="alert">
-            <Disc3 size={32} />
+        <div className="empty-state state-panel state-error" role="alert">
+            <span className="state-symbol" aria-hidden="true">
+                <TriangleAlert size={28} />
+            </span>
             <h2>{tr("mf4a3ad1e66")}</h2>
             <p>{error.message}</p>
             {retry && (
@@ -321,8 +331,10 @@ export function EmptyState({
 }) {
     useLocale();
     return (
-        <div className="empty-state">
-            <Disc3 size={42} strokeWidth={1} />
+        <div className="empty-state state-panel state-empty">
+            <span className="state-symbol" aria-hidden="true">
+                <Disc3 size={32} strokeWidth={1.5} />
+            </span>
             <h2>{title}</h2>
             <p>{text}</p>
             {admin && (

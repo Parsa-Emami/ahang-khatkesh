@@ -106,6 +106,17 @@ for (const phase of roadmap.phases) {
             "F08 requires the conversion and quality browser journey",
         );
     }
+    if (phase.id === "F10") {
+        assert(
+            record.visual &&
+                record.visual.screenshot_count >= 140 &&
+                record.visual.contrast_passed === 104 &&
+                record.visual.optional_gzip_bytes > 0 &&
+                record.visual.optional_gzip_bytes <= 61440 &&
+                record.visual.matrix_combinations_per_project === 8,
+            "F10 requires measured visual matrix and optional effect budget",
+        );
+    }
     for (const gate of [
         "build",
         "format",

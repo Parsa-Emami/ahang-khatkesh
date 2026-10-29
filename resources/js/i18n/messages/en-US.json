@@ -572,5 +572,7 @@
     "editorial.search": "FIND YOUR FREQUENCY",
     "editorial.login": "A LITTLE LESS NOISE. A LOT MORE YOU.",
     "editorial.selects": "AK SELECTS / 001",
-    "editorial.private": "AK / PRIVATE LISTENING"
+    "editorial.private": "AK / PRIVATE LISTENING",
+    "player.expand": "Expand now playing",
+    "player.expandedDescription": "Current track and playback controls"
 }

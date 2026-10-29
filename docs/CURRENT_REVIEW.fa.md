@@ -49,7 +49,7 @@
 | N03 / بخشی از R09 | بسته در دامنهٔ F07 | quota، reservation، cleanup و GC با retention پاس شدند؛ load/offload باقی است | F15 |
 | N04 / R12 | بسته در دامنهٔ F08 | تبدیل واقعی، guard، سهمیه، recovery، پنل و کیفیت با تست واقعی پاس شدند | evidence F08 |
 | N05 / R11 | بسته در دامنهٔ F09 | کاتالوگ fa/en و جهت مستقل، ترجیحات حساب و ماتریس مرورگر اضافه شده‌اند | F09 |
-| N06 / R11 | P2 | shader 21st.dev فقط منبع pin شده دارد؛ ورود runtime، GPU budget و visual matrix باقی است | F10 |
+| N06 / R11 | اجراشده در F10 | منبع محلی MIT، جلوهٔ محدود و visual/contrast matrix اضافه شده؛ تأیید نهایی تابع CI و دستگاه واقعی F16 است | F10 |
 | N07 | P2 | تاریخچه، private session و پیشنهاد توضیح‌پذیر هنوز ساخته نشده‌اند | F11 |
 | N08 | P2 | bulk operations، repair/merge و پیشنهاد اعضا workflow کامل ندارند | F12 |
 | N09 | P2 | متن همگام، crossfade، gapless و loudness analysis نیستند | F13 |

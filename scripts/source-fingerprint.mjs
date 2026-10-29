@@ -2,7 +2,7 @@ import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 const included = (path) =>
-    /^(app|bootstrap|config|database|deploy|resources|routes|lang|public|tests|scripts|\.github)\//.test(
+    /^(app|bootstrap|config|database|deploy|resources|routes|lang|public|tests|third_party|scripts|\.github)\//.test(
         path,
     ) ||
     /^(composer\.(json|lock)|package(-lock)?\.json|phpunit(?:-concurrency)?\.xml|tsconfig\.json|vite\.config\.ts|vitest\.config\.ts|playwright\.config\.ts|index\.html|docs\/openapi\.json)$/.test(

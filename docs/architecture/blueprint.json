@@ -249,13 +249,14 @@
     {
       "id": "A07",
       "title": "21st.dev source admission and bounded visual effects",
-      "status": "planned",
+      "status": "implemented",
       "depends_on": [
         "A06"
       ],
       "finding_ids": [
         "R11"
-      ]
+      ],
+      "runtime_scope": "F10 local source, bounded shader and semantic visual states; release-device G11 remains open"
     },
     {
       "id": "A08",
@@ -893,9 +894,11 @@
       "id": "C34",
       "name": "ShaderBackdrop",
       "group": "effects",
-      "status": "planned",
+      "status": "implemented",
       "target_path": "resources/js/components/effects/ShaderBackdrop.tsx",
-      "existing_sources": [],
+      "existing_sources": [
+        "resources/js/components/effects/ShaderBackdrop.tsx"
+      ],
       "quality_gates": [
         "G06",
         "G07",
@@ -906,9 +909,11 @@
       "id": "C35",
       "name": "EffectBoundary",
       "group": "effects",
-      "status": "planned",
+      "status": "implemented",
       "target_path": "resources/js/components/effects/EffectBoundary.tsx",
-      "existing_sources": [],
+      "existing_sources": [
+        "resources/js/components/effects/EffectBoundary.tsx"
+      ],
       "quality_gates": [
         "G06",
         "G07",
@@ -1348,8 +1353,8 @@
     "source_blob_sha": "eb8273aef893113ead05c4915623d61a68876418",
     "license": "MIT",
     "license_blob_sha": "dc7f5a9b79f500372338ba1287cf67851c2033e3",
-    "status": "selected_source_verified",
-    "runtime_integrated": false,
+    "status": "vendored_adapted",
+    "runtime_integrated": true,
     "runtime_external_requests": false,
     "allowed_surfaces": [
       "library_hero",
@@ -1362,7 +1367,10 @@
     "max_dpr": 1.5,
     "max_fps": 30,
     "max_optional_gzip_bytes": 61440,
-    "budgets_measured": false
+    "budgets_measured": false,
+    "css_blob_sha": "fc76db8b94623b4e8a1f5fe10822f48500dae6c6",
+    "vendored_path": "third_party/dither-flow",
+    "max_render_pixels": 320000
   },
   "media": {
     "profile": {

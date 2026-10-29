@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync, writeFileSync } from "node:fs";
+import { createHash } from "node:crypto";
 import { sourceFingerprint } from "./source-fingerprint.mjs";
 const xml = readFileSync("reports/phpunit.xml", "utf8");
 const cases = [
@@ -35,6 +36,7 @@ if (process.env.AHANG_DATABASE === "mysql") {
         (test) => `${attr(test[1], "classname")}::${attr(test[1], "name")}`,
     );
 }
+let visual = null;
 let browser = null,
     browserTests = [];
 if (process.env.AHANG_DATABASE === "sqlite") {
@@ -57,6 +59,40 @@ if (process.env.AHANG_DATABASE === "sqlite") {
         for (const nested of suite.suites ?? []) visit(nested);
     };
     visit(report);
+    const root = "reports/f10-visual";
+    const budget = JSON.parse(readFileSync(`${root}/budget.json`, "utf8"));
+    const matrix = ["desktop", "mobile"].map((name) =>
+        JSON.parse(readFileSync(`${root}/${name}-matrix.json`, "utf8")),
+    );
+    assert(matrix.every((rows) => rows.length === 8));
+    const images = readdirSync(root)
+        .filter((name) => name.endsWith(".png"))
+        .sort()
+        .map((name) => ({
+            name,
+            sha256: createHash("sha256")
+                .update(readFileSync(`${root}/${name}`))
+                .digest("hex"),
+        }));
+    assert(
+        images.length >= 140 &&
+            budget.contrast_passed === 104 &&
+            budget.optional_gzip_bytes <= 61440,
+    );
+    writeFileSync(`${root}/inventory.json`, JSON.stringify(images, null, 2));
+    visual = {
+        ...budget,
+        screenshot_count: images.length,
+        matrix_combinations_per_project: 8,
+        screenshot_inventory_sha256: createHash("sha256")
+            .update(JSON.stringify(images))
+            .digest("hex"),
+        environments: ["desktop", "mobile"].map((name) =>
+            JSON.parse(
+                readFileSync(`${root}/${name}-environment.json`, "utf8"),
+            ),
+        ),
+    };
     browser = {
         tests: report.stats.expected,
         passed: report.stats.expected,
@@ -83,6 +119,7 @@ console.log(
                 skipped: 0,
             },
             browser,
+            visual,
             concurrency,
             test_inventory: [
                 ...cases.map(

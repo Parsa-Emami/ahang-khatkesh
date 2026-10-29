@@ -18,6 +18,7 @@ import {
 } from "../types";
 import { Artwork, EmptyState, ErrorState, Loading } from "../components/UI";
 import { PlaylistCard, SaveButton, TrackList } from "../components/Music";
+import { ShaderBackdrop } from "../components/effects/ShaderBackdrop";
 
 function Pager({
     page,
@@ -130,6 +131,7 @@ export function LibraryPage({ saved = false }: { saved?: boolean }) {
             </div>
             {!saved && featured && !mood && page === 1 && (
                 <section className="featured">
+                    <ShaderBackdrop surface="library-hero" />
                     <div className="featured-text">
                         <span className="feature-eyebrow">
                             <span className="live-dot" />

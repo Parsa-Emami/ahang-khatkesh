@@ -1,0 +1,90 @@
+:root {
+    --accent-text: var(--on-accent);
+    --radius: 14px;
+    --radius-small: 8px;
+    --radius-large: 18px;
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-6: 24px;
+    --space-8: 32px;
+    --control-height: 44px;
+    --line-body: 1.8;
+    --motion-fast: 160ms;
+    --motion-normal: 240ms;
+    --side: 232px;
+    --bottom: 98px;
+    --bg: #12150f;
+    --surface: #191d15;
+    --surface-2: #22271d;
+    --surface-3: #2b3225;
+    --text: #f2f3ea;
+    --muted: #b4bca7;
+    --border: #30372a;
+    --control-border: #7d896f;
+    --accent: #d8ef78;
+    --on-accent: #1c2810;
+    --active: #d8ef78;
+    --focus: #d8ef78;
+    --hover: #262d20;
+    --player: #171b13;
+    --danger: #ffb4a6;
+    --danger-surface: #32201d;
+    --warning: #ebc469;
+    --warning-surface: #30291a;
+    --success: #bcda8c;
+    --success-surface: #26321e;
+    --scrim: #080c07b3;
+    --shadow: 0 20px 70px #0004;
+}
+:root[data-theme="light"] {
+    --bg: #f4f3ed;
+    --surface: #fcfbf7;
+    --surface-2: #eceee4;
+    --surface-3: #e4e8d9;
+    --text: #202719;
+    --muted: #515b46;
+    --border: #dce1d0;
+    --control-border: #748062;
+    --accent: #d4e998;
+    --on-accent: #24340f;
+    --active: #48681e;
+    --focus: #48681e;
+    --hover: #e9eddf;
+    --player: #fcfbf7;
+    --danger: #a12d23;
+    --danger-surface: #fff0ed;
+    --warning: #795100;
+    --warning-surface: #fff4d7;
+    --success: #38611e;
+    --success-surface: #edf5e0;
+    --scrim: #15200dcc;
+    --shadow: 0 20px 70px #25311315;
+}
+@media (prefers-color-scheme: light) {
+    :root:not([data-theme]) {
+        --bg: #f4f3ed;
+        --surface: #fcfbf7;
+        --surface-2: #eceee4;
+        --surface-3: #e4e8d9;
+        --text: #202719;
+        --muted: #515b46;
+        --border: #dce1d0;
+        --control-border: #748062;
+        --accent: #d4e998;
+        --on-accent: #24340f;
+        --active: #48681e;
+        --focus: #48681e;
+        --hover: #e9eddf;
+        --player: #fcfbf7;
+        --danger: #a12d23;
+        --danger-surface: #fff0ed;
+        --warning: #795100;
+        --warning-surface: #fff4d7;
+        --success: #38611e;
+        --success-surface: #edf5e0;
+        --scrim: #15200dcc;
+        --shadow: 0 20px 70px #25311315;
+    }
+}

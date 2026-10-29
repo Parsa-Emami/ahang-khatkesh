@@ -10,9 +10,13 @@ export default defineConfig({
         baseURL: "http://127.0.0.1:8000",
         trace: "off",
         screenshot: "only-on-failure",
-        launchOptions: process.env.AHANG_BROWSER_EXECUTABLE
-            ? { executablePath: process.env.AHANG_BROWSER_EXECUTABLE }
-            : undefined,
+        launchOptions: {
+            executablePath: process.env.AHANG_BROWSER_EXECUTABLE,
+            args:
+                process.env.AHANG_BROWSER_WEBGL === "1"
+                    ? ["--use-angle=swiftshader", "--enable-unsafe-swiftshader"]
+                    : [],
+        },
         channel: process.env.AHANG_BROWSER_CHANNEL,
     },
     projects: [
