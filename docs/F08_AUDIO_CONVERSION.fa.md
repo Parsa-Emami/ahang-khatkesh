@@ -2,7 +2,7 @@
 
 مبنا: commit `54f669a2be717c68284d5efb232f545e3d63b644`، تاریخ ۲۸ اکتبر ۲۰۲۶، Asia/Tehran. وضعیت تأیید و SHA آزمون‌شده فقط از [رودمپ](ROADMAP.fa.md) و evidence مربوط خوانده شود. این قابلیت استقرار production یا تکمیل F09 تا F16 را اعلام نمی‌کند.
 
-F08 همراه با رگرسیون F01 تا F07 در [CI موفق 40700486944](https://github.com/Parsa-Emami/ahang-khatkesh/actions/runs/40700486944) روی همان source fingerprint پاس شد. ۱۲۸ تست PHP روی هر دو DB، ۲۶ تست فرانت، ۱۲ سناریوی مرورگر و ۹ تست چندپردازه؛ [evidence کامل](verification/foundation-through-f08-2026-10-28.json). این تأیید فقط دامنهٔ فاز را پوشش می‌دهد.
+F08 همراه با رگرسیون F01 تا F07 و اصلاح batch آپلود F08-B10 در [CI موفق 40702936058](https://github.com/Parsa-Emami/ahang-khatkesh/actions/runs/40702936058) روی commit `d90121542eafd938759880dcfdb0f74c848530d1` پاس شد. در بازبینی ۲۹ اکتبر، source fingerprint فعلی با گزارش هر دو job تطبیق داده شد: ۱۲۸ تست PHP روی هر دو DB، ۳۰ تست فرانت شامل چهار تست batch، ۱۲ سناریوی مرورگر و ۹ تست چندپردازه؛ [شواهد کامل](verification/foundation-through-f08-2026-10-29.json). این تأیید فقط دامنهٔ فاز را پوشش می‌دهد.
 
 ## رفتار محصول
 
@@ -26,8 +26,8 @@ FLAC اصلی در فضای خصوصی محفوظ می‌ماند. MP3 مشتق 
 | F08-B06 | رفتن از فرم import به پنل تبدیل، draft درون پنل را از بین می‌برد | عمر ImportsPanel در جابه‌جایی بخش‌های همان admin حفظ و با تغییر actor/epoch پاک می‌شود؛ Dialog فقط در بخش فعال باز است |
 | F08-B07 | صفِ منتظر پشت encoder سالم نباید به‌عنوان worker مرده بازیابی شود | queued stall در حضور heartbeat تازهٔ encoder فعال، rotate نمی‌شود |
 | F08-B08 | رزرو conversion نباید از endpoint لغو upload آزاد شود | لغو فقط از ConversionExecution؛ claim و finalize وضعیت و token رزرو را بررسی می‌کنند |
-| F08-B10 | انتخاب چندفایلی به context آغازین مقید نبود و میان فایل‌ها می‌توانست هویت تازه بگیرد | context ثابت برای کل batch و بررسی دوباره پس از reservation؛ تغییر نشست پیش از ارسال بعدی رد می‌شود |
 | F08-B09 | بازاستفاده از FLAC قدیمی با codec=null می‌توانست admission تبدیل را رد کند | probe facts معتبر در همان admission backfill می‌شوند؛ آماده‌سازی batch فایل قدیمی نیز command دارد |
+| F08-B10 | انتخاب چندفایلی به context آغازین مقید نبود و میان فایل‌ها می‌توانست هویت تازه بگیرد | context ثابت برای کل batch و بررسی دوباره پس از reservation؛ تغییر نشست پیش از ارسال بعدی رد می‌شود |
 
 وجود تست‌های شکستِ این دور نشان‌دهندهٔ شکست نسخهٔ نهایی نیست؛ نتیجهٔ نهایی در evidence همان commit ثبت می‌شود.
 

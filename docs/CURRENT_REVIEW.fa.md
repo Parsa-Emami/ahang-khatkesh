@@ -1,6 +1,4 @@
-> اصلاح تازهٔ F08-B10 برای مقیدکردن کل batch آپلود به actor/epoch آغازین افزوده شده است؛ تأیید جاری تا CI همان source fingerprint به implemented بازمی‌گردد.
-
-> F01 تا F08 با [CI همان commit](https://github.com/Parsa-Emami/ahang-khatkesh/actions/runs/40700486944) تأیید شدند. تبدیل واقعی، پنل کیفیت و اصلاح redelivery اکنون فعال‌اند؛ [قرارداد F08](F08_AUDIO_CONVERSION.fa.md) و [evidence جاری](verification/foundation-through-f08-2026-10-28.json) مقدم‌اند. متن زیر سابقهٔ اصلاحات پیشین را نیز نگه می‌دارد. گام بعدی F09 است.
+> تأیید F01 تا F08 پس از اصلاح F08-B10 روی commit `d90121542eafd938759880dcfdb0f74c848530d1` با [CI موفق همان کد](https://github.com/Parsa-Emami/ahang-khatkesh/actions/runs/40702936058) بسته شد: ۱۲۸ تست PHP روی هر دو DB، ۳۰ تست فرانت، ۱۲ سناریوی مرورگر و ۹ تست چندپردازهٔ MySQL. چهار تست تازه، مقیدبودن کل batch آپلود به actor/epoch آغازین را پوشش می‌دهند. [قرارداد F08](F08_AUDIO_CONVERSION.fa.md) و [شواهد جاری](verification/foundation-through-f08-2026-10-29.json) مقدم‌اند؛ گام بعدی F09 است.
 
 # وضعیت اجرایی و نقص‌های باقی‌مانده
 
