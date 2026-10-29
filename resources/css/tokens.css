@@ -1,4 +1,10 @@
 :root {
+    --font-body: "Vazirmatn", sans-serif;
+    --font-latin: "Manrope Variable", "Vazirmatn", sans-serif;
+    --text-body: 14px;
+    --text-caption: 12px;
+    --text-control: 13px;
+    --text-heading: 22px;
     --accent-text: var(--on-accent);
     --radius: 14px;
     --radius-small: 8px;

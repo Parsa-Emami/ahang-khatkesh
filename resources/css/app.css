@@ -1,6 +1,7 @@
 @import "./tokens.css";
 :root {
-    font-family: "Vazirmatn", sans-serif;
+    font-family: var(--font-body);
+    font-size: var(--text-body);
     background: var(--bg);
     color: var(--text);
     font-synthesis: none;
@@ -120,7 +121,7 @@ select {
 .eyebrow,
 [lang="en"],
 .time {
-    font-family: "Manrope Variable", "Vazirmatn", sans-serif;
+    font-family: var(--font-latin);
 }
 .tiny-label {
     font-size: 9px;
@@ -151,8 +152,8 @@ select {
     background: var(--accent);
     color: var(--accent-text);
     transition:
-        transform 0.18s,
-        background 0.18s;
+        transform var(--motion-fast),
+        background var(--motion-fast);
     white-space: nowrap;
 }
 .button:hover:not(:disabled) {
@@ -426,6 +427,7 @@ select {
     color: var(--muted);
 }
 .workspace {
+    min-height: 0;
     min-width: 0;
     display: flex;
     flex-direction: column;
@@ -489,6 +491,7 @@ select {
     flex: 1;
 }
 .main-content {
+    min-height: 0;
     overflow-y: auto;
     min-width: 0;
     padding: 32px 31px 0;
@@ -1314,7 +1317,7 @@ input[type="range"] {
     background: var(--scrim);
     backdrop-filter: blur(7px);
     z-index: 100;
-    animation: fade 0.16s;
+    animation: fade var(--motion-fast);
 }
 .dialog-content {
     position: fixed;
@@ -1330,7 +1333,7 @@ input[type="range"] {
     width: min(510px, calc(100% - 28px));
     max-height: 88dvh;
     overflow-y: auto;
-    animation: fade 0.18s;
+    animation: fade var(--motion-fast);
 }
 .dialog-content > h2 {
     font-size: 21px;
@@ -3198,7 +3201,7 @@ bdi {
     overflow-wrap: anywhere;
 }
 :root:lang(en) {
-    font-family: "Manrope Variable", "Vazirmatn", sans-serif;
+    font-family: var(--font-latin);
 }
 :root[dir="ltr"] .lucide-arrow-left,
 :root[dir="ltr"] .lucide-arrow-right {
@@ -3294,6 +3297,7 @@ bdi {
     background: var(--danger-surface);
 }
 .state-panel p {
+    font-size: var(--text-caption);
     overflow-wrap: anywhere;
 }
 input:not([type="range"]):not([type="checkbox"]),
@@ -3419,4 +3423,19 @@ select:disabled {
 }
 .featured-actions .button {
     min-height: var(--control-height);
+}
+
+.state-panel h2 {
+    font-size: var(--text-heading);
+}
+.import-success > svg {
+    color: var(--success);
+}
+.button.danger {
+    border-color: var(--danger);
+    background: var(--danger-surface);
+}
+.featured-actions,
+.feature-meta {
+    flex-wrap: wrap;
 }

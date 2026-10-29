@@ -139,7 +139,7 @@ export function LibraryPage({ saved = false }: { saved?: boolean }) {
                             <span>{tr("editorial.selects")}</span>
                         </span>
                         <h2 dir="auto">{featured.name}</h2>
-                        <p>{featured.description}</p>
+                        <p dir="auto">{featured.description}</p>
                         <div className="featured-actions">
                             <button
                                 className="button"

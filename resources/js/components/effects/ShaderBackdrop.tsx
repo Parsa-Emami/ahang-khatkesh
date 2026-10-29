@@ -48,15 +48,24 @@ export function ShaderBackdrop({
         const connection = (
             navigator as Navigator & { connection?: Connection }
         ).connection;
-        const update = () =>
-            setConditions({
+        const update = () => {
+            const next = {
                 reduced: query.matches || forcedColors.matches,
                 saveData: connection?.saveData === true,
                 hidden: document.hidden,
                 blocked: !!document.querySelector(
                     '[role="dialog"]:not(.dialog-now-playing)',
                 ),
-            });
+            };
+            setConditions((previous) =>
+                previous.reduced === next.reduced &&
+                previous.saveData === next.saveData &&
+                previous.hidden === next.hidden &&
+                previous.blocked === next.blocked
+                    ? previous
+                    : next,
+            );
+        };
         const mutations = new MutationObserver(update);
         mutations.observe(document.body, { childList: true, subtree: true });
         query.addEventListener("change", update);

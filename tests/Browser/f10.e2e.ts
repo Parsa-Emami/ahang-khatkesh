@@ -179,12 +179,62 @@ test("visual matrix captures locale direction theme widths and shared empty erro
                     release();
                     await page.unrouteAll({ behavior: "wait" });
                 }
+                await page.setViewportSize({ width: 1440, height: 1000 });
+                await page
+                    .locator(".header-actions")
+                    .getByRole("button", {
+                        name:
+                            locale === "fa-IR"
+                                ? "تنظیمات حساب"
+                                : "Account settings",
+                        exact: true,
+                    })
+                    .click();
+                await page.setViewportSize({ width: 390, height: 844 });
+                let releasePreference: () => void = () => {};
+                const preferenceGate = new Promise<void>((resolve) => {
+                    releasePreference = resolve;
+                });
+                await page.route("**/api/v1/me", async (route) => {
+                    if (route.request().method() === "PATCH")
+                        await preferenceGate;
+                    await route.continue();
+                });
+                const saved = page.waitForResponse(
+                    (response) =>
+                        response.url().endsWith("/api/v1/me") &&
+                        response.request().method() === "PATCH",
+                );
+                await page
+                    .locator('.settings-theme button[aria-pressed="true"]')
+                    .click();
+                await expect(
+                    page.locator(".settings-theme button").first(),
+                ).toBeDisabled();
+                await capture(page, info, `${key}-busy-disabled`);
+                releasePreference();
+                expect((await saved).status()).toBe(200);
+                await page.unrouteAll({ behavior: "wait" });
+                await page.locator(".stack-form > .button").click();
+                await expect(
+                    page.locator('input[name="current_password"]'),
+                ).toHaveAttribute("aria-invalid", "true");
+                await capture(page, info, `${key}-invalid`);
+                await page.keyboard.press("Escape");
                 matrix.push({
                     locale,
                     direction,
                     theme,
                     widths: [320, 390, 768, 1440],
-                    states: ["default", "focus", "empty", "error", "loading"],
+                    states: [
+                        "default",
+                        "focus",
+                        "empty",
+                        "error",
+                        "loading",
+                        "busy-disabled",
+                        "invalid",
+                    ],
                     contrast: pairs,
                 });
             }
@@ -277,6 +327,14 @@ test("shader fallback and reduced motion stop lazy rendering on system preferenc
         }));
     expect(size.pixels).toBeLessThanOrEqual(320000);
     expect(size.ratio).toBeLessThanOrEqual(1.5);
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await expect(page.locator(".shader-canvas")).toHaveCount(0);
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    await expect(hero.locator("canvas")).toHaveCount(1);
+    await page.emulateMedia({ forcedColors: "active" });
+    await expect(page.locator(".shader-canvas")).toHaveCount(0);
+    await page.emulateMedia({ forcedColors: "none" });
+    await expect(hero.locator("canvas")).toHaveCount(1);
     await page.evaluate(() => {
         Object.defineProperty(document, "hidden", {
             configurable: true,
@@ -297,6 +355,11 @@ test("shader fallback and reduced motion stop lazy rendering on system preferenc
     await page.locator(".main-content").evaluate((el) => {
         el.scrollTop = el.scrollHeight;
     });
+    await expect
+        .poll(() =>
+            page.locator(".main-content").evaluate((el) => el.scrollTop),
+        )
+        .toBeGreaterThan(0);
     await expect(hero).toHaveAttribute("data-effect-reason", "offscreen");
     await expect(page.locator(".shader-canvas")).toHaveCount(0);
     await page.locator(".main-content").evaluate((el) => {
@@ -422,4 +485,12 @@ test("shader fallback and reduced motion preserve controls after unavailable Web
             .getByRole("button", { name: "توقف پخش", exact: true }),
     ).toBeVisible();
     await capture(page, info, "compile-fallback");
+    await page.route("**/build/assets/DitherFlowCanvas-*.js", (route) =>
+        route.abort(),
+    );
+    await page.reload();
+    await expect(hero).toHaveAttribute("data-effect-reason", "module");
+    await expect(page.locator(".featured-actions .button")).toBeEnabled();
+    await expect(page.locator(".shader-canvas")).toHaveCount(0);
+    await capture(page, info, "module-fallback");
 });
