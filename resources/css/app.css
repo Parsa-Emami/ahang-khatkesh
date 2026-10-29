@@ -3249,7 +3249,8 @@ bdi {
 :root:lang(en) {
     font-family: "Manrope Variable", "Vazirmatn", sans-serif;
 }
-:root[dir="ltr"] .lucide-arrow-left {
+:root[dir="ltr"] .lucide-arrow-left,
+:root[dir="ltr"] .lucide-arrow-right {
     transform: scaleX(-1);
 }
 :root[dir="ltr"] .toast-region {
