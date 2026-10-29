@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Enums\UserRole;
 use App\Models\User;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Tests\TestCase;
@@ -52,7 +53,7 @@ class LocalePreferencesTest extends TestCase
 
     public function test_persian_catalog_validation_uses_readable_field_names_and_messages(): void
     {
-        $owner = User::factory()->create(['is_admin' => true]);
+        $owner = User::factory()->create(['role' => UserRole::Owner]);
         $this->actingAs($owner)->withSession(['auth.password_confirmed_at' => now()->timestamp, 'auth.mfa_confirmed_at' => now()->timestamp, 'auth.mfa_authenticated' => true])->withHeader('Accept-Language', 'fa-IR');
 
         $this->postJson('/api/v1/admin/artists', ['name' => 'Artist', 'country_code' => 'invalid'])->assertUnprocessable()->assertJsonPath('errors.country_code.0', 'قالب کد کشور معتبر نیست.');
