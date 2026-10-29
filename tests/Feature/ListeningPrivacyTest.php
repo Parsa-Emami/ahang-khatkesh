@@ -127,7 +127,10 @@ class ListeningPrivacyTest extends TestCase
         $this->actingAs($other)->getJson('/api/v1/listening/history')->assertOk()->assertJsonCount(0, 'data');
         $this->postJson('/api/v1/listening/events', ['token' => $token, 'kind' => 'skip', 'listened_seconds' => 35])->assertForbidden();
         $this->deleteJson('/api/v1/listening/history/'.$id, ['revision' => 0])->assertNotFound();
-        $this->actingAs($user)->getJson('/api/v1/listening/export')->assertOk()->assertJsonCount(1, 'data')->assertHeader('Cache-Control', 'private, no-store');
+        $export = $this->actingAs($user)->getJson('/api/v1/listening/export')->assertOk()->assertJsonCount(1, 'data');
+        foreach (['private', 'no-store'] as $directive) {
+            $this->assertTrue($export->headers->hasCacheControlDirective($directive));
+        }
         $track->playlists()->first()->update(['status' => 'draft']);
         $this->getJson('/api/v1/listening/history')->assertOk()->assertJsonCount(0, 'data');
         $this->getJson('/api/v1/listening/export')->assertOk()->assertJsonCount(0, 'data');

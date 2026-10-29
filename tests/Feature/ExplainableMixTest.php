@@ -2,9 +2,12 @@
 
 namespace Tests\Feature;
 
+use App\Actions\EnsureTrackCatalog;
+use App\Models\Artist;
 use App\Models\ListeningEvent;
 use App\Models\MediaAsset;
 use App\Models\Playlist;
+use App\Models\Release;
 use App\Models\Track;
 use App\Models\User;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
@@ -18,9 +21,12 @@ class ExplainableMixTest extends TestCase
     private function catalog(User $user): array
     {
         $playlist = Playlist::factory()->create(['created_by' => $user->id]);
+        $artists = collect(range(0, 2))->map(fn ($i) => Artist::create(['name' => 'Artist '.$i]));
+        $releases = collect(range(0, 3))->map(fn ($i) => Release::create(['title' => 'Release '.$i, 'type' => 'album']));
         $tracks = [];
         for ($i = 0; $i < 8; $i++) {
-            $track = Track::factory()->create(['artist' => 'Artist '.intdiv($i, 3), 'album' => 'Release '.intdiv($i, 2), 'media_asset_id' => MediaAsset::factory()->create(['uploaded_by' => $user->id])]);
+            $track = Track::create(['title' => 'Track '.$i, 'artist' => 'Artist '.intdiv($i, 3), 'album' => 'Release '.intdiv($i, 2), 'media_asset_id' => MediaAsset::factory()->create(['uploaded_by' => $user->id])->id]);
+            app(EnsureTrackCatalog::class)->handle($track, $artists[intdiv($i, 3)]->id, $releases[intdiv($i, 2)]->id);
             $playlist->tracks()->attach($track->id, ['position' => $i]);
             $tracks[] = $track;
         }
@@ -39,6 +45,8 @@ class ExplainableMixTest extends TestCase
         $this->assertNotEmpty($first);
         $counts = array_count_values(array_column(array_column($first, 'track'), 'artist'));
         $this->assertLessThanOrEqual(2, max($counts));
+        $releaseCounts = array_count_values(array_map(fn ($row) => Track::findOrFail($row['track']['id'])->primary_release_id, $first));
+        $this->assertLessThanOrEqual(2, max($releaseCounts));
         foreach ($first as $row) {
             $this->assertSame($row['score'], array_sum(array_column($row['reasons'], 'weight')));
         }

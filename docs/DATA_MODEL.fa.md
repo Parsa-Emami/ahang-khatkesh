@@ -55,3 +55,7 @@ Track می‌تواند در چند Release باشد؛ `primary_release_id` ان
 کلیدهای FK و compositeها برای join و ترتیب‌اند؛ status,id برای کتابخانه و action,id برای audit وجود دارند. جستجوی فعلی `LIKE` پارامتری روی search_text نرمال‌شده است؛ B-tree آن را برای `%term%` سریع نمی‌کند. برای کاتالوگ بزرگ، EXPLAIN با دادهٔ واقعی و سپس FULLTEXT یا موتور جستجو تصمیم بعدی است. تعداد کاربر کم، معادل تعداد آهنگ کم نیست.
 
 backup باید schema، داده، فایل‌های خصوصی و APP_KEY را پوشش دهد. export دیتابیس بدون کلید رمزگشایی MFA و بدون فایل‌ها بازیابی کامل نیست. rollback ساختاری کاتالوگ دادهٔ جدید روابط را حذف می‌کند؛ در محیط عملیاتی forward fix با backup ارجح است.
+
+## دادهٔ شنیدن F11
+
+migration جدید، شش فیلد کنترل رضایت/پیشنهاد/retention/revision/private-until/consent-at را به users و جدول listening_events با UUID و ایندکس user_id/started_at/id اضافه می‌کند. FKهای user و track حذف وابسته دارند. session_pseudonym فقط HMAC است؛ IP و session ID خام ذخیره نمی‌شوند. حد ۱۰٬۰۰۰ ردیف در هر حساب و retention پیش‌فرض سی روز با حذف زمان‌بندی‌شده برقرار است. erase و افزایش revision اتمیک‌اند و مجوزهای قدیمی را باطل می‌کنند. جزئیات در [قرارداد F11](F11_LISTENING_PRIVACY.fa.md) است.

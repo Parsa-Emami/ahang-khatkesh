@@ -72,4 +72,25 @@ class ApiResponseSchemaTest extends TestCase
         $schema = (object) ['$schema' => 'https://json-schema.org/draft/2020-12/schema', 'components' => $spec->components, '$ref' => '#/components/schemas/User'];
         $this->assertFalse((new CompliantValidator)->validate((object) $response, $schema)->isValid());
     }
+
+    public function test_listening_responses_match_the_allowlisted_contract(): void
+    {
+        $user = User::factory()->create();
+        $track = Track::factory()->create();
+        Playlist::factory()->create(['created_by' => $user->id])->tracks()->attach($track->id, ['position' => 0]);
+        $this->actingAs($user)->withCredentials();
+        $this->assertResponseSchema($this->getJson('/api/v1/listening/settings')->assertOk(), '/listening/settings', 'get', '200');
+        $this->assertResponseSchema($this->patchJson('/api/v1/listening/settings', ['revision' => 0, 'history_enabled' => true])->assertOk(), '/listening/settings', 'patch', '200');
+        $grant = $this->postJson('/api/v1/listening/plays', ['track_id' => $track->id, 'privacy_revision' => 1])->assertOk();
+        $this->withCookie(config('session.cookie'), session()->getId());
+        $this->assertResponseSchema($grant, '/listening/plays', 'post', '200');
+        $this->travel(40)->seconds();
+        $event = $this->postJson('/api/v1/listening/events', ['token' => $grant->json('data.token'), 'kind' => 'progress', 'listened_seconds' => 35])->assertOk();
+        $this->assertResponseSchema($event, '/listening/events', 'post', '200');
+        foreach (['history', 'export', 'mix'] as $endpoint) {
+            $this->assertResponseSchema($this->getJson('/api/v1/listening/'.$endpoint)->assertOk(), '/listening/'.$endpoint, 'get', '200');
+        }
+        $this->assertResponseSchema($this->deleteJson('/api/v1/listening/history/'.$event->json('data.play_id'), ['revision' => 1])->assertOk(), '/listening/history/{eventId}', 'delete', '200');
+        $this->assertResponseSchema($this->deleteJson('/api/v1/listening/history', ['revision' => 2])->assertOk(), '/listening/history', 'delete', '200');
+    }
 }

@@ -25,3 +25,7 @@
 خروجی User شامل role، role_label، permissions و mfa_enabled است؛ is_admin فقط سازگاری قدیمی و deprecated است. secret، recovery، password و مسیر فایل از Resource کاربر/آهنگ حذف‌اند. کد بازیابی و QR فقط در endpoint مشخص امنیت برمی‌گردند و نباید وارد Query cache یا لاگ شوند.
 
 فهرست‌های catalog و playlist با page؛ audit با cursor و ترتیب id نزولی است. فیلتر since/until روی audit تاریخ میلادی UTC و until شامل تمام آن روز است. metadata رویداد allowlist دارد. URI کاور و stream داخلی‌اند؛ خطای visibility به 404 تبدیل می‌شود.
+
+## تاریخچه و میکس F11
+
+GET/PATCH `listening/settings`، POST `listening/plays` و `listening/events`، GET/DELETE `listening/history`، DELETE `listening/history/{eventId}`، GET `listening/export` و `listening/mix` فقط برای حساب جاری‌اند. mutationها به revision حریم خصوصی و نشست/CSRF جاری نیاز دارند. playback با listening_revision و private_mode از snapshot خصوصی جلوگیری می‌کند. grant اشتباه 422، نشست دیگر 403، context قدیمی 409 و grant منقضی 410 می‌گیرد. جزئیات آستانه، retention و وزن‌ها در [قرارداد F11](F11_LISTENING_PRIVACY.fa.md) و schema دقیق در OpenAPI است.
