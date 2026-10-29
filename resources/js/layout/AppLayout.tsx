@@ -80,6 +80,21 @@ export function AppLayout() {
             menuButton.current?.focus();
         };
     }, [menu, mobile]);
+    useEffect(() => {
+        const closePrivateDialogs = () => {
+            setSettings(false);
+            setMenu(false);
+        };
+        window.addEventListener("session-context-changed", closePrivateDialogs);
+        window.addEventListener("session-expired", closePrivateDialogs);
+        return () => {
+            window.removeEventListener(
+                "session-context-changed",
+                closePrivateDialogs,
+            );
+            window.removeEventListener("session-expired", closePrivateDialogs);
+        };
+    }, []);
     const playlists = useQuery({
         queryKey: ["playlists", "sidebar"],
         queryFn: () => api<Page<Playlist>>("/playlists"),

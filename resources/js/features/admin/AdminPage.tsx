@@ -182,6 +182,8 @@ export default function AdminPage() {
                             ({ id, label, description, icon: Icon }) => (
                                 <button
                                     key={id}
+                                    aria-label={label}
+                                    aria-describedby={`admin-section-description-${id}`}
                                     aria-current={
                                         active.id === id ? "page" : undefined
                                     }
@@ -193,7 +195,11 @@ export default function AdminPage() {
                                     <Icon size={19} />
                                     <span>
                                         <strong>{label}</strong>
-                                        <small>{description}</small>
+                                        <small
+                                            id={`admin-section-description-${id}`}
+                                        >
+                                            {description}
+                                        </small>
                                     </span>
                                     <ArrowLeft size={15} />
                                 </button>

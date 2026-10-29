@@ -1,3 +1,4 @@
+import { useSession } from "../../context/AppContext";
 import {
     createContext,
     useContext,
@@ -26,6 +27,9 @@ const Context = createContext({
 });
 export function DraftNavigationProvider({ children }: PropsWithChildren) {
     useLocale();
+    const { user } = useSession();
+    const actor = user ? `${user.id}:${user.access_version}` : "guest";
+    const previousActor = useRef(actor);
     const entries = useRef(new Map<string, Draft>());
     const [pending, setPending] = useState<Request | null>(null);
     const blocker = useBlocker(
@@ -43,6 +47,22 @@ export function DraftNavigationProvider({ children }: PropsWithChildren) {
                     ),
             ),
     );
+    const latest = useRef({ pending, blocker });
+    latest.current = { pending, blocker };
+    useEffect(() => {
+        const invalidate = () => {
+            const current = latest.current;
+            if (current.blocker.state === "blocked") current.blocker.reset();
+            else current.pending?.cancel();
+            setPending(null);
+        };
+        window.addEventListener("session-context-changed", invalidate);
+        window.addEventListener("session-expired", invalidate);
+        return () => {
+            window.removeEventListener("session-context-changed", invalidate);
+            window.removeEventListener("session-expired", invalidate);
+        };
+    }, []);
     const register = (key: string, draft: Draft) => {
         entries.current.set(key, draft);
         return () => {
@@ -64,6 +84,13 @@ export function DraftNavigationProvider({ children }: PropsWithChildren) {
                     old || { proceed: blocker.proceed, cancel: blocker.reset },
             );
     }, [blocker]);
+    useEffect(() => {
+        if (previousActor.current === actor) return;
+        previousActor.current = actor;
+        if (blocker.state === "blocked") blocker.reset();
+        else pending?.cancel();
+        setPending(null);
+    }, [actor]);
     useEffect(() => {
         const unload = (event: BeforeUnloadEvent) => {
             if (!dirty()) return;

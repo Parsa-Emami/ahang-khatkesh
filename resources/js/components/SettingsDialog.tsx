@@ -3,7 +3,7 @@ import { useDraftNavigation } from "../features/drafts/DraftNavigation";
 import type { Preferences } from "../i18n/locales";
 import { tr } from "../i18n/runtime";
 import { useLocale } from "../i18n/LocaleProvider";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { LogOut } from "lucide-react";
 import { api, getCsrfToken, json } from "../lib/api";
@@ -30,6 +30,14 @@ export function SettingsDialog({
         password: "",
         password_confirmation: "",
     });
+    useEffect(() => {
+        if (!open)
+            setPasswords({
+                current_password: "",
+                password: "",
+                password_confirmation: "",
+            });
+    }, [open, session.user?.id, session.user?.access_version]);
     const changeTheme = useMutation({
         scope: { id: "interface-preferences" },
         mutationFn: (value: Theme) =>

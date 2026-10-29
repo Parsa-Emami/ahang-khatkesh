@@ -256,7 +256,7 @@ test("DraftNavigationTest preserves audio and drafts across locale theme dialog 
         .click();
     await page
         .getByRole("button", {
-            name: "Catalog Artists, releases and tracks",
+            name: "Catalog",
             exact: true,
         })
         .click();
@@ -277,7 +277,7 @@ test("DraftNavigationTest preserves audio and drafts across locale theme dialog 
         .click();
     await page
         .getByRole("button", {
-            name: "Import music From files to a playlist",
+            name: "Import music",
             exact: true,
         })
         .click();
@@ -341,4 +341,36 @@ test("DraftNavigationTest preserves audio and drafts across locale theme dialog 
         }),
     ).toBeVisible();
     await resetPreferences(page);
+});
+
+test("DraftNavigationTest cancels a pending sign-out intent when session context changes", async ({
+    page,
+}, info) => {
+    await login(page, info.project.name);
+    await openSettings(page);
+    await page.getByLabel("رمز فعلی", { exact: true }).fill("discarded-secret");
+    let signOuts = 0;
+    page.on("request", (request) => {
+        if (
+            request.url().endsWith("/api/v1/logout") &&
+            request.method() === "POST"
+        )
+            signOuts++;
+    });
+    await page
+        .getByRole("button", { name: "خروج از حساب", exact: true })
+        .click();
+    await expect(
+        page.getByRole("dialog", { name: "تغییرهای ذخیره‌نشده", exact: true }),
+    ).toBeVisible();
+    await page.evaluate(() =>
+        window.dispatchEvent(new Event("session-context-changed")),
+    );
+    await expect(page.getByRole("dialog")).toHaveCount(0);
+    await expect(
+        page.getByRole("button", { name: "نمایش صف پخش", exact: true }),
+    ).toBeVisible();
+    expect(signOuts).toBe(0);
+    await openSettings(page);
+    await expect(page.getByLabel("رمز فعلی", { exact: true })).toHaveValue("");
 });
