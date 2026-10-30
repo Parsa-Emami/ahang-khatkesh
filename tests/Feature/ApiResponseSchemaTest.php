@@ -95,6 +95,8 @@ class ApiResponseSchemaTest extends TestCase
         $this->assertResponseSchema($this->rollbackCatalog($preview->json('data'))->assertOk(), '/admin/catalog-changes/{changeId}/rollback', 'post', '200');
         $this->assertResponseSchema($this->getJson('/api/v1/admin/catalog-changes')->assertOk(), '/admin/catalog-changes', 'get', '200');
         $this->assertResponseSchema($this->getJson('/api/v1/admin/catalog-health')->assertOk(), '/admin/catalog-health', 'get', '200');
+        $assets = $this->getJson('/api/v1/admin/media')->assertOk()->assertJsonPath('current_page', 1)->assertJsonPath('last_page', 1)->assertJsonMissingPath('meta');
+        $this->assertResponseSchema($assets, '/admin/media', 'get', '200');
         $this->assertResponseSchema($this->getJson('/api/v1/admin/workflows')->assertOk(), '/admin/workflows', 'get', '200');
     }
 

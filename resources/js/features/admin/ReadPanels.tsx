@@ -16,7 +16,8 @@ import {
     AlertCircle,
 } from "lucide-react";
 import { ErrorState, Loading } from "../../components/UI";
-import { digits } from "../../types";
+import { can, digits } from "../../types";
+import { useSession } from "../../context/AppContext";
 import { adminApi, adminKeys } from "./api";
 const date = (value: string) =>
     new Intl.DateTimeFormat(currentPreferences().locale, {
@@ -26,6 +27,7 @@ const date = (value: string) =>
     }).format(new Date(value));
 export function OverviewPanel({ go }: { go: (value: string) => void }) {
     useLocale();
+    const { user } = useSession();
     const query = useQuery({
         queryKey: adminKeys.overview,
         queryFn: adminApi.overview,
@@ -73,11 +75,13 @@ export function OverviewPanel({ go }: { go: (value: string) => void }) {
                     {tr("mda3eab6147")}
                 </h3>
                 <p>{tr("me9c5f7ef93")}</p>
-                <button className="button" onClick={() => go("imports")}>
-                    <UploadCloud size={17} />
-                    {tr("m32c110efdb")}
-                    <ArrowLeft size={17} />
-                </button>
+                {can(user, "imports.manage") && (
+                    <button className="button" onClick={() => go("imports")}>
+                        <UploadCloud size={17} />
+                        {tr("m32c110efdb")}
+                        <ArrowLeft size={17} />
+                    </button>
+                )}
                 <div className="admin-welcome-art" aria-hidden="true">
                     <i />
                     <i />
@@ -104,25 +108,16 @@ export function OverviewPanel({ go }: { go: (value: string) => void }) {
                             v1: digits(d.failed_imports),
                         })}
                     </p>
-                    <button className="text-link" onClick={() => go("imports")}>
-                        {tr("m315507fad6")}
-                    </button>
+                    {can(user, "imports.manage") && (
+                        <button
+                            className="text-link"
+                            onClick={() => go("imports")}
+                        >
+                            {tr("m315507fad6")}
+                        </button>
+                    )}
                 </div>
             )}
-            <div className="admin-next-grid">
-                {[
-                    ["01", tr("m0746cb4186"), tr("m0a8dda41c6"), "imports"],
-                    ["02", tr("m7abf13371d"), tr("m24b481aab3"), "catalog"],
-                    ["03", tr("m9d5d1ceb8a"), tr("m4967bdf381"), "library"],
-                ].map(([n, title, text, id]) => (
-                    <button key={id} onClick={() => go(id)}>
-                        <span lang="en">{n}</span>
-                        <h3>{title}</h3>
-                        <p>{text}</p>
-                        <ArrowLeft size={18} />
-                    </button>
-                ))}
-            </div>
             <WorkflowOverview />
             <small className="muted">
                 {tr("m22303f1f45")}

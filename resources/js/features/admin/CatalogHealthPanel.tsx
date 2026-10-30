@@ -11,6 +11,11 @@ import { previewChange, type Change } from "../catalog/workflows";
 import { ChangeReview } from "../catalog/ChangeReview";
 import { Pager } from "../catalog/Pager";
 import { createUploadBatch } from "./uploads";
+type MediaPage = {
+    data: MediaAsset[];
+    current_page: number;
+    last_page: number;
+};
 type Health = {
     id: number;
     title: string;
@@ -180,7 +185,7 @@ function HealthEditor({
     const assets = useQuery({
         queryKey: ["admin", "repair-assets", page],
         queryFn: ({ signal }) =>
-            api<Page<MediaAsset>>(`/admin/media?page=${page}`, { signal }),
+            api<MediaPage>(`/admin/media?page=${page}`, { signal }),
         enabled: kind === "repair",
     });
     const upload = useMutation({
@@ -331,7 +336,7 @@ function HealthEditor({
                     {assets.data && (
                         <Pager
                             page={page}
-                            pages={assets.data.meta.last_page}
+                            pages={assets.data.last_page}
                             setPage={setPage}
                         />
                     )}
