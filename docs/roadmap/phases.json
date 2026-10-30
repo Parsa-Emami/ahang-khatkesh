@@ -6,7 +6,7 @@
     {
       "id": "F01",
       "title": "مرز سوپرادمین و سطل بازیافت",
-      "status": "verified",
+      "status": "implemented",
       "depends_on": [],
       "implemented_paths": [
         "app/Actions/AuthorizeLibraryWrite.php",
@@ -21,13 +21,13 @@
         "حذف و بازیابی revision دارند؛ فایل، شناسه، لایک و عضویت حفظ می‌شوند.",
         "API، Action و مرورگر مستقل از پنهان‌کردن دکمه بررسی می‌شوند."
       ],
-      "evidence": "docs/verification/foundation-through-f11-2026-10-29.json",
-      "previous_evidence": "docs/verification/foundation-through-f10-2026-10-29.json"
+      "evidence": null,
+      "previous_evidence": "docs/verification/foundation-through-f11-2026-10-29.json"
     },
     {
       "id": "F02",
       "title": "پیش‌نمایش مؤثر و انتشار اتمیک ایمپورت",
-      "status": "verified",
+      "status": "implemented",
       "depends_on": [
         "F01"
       ],
@@ -45,13 +45,13 @@
         "تغییر مالکیت، revision یا دسترسی سازنده، انتشار جزئی ایجاد نمی‌کند.",
         "اجرای job و failed قدیمی نمی‌توانند نسل تازه را تغییر دهند."
       ],
-      "evidence": "docs/verification/foundation-through-f11-2026-10-29.json",
-      "previous_evidence": "docs/verification/foundation-through-f10-2026-10-29.json"
+      "evidence": null,
+      "previous_evidence": "docs/verification/foundation-through-f11-2026-10-29.json"
     },
     {
       "id": "F03",
       "title": "نسخهٔ امنیتی جاری و کنترل credential",
-      "status": "verified",
+      "status": "implemented",
       "depends_on": [
         "F01"
       ],
@@ -70,13 +70,13 @@
         "epoch از مقدار تازه DB افزایش می‌یابد؛ hash پرهزینه بیرون قفل است.",
         "MFA، recovery، تغییر نقش و reset از کنترل حساب جاری استفاده می‌کنند."
       ],
-      "evidence": "docs/verification/foundation-through-f11-2026-10-29.json",
-      "previous_evidence": "docs/verification/foundation-through-f10-2026-10-29.json"
+      "evidence": null,
+      "previous_evidence": "docs/verification/foundation-through-f11-2026-10-29.json"
     },
     {
       "id": "F04",
       "title": "پاک‌سازی بادوام فایل‌های بدون ارجاع",
-      "status": "verified",
+      "status": "implemented",
       "depends_on": [
         "F01",
         "F03"
@@ -93,13 +93,13 @@
         "شکست حذف قبلی، فایل جدید را حذف نمی‌کند.",
         "cleanup تکرارپذیر است و ارجاع سطل بازیافت را حفظ می‌کند."
       ],
-      "evidence": "docs/verification/foundation-through-f11-2026-10-29.json",
-      "previous_evidence": "docs/verification/foundation-through-f10-2026-10-29.json"
+      "evidence": null,
+      "previous_evidence": "docs/verification/foundation-through-f11-2026-10-29.json"
     },
     {
       "id": "F05",
       "title": "صف شخصی و تایمر خواب",
-      "status": "verified",
+      "status": "implemented",
       "depends_on": [
         "F01",
         "F03"
@@ -118,13 +118,13 @@
         "ترتیب واقعی صف ذخیره و بازیابی می‌شود؛ shuffle مجاورت هنرمند را متعادل می‌کند.",
         "تایمر زمان‌دار و پایان آهنگ قبل از repeat اعمال می‌شوند."
       ],
-      "evidence": "docs/verification/foundation-through-f11-2026-10-29.json",
-      "previous_evidence": "docs/verification/foundation-through-f10-2026-10-29.json"
+      "evidence": null,
+      "previous_evidence": "docs/verification/foundation-through-f11-2026-10-29.json"
     },
     {
       "id": "F06",
       "title": "حفظ draft، نشست چندتب و قرارداد پاسخ",
-      "status": "verified",
+      "status": "implemented",
       "depends_on": [
         "F02",
         "F03",
@@ -148,13 +148,13 @@
         "همه mutationهای authenticated زمینهٔ نشست دارند؛ لغو و پاسخ دیررس حفظ می‌شوند.",
         "reconnect ترتیب محلی را پاک نمی‌کند؛ کنارگذاشتن صریح و schema validation اجرا می‌شوند."
       ],
-      "evidence": "docs/verification/foundation-through-f11-2026-10-29.json",
-      "previous_evidence": "docs/verification/foundation-through-f10-2026-10-29.json"
+      "evidence": null,
+      "previous_evidence": "docs/verification/foundation-through-f11-2026-10-29.json"
     },
     {
       "id": "F07",
       "title": "چرخهٔ کامل job، blob، quota و reconciliation",
-      "status": "verified",
+      "status": "implemented",
       "depends_on": [
         "F02",
         "F03",
@@ -183,13 +183,13 @@
         "blob فیزیکی از asset معنایی جدا شود؛ quota پیش از آپلود رزرو شود.",
         "orphan GC با retention، dry-run و recheck مرجع اجرا شود."
       ],
-      "evidence": "docs/verification/foundation-through-f11-2026-10-29.json",
-      "previous_evidence": "docs/verification/foundation-through-f10-2026-10-29.json"
+      "evidence": null,
+      "previous_evidence": "docs/verification/foundation-through-f11-2026-10-29.json"
     },
     {
       "id": "F08",
       "title": "FLAC به MP3 320k و انتخاب کیفیت",
-      "status": "verified",
+      "status": "implemented",
       "depends_on": [
         "F07"
       ],
@@ -218,13 +218,13 @@
         "خطای codec، disk full، timeout، kill و تکرار job فایل نیمه‌آماده منتشر نکنند.",
         "پنل پیشرفت، retry مجاز، اندازهٔ واقعی و پروفایل خروجی داشته باشد."
       ],
-      "evidence": "docs/verification/foundation-through-f11-2026-10-29.json",
-      "previous_evidence": "docs/verification/foundation-through-f10-2026-10-29.json"
+      "evidence": null,
+      "previous_evidence": "docs/verification/foundation-through-f11-2026-10-29.json"
     },
     {
       "id": "F09",
       "title": "زبان و جهت سراسری و دسترس‌پذیری پایه",
-      "status": "verified",
+      "status": "implemented",
       "depends_on": [
         "F06"
       ],
@@ -248,13 +248,13 @@
         "تغییر locale/theme پلیر را remount نکند؛ متن ترکیبی و logical CSS بررسی شوند.",
         "صفحه‌خوان، کیبورد، خروج امن از فرم و خطاهای ترجمه آزمون شوند."
       ],
-      "evidence": "docs/verification/foundation-through-f11-2026-10-29.json",
-      "previous_evidence": "docs/verification/foundation-through-f10-2026-10-29.json"
+      "evidence": null,
+      "previous_evidence": "docs/verification/foundation-through-f11-2026-10-29.json"
     },
     {
       "id": "F10",
       "title": "هویت بصری و shader محلی 21st.dev",
-      "status": "verified",
+      "status": "implemented",
       "depends_on": [
         "F09"
       ],
@@ -276,13 +276,13 @@
         "رنگ، contrast، focus، density و حالت‌های empty/error/loading یکپارچه شوند.",
         "shader تزئینی با context loss، reduced motion، hidden tab و بودجه GPU افت امن داشته باشد."
       ],
-      "evidence": "docs/verification/foundation-through-f11-2026-10-29.json",
-      "previous_evidence": "docs/verification/foundation-through-f10-2026-10-29.json"
+      "evidence": null,
+      "previous_evidence": "docs/verification/foundation-through-f11-2026-10-29.json"
     },
     {
       "id": "F11",
       "title": "تاریخچه، حالت خصوصی و پیشنهاد قابل توضیح",
-      "status": "verified",
+      "status": "implemented",
       "depends_on": [
         "F05",
         "F08",
@@ -312,7 +312,8 @@
         "پیشنهاد فقط از کاتالوگ مجاز و با توضیح علت، diversity و کنترل کاربر ساخته شود.",
         "پیشنهاد یا mix به پلی‌لیست عمومی تبدیل نشود مگر با تأیید سوپرادمین."
       ],
-      "evidence": "docs/verification/foundation-through-f11-2026-10-29.json"
+      "evidence": null,
+      "previous_evidence": "docs/verification/foundation-through-f11-2026-10-29.json"
     },
     {
       "id": "F12",
