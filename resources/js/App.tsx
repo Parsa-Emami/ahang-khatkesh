@@ -16,6 +16,7 @@ import {
 } from "./pages/LibraryPages";
 import { lazy, Suspense } from "react";
 import { SessionConfirmation } from "./features/security/SessionConfirmation";
+const ProposalsPage = lazy(() => import("./features/catalog/ProposalsPage"));
 const AdminPage = lazy(() => import("./features/admin/AdminPage"));
 
 export function App() {
@@ -47,6 +48,14 @@ export function App() {
                             <Route path="liked" element={<LikedPage />} />
                             <Route path="history" element={<HistoryPage />} />
                             <Route path="mix" element={<MixPage />} />
+                            <Route
+                                path="requests"
+                                element={
+                                    <Suspense fallback={<Loading />}>
+                                        <ProposalsPage />
+                                    </Suspense>
+                                }
+                            />
                             <Route path="search" element={<SearchPage />} />
                             <Route
                                 path="playlists/:id"

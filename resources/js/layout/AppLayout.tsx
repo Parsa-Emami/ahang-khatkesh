@@ -5,6 +5,7 @@ import { useLocale } from "../i18n/LocaleProvider";
 import { useEffect, useState, useRef } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import {
+    MessageSquare,
     History,
     Sparkles,
     Bookmark,
@@ -190,6 +191,10 @@ export function AppLayout() {
                     <NavLink to="/mix">
                         <Sparkles size={20} />
                         {tr("listening.mix")}
+                    </NavLink>
+                    <NavLink to="/requests">
+                        <MessageSquare size={20} />
+                        {tr("catalog.myProposals")}
                     </NavLink>
                 </nav>
                 <div className="sidebar-divider" />

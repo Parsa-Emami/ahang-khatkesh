@@ -1,10 +1,15 @@
 <?php
 
+use App\Actions\Media\IngestMedia;
+use App\Actions\Media\ReserveStorage;
+use App\Actions\RegisterTrack;
 use App\Enums\UserRole;
 use App\Models\Playlist;
 use App\Models\User;
 use Illuminate\Contracts\Console\Kernel;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Storage;
 use Laravel\Fortify\Fortify;
 use Tests\Support\FlacFixture;
 
@@ -50,5 +55,26 @@ if (Artisan::call('media:backfill', ['--apply' => true, '--limit' => 1000]) !== 
 }
 foreach (['desktop', 'mobile'] as $device) {
     file_put_contents(base_path('reports/f08-'.$device.'.flac'), FlacFixture::bytes(2, 44100, $device === 'desktop' ? 880 : 990, 8));
+}
+foreach (['desktop', 'mobile'] as $device) {
+    $owner = User::where('email', 'owner-'.$device.'@example.test')->firstOrFail();
+    $tracks = [];
+    foreach (['Root', 'Duplicate', 'Missing'] as $index => $name) {
+        $sample = ($device === 'desktop' ? 20 : 40) + $index;
+        $samples = str_repeat(pack('v', $sample), 16000 * 4);
+        $bytes = 'RIFF'.pack('V', 36 + strlen($samples)).'WAVEfmt '.pack('VvvVVvv', 16, 1, 1, 16000, 32000, 2, 16).'data'.pack('V', strlen($samples)).$samples;
+        $file = UploadedFile::fake()->createWithContent('f12-'.$device.'-'.$index.'.wav', $bytes);
+        $reservation = app(ReserveStorage::class)->handle($owner, strlen($bytes), 'audio');
+        $asset = app(IngestMedia::class)->handle($owner, $reservation->id, $file, reuse: false)['asset'];
+        $track = app(RegisterTrack::class)->handle(['asset_id' => $asset->id, 'title' => 'F12 '.$device.' '.$name, 'artist' => 'Synthetic F12 '.$device, 'album' => null]);
+        $track->update(['recording_identity' => 'isrc:'.($device === 'desktop' ? 'USAAA2600001' : 'USAAA2600002'), 'recording_provenance' => 'Synthetic F12 '.$device]);
+        $tracks[] = $track;
+        if ($name === 'Missing') {
+            $track->update(['recording_identity' => 'isrc:'.($device === 'desktop' ? 'USAAA2600003' : 'USAAA2600004')]);
+            Storage::disk('media')->delete($asset->storagePath());
+        }
+    }
+    $playlist = Playlist::create(['name' => 'F12 private diagnostics '.$device, 'mood' => 'other', 'status' => 'draft', 'created_by' => $owner->id]);
+    $playlist->tracks()->attach(array_combine(array_map(fn ($track) => $track->id, $tracks), array_map(fn ($index) => ['position' => $index + 1], array_keys($tracks))));
 }
 echo "Isolated browser fixtures prepared.\n";

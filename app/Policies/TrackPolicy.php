@@ -11,6 +11,8 @@ class TrackPolicy
 {
     public function view(User $user, Track $track): Response
     {
-        return $user->is_active && ! $track->trashed() && ($user->hasPermission(Permission::CatalogManage) || $track->playlists()->where('status', 'published')->exists()) ? Response::allow() : Response::denyAsNotFound();
+        $root = $track->merged_into_id ? $track->mergedInto : $track;
+
+        return $root && ! $root->trashed() && $root->merged_into_id === null && $user->is_active && ! $track->trashed() && ($user->hasPermission(Permission::CatalogManage) || $root->playlists()->where('status', 'published')->exists()) ? Response::allow() : Response::denyAsNotFound();
     }
 }

@@ -9,7 +9,6 @@ use App\Http\Resources\TrackResource;
 use App\Models\PlaybackState;
 use App\Models\Track;
 use App\Services\PlaybackMedia;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -22,7 +21,7 @@ class PlaybackController extends Controller
         if (! $state || $user->privateListening()) {
             return response()->json(['data' => ['track_id' => null, 'queue' => [], 'position_seconds' => 0, 'volume' => 0.8, 'shuffle' => false, 'repeat_mode' => 'off', 'revision' => (int) ($state?->revision ?? 0)]]);
         }
-        $tracks = Track::visibleTo($request->user())->with(['mediaAsset.blob', PlaybackMedia::EAGER])->withExists(['likedBy as is_liked' => fn (Builder $q) => $q->where('users.id', $request->user()->id)])->whereIn('id', $state->queue)->get()->keyBy('id');
+        $tracks = Track::visibleTo($request->user())->with(['mediaAsset.blob', PlaybackMedia::EAGER])->withUserLike($request->user())->whereIn('id', $state->queue)->get()->keyBy('id');
         $ordered = collect($state->queue)->map(fn ($id) => $tracks->get($id))->filter()->values();
         $current = $tracks->get($state->track_id);
 

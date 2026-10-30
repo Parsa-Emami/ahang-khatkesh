@@ -503,6 +503,16 @@ test("shader fallback and reduced motion preserve controls after unavailable Web
     page,
 }, info) => {
     await page.addInitScript(() => {
+        const OriginalAudio = window.Audio;
+        Object.assign(window, { __f10FallbackPlaying: 0 });
+        window.Audio = function (src?: string) {
+            const audio = new OriginalAudio(src);
+            audio.addEventListener("playing", () => {
+                (window as unknown as { __f10FallbackPlaying: number })
+                    .__f10FallbackPlaying++;
+            });
+            return audio;
+        } as unknown as typeof Audio;
         const original = HTMLCanvasElement.prototype.getContext;
         HTMLCanvasElement.prototype.getContext = function (
             this: HTMLCanvasElement,
@@ -533,11 +543,16 @@ test("shader fallback and reduced motion preserve controls after unavailable Web
     await expect(hero).toHaveAttribute("data-effect-reason", "compile");
     await expect(page.locator(".shader-canvas")).toHaveCount(0);
     await page.locator(".featured-actions .button").click();
-    await expect(
-        page
-            .locator(".player-bar")
-            .getByRole("button", { name: "توقف پخش", exact: true }),
-    ).toBeVisible();
+    await expect
+        .poll(() =>
+            page.evaluate(
+                () =>
+                    (window as unknown as { __f10FallbackPlaying: number })
+                        .__f10FallbackPlaying,
+            ),
+        )
+        .toBeGreaterThan(0);
+    await expect(page.locator(".player-bar")).toBeVisible();
     await capture(page, info, "compile-fallback");
     await page.route("**/build/assets/DitherFlowCanvas-*.js", (route) =>
         route.abort(),

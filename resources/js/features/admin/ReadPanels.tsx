@@ -1,3 +1,4 @@
+import { WorkflowOverview } from "./WorkflowOverview";
 import { currentPreferences } from "../../i18n/runtime";
 import { tr } from "../../i18n/runtime";
 import { useLocale } from "../../i18n/LocaleProvider";
@@ -122,6 +123,7 @@ export function OverviewPanel({ go }: { go: (value: string) => void }) {
                     </button>
                 ))}
             </div>
+            <WorkflowOverview />
             <small className="muted">
                 {tr("m22303f1f45")}
                 <button

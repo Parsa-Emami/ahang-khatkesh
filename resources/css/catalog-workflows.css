@@ -1,0 +1,236 @@
+.workflow-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
+    gap: 14px;
+    margin-block: 24px;
+}
+.workflow-card {
+    text-align: start;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    background: var(--surface);
+    color: var(--text);
+    padding: 20px;
+    display: grid;
+    gap: 10px;
+    min-height: 150px;
+}
+.workflow-card strong {
+    font-size: 1.1rem;
+}
+.workflow-card small {
+    color: var(--muted);
+}
+.catalog-workflow {
+    display: grid;
+    gap: 20px;
+    min-width: 0;
+}
+.catalog-workflow input:not([type="checkbox"]),
+.catalog-workflow select,
+.catalog-workflow textarea {
+    width: 100%;
+    min-width: 0;
+}
+.catalog-workflow label {
+    display: grid;
+    gap: 8px;
+}
+.catalog-workflow label.checkbox-label {
+    display: flex;
+}
+.catalog-form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
+    gap: 16px;
+}
+.catalog-selection,
+.catalog-health-list,
+.proposal-list {
+    display: grid;
+    gap: 14px;
+    padding: 0;
+    list-style: none;
+}
+.catalog-selection > li,
+.catalog-health-list > article,
+.proposal-list > article,
+.catalog-history > article {
+    border: 1px solid var(--border);
+    background: var(--surface);
+    padding: 18px;
+    border-radius: 14px;
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+.catalog-selection li header,
+.catalog-history article,
+.proposal-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+.catalog-selection fieldset {
+    margin-block: 12px;
+    border: 1px solid var(--border);
+    padding: 12px;
+    border-radius: 10px;
+    min-width: 0;
+}
+.catalog-selection .catalog-credit {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-block: 8px;
+}
+.catalog-selection .catalog-credit select {
+    width: auto;
+    flex: 1;
+}
+.catalog-tabs,
+.catalog-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+.catalog-tabs {
+    margin-block-end: 20px;
+}
+.catalog-tabs .selected {
+    border-color: var(--accent);
+}
+.catalog-history {
+    display: grid;
+    gap: 12px;
+    margin-block: 20px;
+}
+.catalog-status {
+    font-weight: 700;
+}
+.catalog-review {
+    width: min(860px, calc(100vw - 32px));
+}
+.change-row {
+    border-block-start: 1px solid var(--border);
+    padding-block: 14px;
+}
+.change-comparison {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+.change-comparison > div {
+    min-width: 0;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px;
+    overflow-wrap: anywhere;
+}
+.change-fields {
+    display: grid;
+    gap: 10px;
+    margin: 0;
+}
+.change-fields dt {
+    color: var(--muted);
+    font-size: 0.8rem;
+}
+.change-fields dd {
+    margin: 4px 0 0;
+}
+.change-values {
+    padding-inline-start: 22px;
+    margin-block: 4px;
+}
+.change-values li {
+    margin-block: 5px;
+}
+.catalog-review > small {
+    display: block;
+    margin-block-start: 16px;
+}
+.catalog-undo {
+    margin-block: 14px;
+    border: 1px solid var(--border);
+    padding: 14px;
+    border-radius: 12px;
+}
+.catalog-request-page {
+    display: grid;
+    gap: 24px;
+}
+.catalog-request-page h1 {
+    margin-block-end: 8px;
+}
+.catalog-request-page .catalog-workflow {
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 24px;
+    background: var(--surface);
+}
+.catalog-health-list .catalog-actions {
+    margin-block-start: 14px;
+}
+.catalog-health-list p,
+.proposal-list p {
+    overflow-wrap: anywhere;
+}
+.catalog-proposal-payload {
+    border-inline-start: 3px solid var(--accent);
+    padding-inline-start: 16px;
+}
+.catalog-review .button {
+    margin-block-start: 10px;
+}
+@media (max-width: 600px) {
+    .change-comparison {
+        grid-template-columns: 1fr;
+    }
+    .catalog-request-page .catalog-workflow {
+        padding: 16px;
+    }
+    .catalog-selection > li {
+        padding: 14px;
+    }
+}
+.catalog-workflow input:not([type="checkbox"]),
+.catalog-workflow select,
+.catalog-workflow textarea {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--surface-2);
+    color: var(--text);
+    padding: 10px 14px;
+    min-height: 44px;
+    font: inherit;
+}
+.catalog-workflow .picker-results {
+    display: grid;
+    gap: 8px;
+    max-height: 280px;
+    overflow: auto;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 8px;
+}
+.catalog-workflow .picker-results button {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    text-align: start;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--surface-2);
+    color: var(--text);
+    padding: 12px;
+    min-height: 44px;
+}
+.catalog-workflow .picker-results button small {
+    display: block;
+    color: var(--muted);
+}

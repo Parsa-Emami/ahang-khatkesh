@@ -22,7 +22,7 @@ class RegisterTrack
             $asset = MediaAsset::whereKey($row['asset_id'])->lockForUpdate()->first();
             $existing = Track::withTrashed()->where('media_asset_id', $row['asset_id'])->lockForUpdate()->first();
             $link = DB::table('track_media')->where('media_asset_id', $row['asset_id'])->first();
-            if (! $asset || $asset->source_asset_id || $existing?->trashed() || ($link && (! $existing || (int) $link->track_id !== $existing->id || $link->purpose !== 'original'))) {
+            if (! $asset || $asset->source_asset_id || ($existing?->trashed() || $existing?->merged_into_id !== null) || ($link && (! $existing || (int) $link->track_id !== $existing->id || $link->purpose !== 'original'))) {
                 throw new ImportPlanChanged(__('مالکیت رسانه تغییر کرده است؛ پیش‌نمایش تازه بسازید.'));
             }
             if ($existing) {

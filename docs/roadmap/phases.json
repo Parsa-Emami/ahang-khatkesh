@@ -318,17 +318,38 @@
     {
       "id": "F12",
       "title": "پنل کامل مدیریت کاتالوگ و درخواست اعضا",
-      "status": "planned",
+      "status": "implemented",
       "depends_on": [
         "F07",
         "F08",
         "F09",
         "F10"
       ],
-      "implemented_paths": [],
+      "implemented_paths": [
+        "app/Services/Catalog/CatalogChanges.php",
+        "app/Services/Catalog/CatalogSnapshot.php",
+        "app/Services/Catalog/CatalogPlan.php",
+        "app/Services/Catalog/MemberProposals.php",
+        "app/Services/Catalog/CatalogHealth.php",
+        "database/migrations/2026_10_30_034717_add_catalog_workflows.php",
+        "resources/js/features/admin/CatalogWorkspace.tsx",
+        "resources/js/features/admin/BulkCatalogPanel.tsx",
+        "resources/js/features/admin/CatalogHealthPanel.tsx",
+        "resources/js/features/catalog/ProposalsPage.tsx",
+        "resources/js/features/catalog/ChangeReview.tsx",
+        "tests/Feature/CatalogBulkChangeTest.php",
+        "tests/Feature/MemberProposalTest.php",
+        "tests/Feature/CatalogWorkflowTest.php",
+        "tests/Browser/f12.e2e.ts",
+        "tests/Concurrency/CatalogWorkflowProcessTest.php"
+      ],
       "required_tests": [
         "CatalogBulkChangeTest",
-        "MemberProposalTest"
+        "MemberProposalTest",
+        "CatalogWorkflowTest",
+        "CatalogWorkflowProcessTest",
+        "MemberProposalTest real CSRF",
+        "CatalogBulkChangeTest browser bulk"
       ],
       "acceptance": [
         "bulk edit با preview، revision، rollback و audit باشد.",

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
     Download,
@@ -346,12 +346,18 @@ export function HistoryPage() {
         </div>
     );
 }
+const MixProposalForm = lazy(() =>
+    import("../catalog/ProposalsPage").then((module) => ({
+        default: module.ProposalForm,
+    })),
+);
 export function MixPage() {
     useLocale();
     const { user } = useSession(),
         listening = useListening(),
         player = usePlayer();
     const [mood, setMood] = useState<Mood | "">("");
+    const [proposedTracks, setProposedTracks] = useState<Track[] | null>(null);
     const mix = useQuery({
         queryKey: [
             "listening-mix",
@@ -380,6 +386,20 @@ export function MixPage() {
                 </div>
                 <Sparkles size={28} aria-hidden="true" />
             </div>
+            {proposedTracks && (
+                <Dialog
+                    open
+                    onOpenChange={(open) => {
+                        if (!open) setProposedTracks(null);
+                    }}
+                    title={tr("catalog.playlistProposal")}
+                    description={tr("catalog.memberHelp")}
+                >
+                    <Suspense fallback={<Loading />}>
+                        <MixProposalForm initialTracks={proposedTracks} />
+                    </Suspense>
+                </Dialog>
+            )}
             <div className="filter-chips" aria-label={tr("listening.mood")}>
                 <button
                     className={!mood ? "selected" : ""}
@@ -421,6 +441,13 @@ export function MixPage() {
                         >
                             <Play size={18} />
                             {tr("listening.playMix")}
+                        </button>
+                        <button
+                            className="button secondary"
+                            disabled={!tracks.length}
+                            onClick={() => setProposedTracks([...tracks])}
+                        >
+                            {tr("catalog.suggestMix")}
                         </button>
                     </div>
                     {!tracks.length ? (

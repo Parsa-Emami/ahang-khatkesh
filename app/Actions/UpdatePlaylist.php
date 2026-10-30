@@ -20,7 +20,7 @@ class UpdatePlaylist
             $locked = Playlist::whereKey($playlist->id)->lockForUpdate()->firstOrFail();
             abort_unless((int) $locked->revision === (int) $data['revision'], 409, __('این پلی‌لیست هم‌زمان تغییر کرده است؛ اطلاعات تازه را بارگذاری کنید.'));
             if ($tracks !== null) {
-                abort_unless(Track::whereIn('id', $tracks)->count() === count($tracks), 422, __('بعضی آهنگ‌ها در دسترس نیستند.'));
+                abort_unless(Track::canonical()->whereIn('id', $tracks)->count() === count($tracks), 422, __('بعضی آهنگ‌ها در دسترس نیستند.'));
                 $locked->tracks()->detach();
                 foreach ($tracks as $i => $id) {
                     $locked->tracks()->attach($id, ['position' => $i + 1]);

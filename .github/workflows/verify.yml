@@ -105,6 +105,12 @@ jobs:
         env:
           AHANG_BROWSER_CHANNEL: chrome
           AHANG_BROWSER_WEBGL: '1'
+      - name: Catalog workflow browser preflight
+        if: matrix.database == 'sqlite'
+        run: node scripts/run-browser-tests.mjs tests/Browser/f12.e2e.ts --reporter=list
+        env:
+          AHANG_BROWSER_CHANNEL: chrome
+          AHANG_BROWSER_WEBGL: '1'
       - name: Browser journeys with real CSRF
         if: matrix.database == 'sqlite'
         run: npm run test:browser
@@ -129,5 +135,13 @@ jobs:
         with:
           name: f11-privacy
           path: reports/f11-privacy/
+          if-no-files-found: error
+          retention-days: 14
+      - name: Retain synthetic F12 catalog workflows
+        if: always() && matrix.database == 'sqlite'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: f12-catalog
+          path: reports/f12-catalog/
           if-no-files-found: error
           retention-days: 14

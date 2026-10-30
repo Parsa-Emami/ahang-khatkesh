@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\ListeningEventController;
 use App\Http\Controllers\Api\ListeningHistoryController;
 use App\Http\Controllers\Api\ListeningMixController;
 use App\Http\Controllers\Api\ListeningSettingsController;
+use App\Http\Controllers\Api\MemberProposalController;
 use App\Http\Controllers\Api\MfaController;
 use App\Http\Controllers\Api\PlaybackController;
 use App\Http\Controllers\Api\SessionController;
@@ -47,6 +48,9 @@ Route::prefix('api/v1')->group(function (): void {
             Route::delete('listening/history', [ListeningHistoryController::class, 'destroy']);
             Route::delete('listening/history/{eventId}', [ListeningHistoryController::class, 'destroy'])->whereUuid('eventId');
             Route::get('listening/mix', ListeningMixController::class);
+            Route::get('member-proposals', [MemberProposalController::class, 'index'])->name('member.proposals.index');
+            Route::get('member-proposals/{proposalId}', [MemberProposalController::class, 'show'])->whereUuid('proposalId')->name('member.proposals.show');
+            Route::post('member-proposals', [MemberProposalController::class, 'store'])->name('member.proposals.store');
             Route::get('stats', [CatalogController::class, 'stats']);
             Route::get('playlists', [CatalogController::class, 'playlists']);
             Route::get('playlists/{playlist}', [CatalogController::class, 'show']);
@@ -59,11 +63,20 @@ Route::prefix('api/v1')->group(function (): void {
             Route::put('playback', [PlaybackController::class, 'update']);
             Route::prefix('admin')->middleware(['can:admin', 'mfa'])->group(function (): void {
                 Route::middleware('can:catalog.manage')->group(function (): void {
+                    Route::get('catalog-health', Admin\CatalogHealthController::class);
+                    Route::get('catalog-changes', [Admin\CatalogChangeController::class, 'index']);
+                    Route::get('catalog-changes/{changeId}', [Admin\CatalogChangeController::class, 'show'])->whereUuid('changeId');
+                    Route::get('proposals', [MemberProposalController::class, 'index'])->name('admin.proposals.index');
+                    Route::get('proposals/{proposalId}', [MemberProposalController::class, 'show'])->whereUuid('proposalId')->name('admin.proposals.show');
                     Route::get('artists', [Admin\CatalogManagementController::class, 'artists']);
                     Route::get('releases', [Admin\CatalogManagementController::class, 'releases']);
                     Route::get('releases/{release}', [Admin\CatalogManagementController::class, 'showRelease']);
                     Route::get('tracks', [Admin\CatalogManagementController::class, 'tracks']);
                     Route::middleware('recent-password')->group(function (): void {
+                        Route::post('catalog-changes/preview', [Admin\CatalogChangeController::class, 'preview']);
+                        Route::post('catalog-changes/{changeId}/commit', [Admin\CatalogChangeController::class, 'commit'])->whereUuid('changeId');
+                        Route::post('catalog-changes/{changeId}/rollback', [Admin\CatalogChangeController::class, 'rollback'])->whereUuid('changeId');
+                        Route::post('proposals/{proposalId}/reject', [MemberProposalController::class, 'reject'])->whereUuid('proposalId')->name('admin.proposals.reject');
                         Route::post('artists', [Admin\CatalogManagementController::class, 'saveArtist']);
                         Route::patch('artists/{artist}', [Admin\CatalogManagementController::class, 'saveArtist']);
                         Route::post('releases', [Admin\CatalogManagementController::class, 'saveRelease']);
@@ -78,6 +91,7 @@ Route::prefix('api/v1')->group(function (): void {
                 Route::post('tracks/{track}/restore', [Admin\TrashController::class, 'track'])->withTrashed()->middleware(['can:catalog.manage', 'recent-password']);
                 Route::delete('playlists/{playlist}', [Admin\TrashController::class, 'playlist'])->withTrashed()->middleware(['can:catalog.manage', 'recent-password']);
                 Route::post('playlists/{playlist}/restore', [Admin\TrashController::class, 'playlist'])->withTrashed()->middleware(['can:catalog.manage', 'recent-password']);
+                Route::get('workflows', Admin\WorkflowsController::class)->middleware('can:dashboard.read');
                 Route::get('overview', OverviewController::class)->middleware('can:dashboard.read');
                 Route::get('operations', OperationsController::class)->middleware('can:operations.read');
                 Route::get('audit-events', [AuditEventController::class, 'index'])->middleware('can:audit.read');

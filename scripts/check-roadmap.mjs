@@ -141,6 +141,30 @@ for (const phase of roadmap.phases) {
             "F11 requires synthetic history and opt-out screenshots",
         );
     }
+    if (phase.id === "F12") {
+        assert(
+            record.concurrency?.tests >= 13 &&
+                record.concurrency.passed === record.concurrency.tests &&
+                record.concurrency.failed === 0 &&
+                record.concurrency.skipped === 0,
+            "F12 requires real MySQL catalog commit and proposal cap process evidence",
+        );
+        for (const project of ["desktop", "mobile"])
+            for (const journey of [
+                "MemberProposalTest real CSRF",
+                "CatalogBulkChangeTest browser bulk",
+            ])
+                assert(
+                    record.test_inventory.some((name) =>
+                        name.startsWith(`${project}: ${journey}`),
+                    ),
+                    "F12 requires member review, bulk, merge and repair browser evidence",
+                );
+        assert(
+            record.catalog?.screenshot_count === 14,
+            "F12 requires synthetic catalog workflow screenshots",
+        );
+    }
     for (const gate of [
         "build",
         "format",

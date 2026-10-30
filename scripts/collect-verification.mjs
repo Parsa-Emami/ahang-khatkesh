@@ -37,7 +37,8 @@ if (process.env.AHANG_DATABASE === "mysql") {
     );
 }
 let visual = null,
-    privacy = null;
+    privacy = null,
+    catalog = null;
 let browser = null,
     browserTests = [];
 if (process.env.AHANG_DATABASE === "sqlite") {
@@ -121,6 +122,26 @@ if (process.env.AHANG_DATABASE === "sqlite") {
             .digest("hex"),
     };
 }
+if (process.env.AHANG_DATABASE === "sqlite") {
+    const root = "reports/f12-catalog";
+    const images = readdirSync(root)
+        .filter((name) => name.endsWith(".png"))
+        .sort()
+        .map((name) => ({
+            name,
+            sha256: createHash("sha256")
+                .update(readFileSync(`${root}/${name}`))
+                .digest("hex"),
+        }));
+    assert.equal(images.length, 14);
+    writeFileSync(`${root}/inventory.json`, JSON.stringify(images, null, 2));
+    catalog = {
+        screenshot_count: images.length,
+        screenshot_inventory_sha256: createHash("sha256")
+            .update(JSON.stringify(images))
+            .digest("hex"),
+    };
+}
 console.log(
     "AHANG_VERIFICATION_RECORD=" +
         JSON.stringify({
@@ -142,6 +163,7 @@ console.log(
             browser,
             visual,
             privacy,
+            catalog,
             concurrency,
             test_inventory: [
                 ...cases.map(

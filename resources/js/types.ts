@@ -64,6 +64,9 @@ export type AudioConversion = {
     } | null;
 };
 export type Track = {
+    merged_into_id?: number | null;
+    recording_identity?: string | null;
+    recording_provenance?: string | null;
     id: number;
     title: string;
     artist: string;

@@ -9401,6 +9401,1887 @@
           }
         ]
       }
+    },
+    "/member-proposals": {
+      "get": {
+        "operationId": "get_member_proposals",
+        "summary": "Read member proposals scoped to own account or owner inbox",
+        "tags": [
+          "Member proposals"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/MemberProposal"
+                      }
+                    },
+                    "meta": {
+                      "type": "object"
+                    },
+                    "links": {
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta",
+                    "links"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Request refused or preview no longer applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Request refused or preview no longer applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Request refused or preview no longer applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Request refused or preview no longer applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "419": {
+            "description": "Request refused or preview no longer applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Request refused or preview no longer applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Request refused or preview no longer applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10000
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "enum": [
+                "pending",
+                "accepted",
+                "rejected"
+              ]
+            }
+          }
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ]
+      },
+      "post": {
+        "operationId": "post_member_proposals",
+        "summary": "Submit an idempotent proposal without catalog writes",
+        "tags": [
+          "Member proposals"
+        ],
+        "responses": {
+          "201": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/MemberProposal"
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Request refused or preview no longer applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Request refused or preview no longer applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Request refused or preview no longer applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Request refused or preview no longer applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "419": {
+            "description": "Request refused or preview no longer applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Request refused or preview no longer applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Request refused or preview no longer applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/MemberProposal"
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "X-Session-Context",
+            "in": "header",
+            "required": true,
+            "description": "Non-secret actor id:access_version from session. Required for authenticated writes. This header never authorizes a request.",
+            "schema": {
+              "type": "string",
+              "pattern": "^[1-9][0-9]*:[0-9]+$"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
+          }
+        ],
+        "security": [
+          {
+            "sessionCookie": [],
+            "csrfToken": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberProposalWrite"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/member-proposals/{proposalId}": {
+      "get": {
+        "operationId": "get_member_proposals_proposalId",
+        "summary": "Read one scoped proposal",
+        "tags": [
+          "Member proposals"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/MemberProposal"
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Request refused or preview no longer applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Request refused or preview no longer applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Request refused or preview no longer applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Request refused or preview no longer applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "419": {
+            "description": "Request refused or preview no longer applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Request refused or preview no longer applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Request refused or preview no longer applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
+          },
+          {
+            "name": "proposalId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ]
+      }
+    },
+    "/admin/proposals": {
+      "get": {
+        "operationId": "get_admin_proposals",
+        "summary": "Read member proposals scoped to own account or owner inbox",
+        "tags": [
+          "Administration"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/MemberProposal"
+                      }
+                    },
+                    "meta": {
+                      "type": "object"
+                    },
+                    "links": {
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta",
+                    "links"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Request refused or preview no longer applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Request refused or preview no longer applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Request refused or preview no longer applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Request refused or preview no longer applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "419": {
+            "description": "Request refused or preview no longer applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Request refused or preview no longer applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Request refused or preview no longer applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10000
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "enum": [
+                "pending",
+                "accepted",
+                "rejected"
+              ]
+            }
+          }
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ]
+      }
+    },
+    "/admin/proposals/{proposalId}": {
+      "get": {
+        "operationId": "get_admin_proposals_proposalId",
+        "summary": "Read one scoped proposal",
+        "tags": [
+          "Administration"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/MemberProposal"
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Request refused or preview no longer applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Request refused or preview no longer applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Request refused or preview no longer applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Request refused or preview no longer applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "419": {
+            "description": "Request refused or preview no longer applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Request refused or preview no longer applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Request refused or preview no longer applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
+          },
+          {
+            "name": "proposalId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ]
+      }
+    },
+    "/admin/proposals/{proposalId}/reject": {
+      "post": {
+        "operationId": "post_admin_proposals_proposalId_reject",
+        "summary": "Reject a pending proposal with a private reason",
+        "tags": [
+          "Administration"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/MemberProposal"
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Request refused or preview no longer applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Request refused or preview no longer applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Request refused or preview no longer applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Request refused or preview no longer applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "419": {
+            "description": "Request refused or preview no longer applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Request refused or preview no longer applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Request refused or preview no longer applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "423": {
+            "description": "Request refused or preview no longer applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "428": {
+            "description": "Request refused or preview no longer applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Request refused or preview no longer applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "X-Session-Context",
+            "in": "header",
+            "required": true,
+            "description": "Non-secret actor id:access_version from session. Required for authenticated writes. This header never authorizes a request.",
+            "schema": {
+              "type": "string",
+              "pattern": "^[1-9][0-9]*:[0-9]+$"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
+          },
+          {
+            "name": "proposalId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "security": [
+          {
+            "sessionCookie": [],
+            "csrfToken": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "revision": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "reason": {
+                    "type": "string",
+                    "minLength": 3,
+                    "maxLength": 1000
+                  }
+                },
+                "required": [
+                  "revision",
+                  "reason"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/catalog-changes": {
+      "get": {
+        "operationId": "get_admin_catalog_changes",
+        "summary": "Read own catalog change journal",
+        "tags": [
+          "Administration"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/CatalogChange"
+                      }
+                    },
+                    "meta": {
+                      "type": "object"
+                    },
+                    "links": {
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta",
+                    "links"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Request refused or preview no longer applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Request refused or preview no longer applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Request refused or preview no longer applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Request refused or preview no longer applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "419": {
+            "description": "Request refused or preview no longer applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Request refused or preview no longer applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Request refused or preview no longer applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10000
+            }
+          }
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ]
+      }
+    },
+    "/admin/catalog-changes/{changeId}": {
+      "get": {
+        "operationId": "get_admin_catalog_changes_changeId",
+        "summary": "Read own catalog preview or undo record",
+        "tags": [
+          "Administration"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/CatalogChange"
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Request refused or preview no longer applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Request refused or preview no longer applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Request refused or preview no longer applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Request refused or preview no longer applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "419": {
+            "description": "Request refused or preview no longer applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Request refused or preview no longer applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Request refused or preview no longer applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
+          },
+          {
+            "name": "changeId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ]
+      }
+    },
+    "/admin/catalog-changes/preview": {
+      "post": {
+        "operationId": "post_admin_catalog_changes_preview",
+        "summary": "Dry run bounded catalog changes and capture a catalog-only snapshot",
+        "tags": [
+          "Administration"
+        ],
+        "responses": {
+          "201": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/CatalogChange"
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Request refused or preview no longer applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Request refused or preview no longer applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Request refused or preview no longer applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Request refused or preview no longer applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "419": {
+            "description": "Request refused or preview no longer applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Request refused or preview no longer applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Request refused or preview no longer applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "423": {
+            "description": "Request refused or preview no longer applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "428": {
+            "description": "Request refused or preview no longer applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Request refused or preview no longer applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "X-Session-Context",
+            "in": "header",
+            "required": true,
+            "description": "Non-secret actor id:access_version from session. Required for authenticated writes. This header never authorizes a request.",
+            "schema": {
+              "type": "string",
+              "pattern": "^[1-9][0-9]*:[0-9]+$"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
+          }
+        ],
+        "security": [
+          {
+            "sessionCookie": [],
+            "csrfToken": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CatalogChangeWrite"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/catalog-changes/{changeId}/commit": {
+      "post": {
+        "operationId": "post_admin_catalog_changes_changeId_commit",
+        "summary": "Atomically commit a catalog change with revision and snapshot fencing",
+        "tags": [
+          "Administration"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/CatalogChange"
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Request refused or preview no longer applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Request refused or preview no longer applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Request refused or preview no longer applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Request refused or preview no longer applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "419": {
+            "description": "Request refused or preview no longer applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Request refused or preview no longer applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Request refused or preview no longer applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "423": {
+            "description": "Request refused or preview no longer applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "428": {
+            "description": "Request refused or preview no longer applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Request refused or preview no longer applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "X-Session-Context",
+            "in": "header",
+            "required": true,
+            "description": "Non-secret actor id:access_version from session. Required for authenticated writes. This header never authorizes a request.",
+            "schema": {
+              "type": "string",
+              "pattern": "^[1-9][0-9]*:[0-9]+$"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
+          },
+          {
+            "name": "changeId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "security": [
+          {
+            "sessionCookie": [],
+            "csrfToken": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CatalogChangeFence"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/catalog-changes/{changeId}/rollback": {
+      "post": {
+        "operationId": "post_admin_catalog_changes_changeId_rollback",
+        "summary": "Atomically rollback a catalog change with revision and snapshot fencing",
+        "tags": [
+          "Administration"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/CatalogChange"
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Request refused or preview no longer applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Request refused or preview no longer applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Request refused or preview no longer applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Request refused or preview no longer applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "419": {
+            "description": "Request refused or preview no longer applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Request refused or preview no longer applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Request refused or preview no longer applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "423": {
+            "description": "Request refused or preview no longer applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "428": {
+            "description": "Request refused or preview no longer applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Request refused or preview no longer applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "X-Session-Context",
+            "in": "header",
+            "required": true,
+            "description": "Non-secret actor id:access_version from session. Required for authenticated writes. This header never authorizes a request.",
+            "schema": {
+              "type": "string",
+              "pattern": "^[1-9][0-9]*:[0-9]+$"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
+          },
+          {
+            "name": "changeId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "security": [
+          {
+            "sessionCookie": [],
+            "csrfToken": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CatalogChangeFence"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/catalog-health": {
+      "get": {
+        "operationId": "get_admin_catalog_health",
+        "summary": "Read source health and identity-based versus advisory duplicate candidates",
+        "tags": [
+          "Administration"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/CatalogHealth"
+                      }
+                    },
+                    "meta": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "current_page": {
+                          "type": "integer",
+                          "minimum": 1
+                        },
+                        "last_page": {
+                          "type": "integer",
+                          "minimum": 1
+                        },
+                        "per_page": {
+                          "type": "integer",
+                          "minimum": 1
+                        },
+                        "total": {
+                          "type": "integer",
+                          "minimum": 0
+                        }
+                      },
+                      "required": [
+                        "current_page",
+                        "last_page",
+                        "per_page",
+                        "total"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Request refused or preview no longer applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Request refused or preview no longer applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Request refused or preview no longer applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Request refused or preview no longer applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "419": {
+            "description": "Request refused or preview no longer applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Request refused or preview no longer applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Request refused or preview no longer applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10000
+            }
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "maxLength": 120
+            }
+          }
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ]
+      }
+    },
+    "/admin/workflows": {
+      "get": {
+        "operationId": "get_admin_workflows",
+        "summary": "Read capability-scoped workflow counts and next actions",
+        "tags": [
+          "Administration"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/CatalogWorkflow"
+                      }
+                    },
+                    "generated_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "generated_at"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Request refused or preview no longer applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Request refused or preview no longer applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Request refused or preview no longer applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Request refused or preview no longer applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "419": {
+            "description": "Request refused or preview no longer applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Request refused or preview no longer applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Request refused or preview no longer applicable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
+          }
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ]
+      }
     }
   },
   "components": {
@@ -9537,7 +11418,8 @@
           "is_liked",
           "revision",
           "primary_release_id",
-          "audio_qualities"
+          "audio_qualities",
+          "merged_into_id"
         ],
         "properties": {
           "id": {
@@ -9657,6 +11539,27 @@
                 }
               }
             }
+          },
+          "merged_into_id": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 1
+          },
+          "recording_identity": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^(isrc:[A-Z]{2}[A-Z0-9]{3}[0-9]{7}|manual:[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})$"
+          },
+          "recording_provenance": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 160
           }
         },
         "additionalProperties": false
@@ -10905,6 +12808,1167 @@
           "revision"
         ],
         "additionalProperties": false
+      },
+      "CatalogTrackWrite": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255
+          },
+          "credits": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "artist_id": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "role": {
+                  "enum": [
+                    "primary",
+                    "featured",
+                    "composer",
+                    "producer"
+                  ]
+                }
+              },
+              "required": [
+                "artist_id",
+                "role"
+              ]
+            },
+            "minItems": 1,
+            "maxItems": 30
+          },
+          "primary_release_id": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 1
+          },
+          "recording_identity": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^(isrc:[A-Z]{2}[A-Z0-9]{3}[0-9]{7}|manual:[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})$"
+          },
+          "recording_provenance": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 160
+          }
+        },
+        "required": [
+          "id",
+          "revision",
+          "title",
+          "credits",
+          "primary_release_id"
+        ]
+      },
+      "CatalogPlaylistWrite": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          },
+          "description": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 3000
+          },
+          "mood": {
+            "enum": [
+              "focus",
+              "night",
+              "calm",
+              "energy",
+              "other"
+            ]
+          },
+          "status": {
+            "enum": [
+              "draft",
+              "published",
+              "archived"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "revision",
+          "name",
+          "mood",
+          "status"
+        ]
+      },
+      "ProposalPlaylist": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          },
+          "description": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 3000
+          },
+          "mood": {
+            "enum": [
+              "focus",
+              "night",
+              "calm",
+              "energy",
+              "other"
+            ]
+          },
+          "track_ids": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "minItems": 1,
+            "maxItems": 100,
+            "uniqueItems": true
+          }
+        },
+        "required": [
+          "name",
+          "mood",
+          "track_ids"
+        ]
+      },
+      "ProposalTitle": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "track_id": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255
+          }
+        },
+        "required": [
+          "track_id",
+          "title"
+        ]
+      },
+      "MemberProposalWrite": {
+        "oneOf": [
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "kind": {
+                "const": "playlist"
+              },
+              "payload": {
+                "$ref": "#/components/schemas/ProposalPlaylist"
+              },
+              "idempotency_key": {
+                "type": "string",
+                "format": "uuid"
+              }
+            },
+            "required": [
+              "kind",
+              "payload",
+              "idempotency_key"
+            ]
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "kind": {
+                "const": "track_metadata"
+              },
+              "payload": {
+                "$ref": "#/components/schemas/ProposalTitle"
+              },
+              "idempotency_key": {
+                "type": "string",
+                "format": "uuid"
+              }
+            },
+            "required": [
+              "kind",
+              "payload",
+              "idempotency_key"
+            ]
+          }
+        ]
+      },
+      "MemberProposal": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "kind": {
+            "enum": [
+              "playlist",
+              "track_metadata"
+            ]
+          },
+          "status": {
+            "enum": [
+              "pending",
+              "accepted",
+              "rejected"
+            ]
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "payload": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/ProposalPlaylist"
+              },
+              {
+                "$ref": "#/components/schemas/ProposalTitle"
+              }
+            ]
+          },
+          "resolution": {
+            "enum": [
+              null,
+              "accepted",
+              "rejected",
+              "rolled_back"
+            ]
+          },
+          "review_note": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "reviewed_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "result_playlist_id": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 1
+          },
+          "submitter": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "name": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "name"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "status",
+          "revision",
+          "payload",
+          "resolution",
+          "review_note",
+          "created_at",
+          "reviewed_at",
+          "result_playlist_id"
+        ]
+      },
+      "CatalogChange": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "operation": {
+            "enum": [
+              "metadata",
+              "playlists",
+              "move",
+              "merge",
+              "repair",
+              "proposal"
+            ]
+          },
+          "status": {
+            "enum": [
+              "previewed",
+              "committed",
+              "rolled_back"
+            ]
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "snapshot_hash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "summary": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "entity": {
+                  "enum": [
+                    "track",
+                    "playlist",
+                    "playlist_order",
+                    "recording_merge",
+                    "media_repair",
+                    "new_playlist"
+                  ]
+                },
+                "id": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ],
+                  "minimum": 1
+                },
+                "before": {
+                  "oneOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "array",
+                      "items": {
+                        "type": "integer",
+                        "minimum": 1
+                      }
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "credits": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                              "artist_id": {
+                                "type": "integer",
+                                "minimum": 1
+                              },
+                              "role": {
+                                "enum": [
+                                  "primary",
+                                  "featured",
+                                  "composer",
+                                  "producer"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "artist_id",
+                              "role"
+                            ]
+                          }
+                        },
+                        "title": {
+                          "type": "string"
+                        },
+                        "artist": {
+                          "type": "string"
+                        },
+                        "primary_release_id": {
+                          "type": [
+                            "integer",
+                            "null"
+                          ]
+                        },
+                        "recording_identity": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "recording_provenance": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "description": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "mood": {
+                          "enum": [
+                            "focus",
+                            "night",
+                            "calm",
+                            "energy",
+                            "other"
+                          ]
+                        },
+                        "status": {
+                          "enum": [
+                            "draft",
+                            "published",
+                            "archived"
+                          ]
+                        },
+                        "sources": {
+                          "type": "array",
+                          "items": {
+                            "type": "integer",
+                            "minimum": 1
+                          },
+                          "minItems": 1,
+                          "maxItems": 20,
+                          "uniqueItems": true
+                        },
+                        "canonical_id": {
+                          "type": "integer",
+                          "minimum": 1
+                        },
+                        "identity": {
+                          "type": "string"
+                        },
+                        "provenance": {
+                          "type": "string"
+                        },
+                        "retained_ids": {
+                          "type": "array",
+                          "items": {
+                            "type": "integer",
+                            "minimum": 1
+                          },
+                          "minItems": 1,
+                          "maxItems": 100,
+                          "uniqueItems": true
+                        },
+                        "track_ids": {
+                          "type": "array",
+                          "items": {
+                            "type": "integer",
+                            "minimum": 1
+                          },
+                          "minItems": 1,
+                          "maxItems": 100,
+                          "uniqueItems": true
+                        },
+                        "asset_id": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "sha256": {
+                          "type": "string",
+                          "pattern": "^[a-f0-9]{64}$"
+                        },
+                        "source_exists": {
+                          "type": "boolean"
+                        },
+                        "size_bytes": {
+                          "type": "integer",
+                          "minimum": 1
+                        }
+                      },
+                      "required": []
+                    }
+                  ]
+                },
+                "after": {
+                  "oneOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "array",
+                      "items": {
+                        "type": "integer",
+                        "minimum": 1
+                      }
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "credits": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                              "artist_id": {
+                                "type": "integer",
+                                "minimum": 1
+                              },
+                              "role": {
+                                "enum": [
+                                  "primary",
+                                  "featured",
+                                  "composer",
+                                  "producer"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "artist_id",
+                              "role"
+                            ]
+                          }
+                        },
+                        "title": {
+                          "type": "string"
+                        },
+                        "artist": {
+                          "type": "string"
+                        },
+                        "primary_release_id": {
+                          "type": [
+                            "integer",
+                            "null"
+                          ]
+                        },
+                        "recording_identity": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "recording_provenance": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "description": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "mood": {
+                          "enum": [
+                            "focus",
+                            "night",
+                            "calm",
+                            "energy",
+                            "other"
+                          ]
+                        },
+                        "status": {
+                          "enum": [
+                            "draft",
+                            "published",
+                            "archived"
+                          ]
+                        },
+                        "sources": {
+                          "type": "array",
+                          "items": {
+                            "type": "integer",
+                            "minimum": 1
+                          },
+                          "minItems": 1,
+                          "maxItems": 20,
+                          "uniqueItems": true
+                        },
+                        "canonical_id": {
+                          "type": "integer",
+                          "minimum": 1
+                        },
+                        "identity": {
+                          "type": "string"
+                        },
+                        "provenance": {
+                          "type": "string"
+                        },
+                        "retained_ids": {
+                          "type": "array",
+                          "items": {
+                            "type": "integer",
+                            "minimum": 1
+                          },
+                          "minItems": 1,
+                          "maxItems": 100,
+                          "uniqueItems": true
+                        },
+                        "track_ids": {
+                          "type": "array",
+                          "items": {
+                            "type": "integer",
+                            "minimum": 1
+                          },
+                          "minItems": 1,
+                          "maxItems": 100,
+                          "uniqueItems": true
+                        },
+                        "asset_id": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "sha256": {
+                          "type": "string",
+                          "pattern": "^[a-f0-9]{64}$"
+                        },
+                        "source_exists": {
+                          "type": "boolean"
+                        },
+                        "size_bytes": {
+                          "type": "integer",
+                          "minimum": 1
+                        }
+                      },
+                      "required": []
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "entity",
+                "id",
+                "before",
+                "after"
+              ]
+            }
+          },
+          "result": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "created_playlist_id": {
+                "type": "integer",
+                "minimum": 1
+              }
+            },
+            "required": []
+          },
+          "proposal_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "committed_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "rolled_back_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "rollback_until": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "can_commit": {
+            "type": "boolean"
+          },
+          "can_rollback": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "operation",
+          "status",
+          "revision",
+          "snapshot_hash",
+          "summary",
+          "result",
+          "proposal_id",
+          "expires_at",
+          "created_at",
+          "committed_at",
+          "rolled_back_at",
+          "rollback_until",
+          "can_commit",
+          "can_rollback"
+        ]
+      },
+      "CatalogChangeFence": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "revision": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "snapshot_hash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          }
+        },
+        "required": [
+          "revision",
+          "snapshot_hash"
+        ]
+      },
+      "CatalogChangeWrite": {
+        "oneOf": [
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "operation": {
+                "const": "metadata"
+              },
+              "rows": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 100,
+                "items": {
+                  "$ref": "#/components/schemas/CatalogTrackWrite"
+                }
+              }
+            },
+            "required": [
+              "operation",
+              "rows"
+            ]
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "operation": {
+                "const": "playlists"
+              },
+              "rows": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 25,
+                "items": {
+                  "$ref": "#/components/schemas/CatalogPlaylistWrite"
+                }
+              }
+            },
+            "required": [
+              "operation",
+              "rows"
+            ]
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "operation": {
+                "const": "move"
+              },
+              "source_playlist_id": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "target_playlist_id": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "source_revision": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "target_revision": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "track_ids": {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "minItems": 1,
+                "maxItems": 100,
+                "uniqueItems": true
+              }
+            },
+            "required": [
+              "operation",
+              "source_playlist_id",
+              "target_playlist_id",
+              "source_revision",
+              "target_revision",
+              "track_ids"
+            ]
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "operation": {
+                "const": "merge"
+              },
+              "canonical_id": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "canonical_revision": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "source_ids": {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "minItems": 1,
+                "maxItems": 20,
+                "uniqueItems": true
+              },
+              "recording_identity": {
+                "type": "string"
+              },
+              "recording_provenance": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "operation",
+              "canonical_id",
+              "canonical_revision",
+              "source_ids",
+              "recording_identity",
+              "recording_provenance"
+            ]
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "operation": {
+                "const": "repair"
+              },
+              "track_id": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "revision": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "asset_id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "recording_identity": {
+                "type": "string"
+              },
+              "recording_provenance": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "operation",
+              "track_id",
+              "revision",
+              "asset_id",
+              "recording_identity",
+              "recording_provenance"
+            ]
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "operation": {
+                "const": "proposal"
+              },
+              "proposal_id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "revision": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "publish": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "operation",
+              "proposal_id",
+              "revision"
+            ]
+          }
+        ]
+      },
+      "CatalogHealth": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "title": {
+            "type": "string"
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "recording_identity": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "recording_provenance": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "source_exists": {
+            "type": "boolean"
+          },
+          "source_ready": {
+            "type": "boolean"
+          },
+          "issues": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "missing_source",
+                "source_not_ready",
+                "recording_identity_match",
+                "title_advisory",
+                "bytes_advisory"
+              ]
+            }
+          },
+          "identity_matches": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "id": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "title": {
+                  "type": "string"
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "id",
+                "title",
+                "revision"
+              ]
+            }
+          },
+          "title_matches": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "id": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "title": {
+                  "type": "string"
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "id",
+                "title",
+                "revision"
+              ]
+            }
+          },
+          "bytes_matches": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "id": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "title": {
+                  "type": "string"
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "id",
+                "title",
+                "revision"
+              ]
+            }
+          },
+          "candidates_truncated": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "revision",
+          "recording_identity",
+          "recording_provenance",
+          "source_exists",
+          "source_ready",
+          "issues",
+          "identity_matches",
+          "title_matches",
+          "bytes_matches",
+          "candidates_truncated"
+        ]
+      },
+      "CatalogWorkflow": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "enum": [
+              "catalog",
+              "changes",
+              "proposals",
+              "trash",
+              "imports",
+              "conversions",
+              "users",
+              "audit",
+              "operations"
+            ]
+          },
+          "count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "attention": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "next": {
+            "enum": [
+              "catalog",
+              "bulk",
+              "proposals",
+              "trash",
+              "imports",
+              "conversions",
+              "users",
+              "audit",
+              "operations"
+            ]
+          },
+          "capacity": {
+            "const": 10
+          }
+        },
+        "required": [
+          "id",
+          "count",
+          "attention",
+          "next"
+        ]
       }
     },
     "responses": {

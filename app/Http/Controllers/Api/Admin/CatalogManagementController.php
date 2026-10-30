@@ -73,7 +73,7 @@ class CatalogManagementController extends Controller
     {
         $data = $request->validate(['q' => ['nullable', 'string', 'max:120']]);
 
-        return TrackResource::collection(Track::query()->when(filled($data['q'] ?? null), fn ($q) => $q->whereRaw("search_text LIKE ? ESCAPE '!'", [TextNormalizer::like($data['q'])]))->with(['mediaAsset.blob', PlaybackMedia::EAGER, 'artists', 'releases'])->orderByDesc('id')->paginate(50));
+        return TrackResource::collection(Track::canonical()->when(filled($data['q'] ?? null), fn ($q) => $q->whereRaw("search_text LIKE ? ESCAPE '!'", [TextNormalizer::like($data['q'])]))->with(['mediaAsset.blob', PlaybackMedia::EAGER, 'artists', 'releases'])->orderByDesc('id')->paginate(50));
     }
 
     public function updateTrack(Request $request, Track $track, UpdateTrackCatalog $update): TrackResource

@@ -24,13 +24,16 @@ class ExplainableMix
             return ['basis' => 'disabled', 'data' => []];
         }
         $personal = ! $user->privateListening();
-        $liked = $personal ? $user->likedTracks()->with('artists')->orderByDesc('liked_tracks.created_at')->limit(100)->get() : collect();
+        $liked = $personal ? $user->likedTracks()->with(['artists', 'mergedInto.artists'])->orderByDesc('liked_tracks.created_at')->limit(100)->get() : collect();
         $recent = $personal ? $this->history->query($user)->orderByDesc('started_at')->limit(300)->get() : collect();
+        $liked = $liked->map(fn ($track) => $track->mergedInto ?? $track)->unique('id');
+        $roots = Track::whereIn('id', $recent->pluck('track_id'))->get(['id', 'merged_into_id'])->keyBy('id');
+        $recent->each(fn ($event) => $event->track_id = $roots->get($event->track_id)?->merged_into_id ?? $event->track_id);
         $likedIds = $liked->pluck('id');
         $artists = $liked->map(fn ($track) => $this->artist($track))->all();
-        $query = $this->catalog->query($user)->whereHas('playlists', fn (Builder $query) => $query->where('status', Playlist::PUBLISHED)->when($mood, fn (Builder $query) => $query->where('mood', $mood)));
+        $query = $this->catalog->query($user)->canonical()->whereHas('playlists', fn (Builder $query) => $query->where('status', Playlist::PUBLISHED)->when($mood, fn (Builder $query) => $query->where('mood', $mood)));
         $seeds = (clone $query)->orderBy('tracks.id')->limit(config('listening.candidate_limit'))->pluck('tracks.id')->merge($likedIds)->merge($recent->pluck('track_id'))->unique();
-        $tracks = $query->whereIn('tracks.id', $seeds)->with(['artists', 'mediaAsset.blob', PlaybackMedia::EAGER, 'playlists' => fn ($query) => $query->where('status', Playlist::PUBLISHED)])->withExists(['likedBy as is_liked' => fn (Builder $query) => $query->where('users.id', $user->id)])->get();
+        $tracks = $query->whereIn('tracks.id', $seeds)->with(['artists', 'mediaAsset.blob', PlaybackMedia::EAGER, 'playlists' => fn ($query) => $query->where('status', Playlist::PUBLISHED)])->withUserLike($user)->get();
         $scored = [];
         foreach ($tracks as $track) {
             $reasons = [['code' => 'curated', 'weight' => 5]];

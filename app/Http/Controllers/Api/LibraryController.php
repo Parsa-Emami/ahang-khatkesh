@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Actions\ToggleTrackLike;
 use App\Http\Controllers\Controller;
 use App\Models\Playlist;
 use App\Models\Track;
@@ -12,18 +13,16 @@ use Illuminate\Support\Facades\Gate;
 
 class LibraryController extends Controller
 {
-    public function like(Request $request, Track $track): JsonResponse
+    public function like(Request $request, Track $track, ToggleTrackLike $toggle): JsonResponse
     {
-        Gate::authorize('view', $track);
-        DB::table('liked_tracks')->insertOrIgnore(['user_id' => $request->user()->id, 'track_id' => $track->id, 'created_at' => now(), 'updated_at' => now()]);
+        $toggle->handle($request->user(), $track, true);
 
         return response()->json(['data' => ['is_liked' => true]]);
     }
 
-    public function unlike(Request $request, Track $track): JsonResponse
+    public function unlike(Request $request, Track $track, ToggleTrackLike $toggle): JsonResponse
     {
-        Gate::authorize('view', $track);
-        $request->user()->likedTracks()->detach($track->id);
+        $toggle->handle($request->user(), $track, false);
 
         return response()->json(['data' => ['is_liked' => false]]);
     }

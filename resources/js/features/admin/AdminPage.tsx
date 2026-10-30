@@ -25,7 +25,8 @@ import { MembersPanel } from "./MembersPanel";
 import { ManageLibraryPanel } from "./ManageLibraryPanel";
 import { OverviewPanel, OperationsPanel, AuditPanel } from "./ReadPanels";
 import { TrashPanel } from "./TrashPanel";
-import { CatalogPanel } from "./CatalogPanel";
+import { CatalogWorkspace } from "./CatalogWorkspace";
+import { ProposalList } from "../catalog/ProposalsPage";
 import { MfaPanel } from "../security/MfaPanel";
 const sections: {
     id: string;
@@ -88,6 +89,17 @@ const sections: {
         },
         permission: "catalog.manage",
         icon: Disc3,
+    },
+    {
+        id: "proposals",
+        get label() {
+            return tr("catalog.proposalInbox");
+        },
+        get description() {
+            return tr("catalog.inboxHelp");
+        },
+        permission: "catalog.manage",
+        icon: ListMusic,
     },
     {
         id: "trash",
@@ -237,7 +249,9 @@ export default function AdminPage() {
                         ) : active.id === "library" ? (
                             <ManageLibraryPanel />
                         ) : active.id === "catalog" ? (
-                            <CatalogPanel />
+                            <CatalogWorkspace />
+                        ) : active.id === "proposals" ? (
+                            <ProposalList owner />
                         ) : active.id === "trash" ? (
                             <TrashPanel />
                         ) : active.id === "users" ? (

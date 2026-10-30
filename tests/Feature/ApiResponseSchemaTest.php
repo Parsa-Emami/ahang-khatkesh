@@ -8,13 +8,16 @@ use App\Models\Track;
 use App\Models\User;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\Testing\TestResponse;
 use Opis\JsonSchema\CompliantValidator;
 use Opis\JsonSchema\Errors\ErrorFormatter;
+use Tests\Support\CatalogFixtures;
 use Tests\TestCase;
 
 class ApiResponseSchemaTest extends TestCase
 {
+    use CatalogFixtures;
     use LazilyRefreshDatabase;
 
     private function assertResponseSchema(TestResponse $response, string $path, string $method, string $status): void
@@ -71,6 +74,28 @@ class ApiResponseSchemaTest extends TestCase
         $spec = json_decode(file_get_contents(base_path('docs/openapi.json')));
         $schema = (object) ['$schema' => 'https://json-schema.org/draft/2020-12/schema', 'components' => $spec->components, '$ref' => '#/components/schemas/User'];
         $this->assertFalse((new CompliantValidator)->validate((object) $response, $schema)->isValid());
+    }
+
+    public function test_catalog_workflow_and_proposal_responses_are_allowlisted(): void
+    {
+        Storage::fake('media');
+        $owner = $this->catalogOwner();
+        $track = $this->catalogTrack($owner);
+        $this->catalogPlaylist($owner, [$track]);
+        $member = User::factory()->create();
+        $this->actingAs($member);
+        $proposal = $this->postJson('/api/v1/member-proposals', ['kind' => 'track_metadata', 'idempotency_key' => (string) Str::uuid(), 'payload' => ['track_id' => $track->id, 'title' => 'Suggested title']])->assertCreated();
+        $this->assertResponseSchema($proposal, '/member-proposals', 'post', '201');
+        $this->assertResponseSchema($this->getJson('/api/v1/member-proposals')->assertOk(), '/member-proposals', 'get', '200');
+        $this->authenticateCatalog($owner);
+        $this->assertResponseSchema($this->getJson('/api/v1/admin/proposals')->assertOk(), '/admin/proposals', 'get', '200');
+        $preview = $this->postJson('/api/v1/admin/catalog-changes/preview', ['operation' => 'proposal', 'proposal_id' => $proposal->json('data.id'), 'revision' => 0])->assertCreated();
+        $this->assertResponseSchema($preview, '/admin/catalog-changes/preview', 'post', '201');
+        $this->assertResponseSchema($this->commitCatalog($preview->json('data'))->assertOk(), '/admin/catalog-changes/{changeId}/commit', 'post', '200');
+        $this->assertResponseSchema($this->rollbackCatalog($preview->json('data'))->assertOk(), '/admin/catalog-changes/{changeId}/rollback', 'post', '200');
+        $this->assertResponseSchema($this->getJson('/api/v1/admin/catalog-changes')->assertOk(), '/admin/catalog-changes', 'get', '200');
+        $this->assertResponseSchema($this->getJson('/api/v1/admin/catalog-health')->assertOk(), '/admin/catalog-health', 'get', '200');
+        $this->assertResponseSchema($this->getJson('/api/v1/admin/workflows')->assertOk(), '/admin/workflows', 'get', '200');
     }
 
     public function test_listening_responses_match_the_allowlisted_contract(): void

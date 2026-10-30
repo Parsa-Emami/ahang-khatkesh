@@ -1,3 +1,4 @@
+import "../css/catalog-workflows.css";
 import { FieldValidation } from "./i18n/FieldValidation";
 import { createRoot } from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";

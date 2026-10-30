@@ -18,6 +18,7 @@ class UpdateTrackCatalog
         return DB::transaction(function () use ($track, $actor, $data): Track {
             $actor = $this->authorize->handle($actor);
             $locked = Track::whereKey($track->id)->lockForUpdate()->firstOrFail();
+            abort_if($locked->merged_into_id !== null, 409, __('catalog.alias_read_only'));
             abort_unless($locked->catalog_revision === (int) $data['revision'], 409, __('اطلاعات آهنگ تغییر کرده است؛ دوباره بارگذاری کنید.'));
             $locked->artists()->detach();
             $credits = collect($data['credits'])->map(fn ($credit, $i) => ['track_id' => $locked->id, 'artist_id' => $credit['artist_id'], 'role' => $credit['role'], 'position' => $i + 1])->all();

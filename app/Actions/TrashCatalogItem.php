@@ -17,6 +17,7 @@ class TrashCatalogItem
         return DB::transaction(function () use ($actor, $item, $revision, $restore): Track|Playlist {
             $actor = $this->authorize->handle($actor);
             $locked = $item::withTrashed()->whereKey($item->id)->lockForUpdate()->firstOrFail();
+            abort_if($locked instanceof Track && $locked->merged_into_id !== null, 409, __('catalog.alias_read_only'));
             $column = $locked instanceof Track ? 'catalog_revision' : 'revision';
             if ($locked->trashed() !== $restore) {
                 return $locked;

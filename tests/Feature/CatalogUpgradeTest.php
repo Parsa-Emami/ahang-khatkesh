@@ -37,6 +37,16 @@ class CatalogUpgradeTest extends TestCase
             $this->assertSame(2, DB::table('releases')->count());
             $this->assertSame(2, DB::table('track_media')->where('purpose', 'original')->count());
             $this->assertSame(2, DB::table('tracks')->whereNotNull('primary_release_id')->count());
+            foreach (['2026_10_27_173124_add_catalog_trash_and_import_generation', '2026_10_28_072416_add_durable_media_storage_and_import_leases', '2026_10_28_124654_add_audio_conversion_pipeline', '2026_10_29_130000_add_user_interface_preferences', '2026_10_29_230000_create_listening_privacy', '2026_10_30_034717_add_catalog_workflows'] as $name) {
+                (require database_path('migrations/'.$name.'.php'))->up();
+            }
+            $this->assertSame([41, 42], DB::table('tracks')->orderBy('id')->pluck('id')->all());
+            $this->assertSame([41, 42], DB::table('playlist_track')->where('playlist_id', 19)->orderBy('position')->pluck('track_id')->all());
+            $this->assertSame(1, DB::table('liked_tracks')->where(['user_id' => 7, 'track_id' => 42])->count());
+            $this->assertSame(2, DB::table('tracks')->whereNull('merged_into_id')->whereNull('recording_identity')->whereNull('recording_provenance')->count());
+            $this->assertSame(0, DB::table('catalog_change_sets')->count());
+            $this->assertSame(0, DB::table('member_proposals')->count());
+
         } finally {
             DB::purge('upgrade_fixture');
             DB::setDefaultConnection($original);

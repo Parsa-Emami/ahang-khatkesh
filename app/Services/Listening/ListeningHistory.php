@@ -18,6 +18,6 @@ class ListeningHistory
 
     public function eager(User $user): Builder
     {
-        return $this->query($user)->with(['track' => fn ($query) => $query->with(['mediaAsset.blob', PlaybackMedia::EAGER])->withExists(['likedBy as is_liked' => fn (Builder $liked) => $liked->where('users.id', $user->id)])])->orderByDesc('started_at')->orderByDesc('id');
+        return $this->query($user)->with(['track' => fn ($query) => $query->with(['mediaAsset.blob', PlaybackMedia::EAGER])->withUserLike($user)])->orderByDesc('started_at')->orderByDesc('id');
     }
 }

@@ -11,16 +11,17 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\DB;
 
 class Track extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $fillable = ['media_asset_id', 'title', 'artist', 'album', 'search_text', 'catalog_revision', 'primary_release_id'];
+    protected $fillable = ['media_asset_id', 'title', 'artist', 'album', 'search_text', 'catalog_revision', 'primary_release_id', 'recording_identity', 'recording_provenance', 'merged_into_id'];
 
     protected function casts(): array
     {
-        return ['catalog_revision' => 'integer'];
+        return ['catalog_revision' => 'integer', 'merged_into_id' => 'integer'];
     }
 
     protected static function booted(): void
@@ -28,6 +29,34 @@ class Track extends Model
         static::saving(function (Track $track): void {
             $track->search_text = TextNormalizer::normalize(implode(' ', [$track->title, $track->artist, $track->album]));
         });
+    }
+
+    public function mergedInto(): BelongsTo
+    {
+        return $this->belongsTo(self::class, 'merged_into_id');
+    }
+
+    #[Scope]
+    protected function canonical(Builder $query): Builder
+    {
+        return $query->whereNull('tracks.merged_into_id');
+    }
+
+    private function userLikeQuery(User $user): \Illuminate\Database\Query\Builder
+    {
+        return DB::table('liked_tracks as own_likes')->join('tracks as liked_recording', 'liked_recording.id', '=', 'own_likes.track_id')->where('own_likes.user_id', $user->id)->whereNull('liked_recording.deleted_at')->whereRaw('COALESCE(liked_recording.merged_into_id, liked_recording.id) = COALESCE(tracks.merged_into_id, tracks.id)');
+    }
+
+    #[Scope]
+    protected function withUserLike(Builder $query, User $user): Builder
+    {
+        return $query->addSelect('tracks.*')->selectSub($this->userLikeQuery($user)->selectRaw('1')->limit(1), 'is_liked');
+    }
+
+    #[Scope]
+    protected function likedFor(Builder $query, User $user): Builder
+    {
+        return $query->whereExists($this->userLikeQuery($user)->selectRaw('1'));
     }
 
     public function mediaAsset(): BelongsTo
@@ -68,6 +97,6 @@ class Track extends Model
     #[Scope]
     protected function visibleTo(Builder $query, User $user): Builder
     {
-        return $query->when(! $user->hasPermission(Permission::CatalogManage), fn (Builder $q) => $q->whereHas('playlists', fn (Builder $p) => $p->where('status', Playlist::PUBLISHED)));
+        return $query->where(fn (Builder $q) => $q->whereNull('tracks.merged_into_id')->orWhereHas('mergedInto', fn (Builder $root) => $root->whereNull('merged_into_id')))->when(! $user->hasPermission(Permission::CatalogManage), fn (Builder $q) => $q->where(fn (Builder $visible) => $visible->where(fn (Builder $root) => $root->whereNull('tracks.merged_into_id')->whereHas('playlists', fn (Builder $p) => $p->where('status', Playlist::PUBLISHED)))->orWhereHas('mergedInto.playlists', fn (Builder $p) => $p->where('status', Playlist::PUBLISHED))));
     }
 }

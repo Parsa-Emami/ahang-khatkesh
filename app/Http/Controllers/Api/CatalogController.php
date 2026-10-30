@@ -41,7 +41,7 @@ class CatalogController extends Controller
     {
         Gate::authorize('view', $playlist);
         $playlist->loadCount('tracks')->loadExists(['savedBy as is_saved' => fn (Builder $q) => $q->where('users.id', $request->user()->id)]);
-        $playlist->load(['tracks' => fn ($query) => $query->with(['mediaAsset.blob', PlaybackMedia::EAGER])->withExists(['likedBy as is_liked' => fn (Builder $q) => $q->where('users.id', $request->user()->id)])]);
+        $playlist->load(['tracks' => fn ($query) => $query->with(['mediaAsset.blob', PlaybackMedia::EAGER])->withUserLike($request->user())]);
 
         return new PlaylistResource($playlist);
     }
@@ -49,12 +49,12 @@ class CatalogController extends Controller
     public function tracks(Request $request): AnonymousResourceCollection
     {
         $data = $request->validate(['q' => ['nullable', 'string', 'max:120'], 'liked' => ['nullable', 'boolean']]);
-        $query = Track::visibleTo($request->user())->with(['mediaAsset.blob', PlaybackMedia::EAGER])->withExists(['likedBy as is_liked' => fn (Builder $q) => $q->where('users.id', $request->user()->id)]);
+        $query = Track::visibleTo($request->user())->canonical()->with(['mediaAsset.blob', PlaybackMedia::EAGER])->withUserLike($request->user());
         if (! empty($data['q'])) {
             $query->whereRaw("search_text LIKE ? ESCAPE '!'", [TextNormalizer::like($data['q'])]);
         }
         if ($request->boolean('liked')) {
-            $query->whereHas('likedBy', fn (Builder $q) => $q->where('users.id', $request->user()->id));
+            $query->likedFor($request->user());
         }
 
         return TrackResource::collection($query->orderByDesc('id')->paginate(50));
@@ -62,7 +62,7 @@ class CatalogController extends Controller
 
     public function stats(Request $request): JsonResponse
     {
-        return response()->json(['data' => ['playlists' => Playlist::visibleTo($request->user())->count(), 'tracks' => Track::visibleTo($request->user())->count()]]);
+        return response()->json(['data' => ['playlists' => Playlist::visibleTo($request->user())->count(), 'tracks' => Track::visibleTo($request->user())->canonical()->count()]]);
     }
 
     public function cover(Playlist $playlist, PrivateMedia $media): BinaryFileResponse
