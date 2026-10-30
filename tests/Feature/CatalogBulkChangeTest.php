@@ -11,15 +11,19 @@ use App\Models\ListeningEvent;
 use App\Models\Track;
 use App\Models\User;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use RuntimeException;
 use Tests\Support\CatalogFixtures;
+use Tests\Support\CreatesConversions;
+use Tests\Support\FlacFixture;
 use Tests\TestCase;
 
 class CatalogBulkChangeTest extends TestCase
 {
     use CatalogFixtures, LazilyRefreshDatabase;
+    use CreatesConversions;
 
     public function test_preview_commit_replay_and_rollback_preserve_ids_likes_and_audit_only_safe_metadata(): void
     {
@@ -256,5 +260,52 @@ class CatalogBulkChangeTest extends TestCase
         $this->authenticateCatalog($owner, false);
         $this->postJson('/api/v1/admin/catalog-changes/preview', [])->assertStatus(423);
         $this->assertDatabaseCount('catalog_change_sets', 0);
+    }
+
+    public function test_alias_streams_follow_current_reference_visibility_and_canonical_bytes_are_rechecked(): void
+    {
+        Storage::fake('media');
+        $owner = $this->catalogOwner();
+        $a = $this->catalogTrack($owner, 'Root', 'isrc:USAAA2600001');
+        $b = $this->catalogTrack($owner, 'Source', 'isrc:USAAA2600001', 1);
+        $playlist = $this->catalogPlaylist($owner, [$a, $b]);
+        $this->authenticateCatalog($owner);
+        $input = ['operation' => 'merge', 'canonical_id' => $a->id, 'canonical_revision' => 0, 'source_ids' => [$b->id], 'recording_identity' => $a->recording_identity, 'recording_provenance' => $a->recording_provenance];
+        $preview = $this->previewCatalog($input);
+        Storage::disk('media')->put($a->mediaAsset->storagePath(), 'Tampered canonical');
+        $this->commitCatalog($preview)->assertUnprocessable();
+        $this->assertNull($b->fresh()->merged_into_id);
+        Storage::disk('media')->put($a->mediaAsset->storagePath(), $this->catalogBytes());
+        $this->commitCatalog($preview)->assertOk();
+        $member = User::factory()->create();
+        $this->actingAs($member)->withHeader('Range', 'bytes=0-31')->get('/api/v1/tracks/'.$b->id.'/stream')->assertStatus(206);
+        $this->authenticateCatalog($owner);
+        $this->deleteJson('/api/v1/admin/tracks/'.$a->id, ['revision' => 1])->assertOk();
+        $this->actingAs($member)->get('/api/v1/tracks/'.$b->id.'/stream')->assertNotFound();
+        $this->putJson('/api/v1/tracks/'.$b->id.'/like')->assertNotFound();
+        $this->authenticateCatalog($owner);
+        $this->postJson('/api/v1/admin/tracks/'.$a->id.'/restore', ['revision' => 2])->assertOk();
+        $this->actingAs($member)->withHeader('Range', 'bytes=0-31')->get('/api/v1/tracks/'.$b->id.'/stream')->assertStatus(206);
+    }
+
+    public function test_flac_repair_requires_real_validated_output_bytes_at_preview_and_commit(): void
+    {
+        $owner = $this->library();
+        $track = $this->catalogTrack($owner, 'FLAC repair', 'isrc:USAAA2600001');
+        $file = UploadedFile::fake()->createWithContent('replacement.flac', FlacFixture::bytes(2, 44100, 440, 40));
+        [$asset, $conversion] = $this->source($owner, $file);
+        $this->runConversion($conversion);
+        $this->assertSame('ready', $conversion->fresh()->status);
+        $output = $conversion->fresh()->output;
+        $bytes = Storage::disk('media')->get($output->storagePath());
+        Storage::disk('media')->delete($output->storagePath());
+        $this->authenticateCatalog($owner);
+        $input = ['operation' => 'repair', 'track_id' => $track->id, 'revision' => 0, 'asset_id' => $asset->id, 'recording_identity' => $track->recording_identity, 'recording_provenance' => $track->recording_provenance];
+        $this->postJson('/api/v1/admin/catalog-changes/preview', $input)->assertUnprocessable();
+        Storage::disk('media')->put($output->storagePath(), $bytes);
+        $preview = $this->previewCatalog($input);
+        Storage::disk('media')->put($output->storagePath(), 'Tampered output');
+        $this->commitCatalog($preview)->assertUnprocessable();
+        $this->assertNotSame($asset->id, $track->fresh()->media_asset_id);
     }
 }

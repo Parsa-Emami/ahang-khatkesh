@@ -171,4 +171,16 @@ class MemberProposalTest extends TestCase
         }
         $this->assertDatabaseCount('member_proposals', 0);
     }
+
+    public function test_members_cannot_propose_a_published_track_with_a_missing_source(): void
+    {
+        Storage::fake('media');
+        $owner = $this->catalogOwner();
+        $track = $this->catalogTrack($owner);
+        $this->catalogPlaylist($owner, [$track]);
+        Storage::disk('media')->delete($track->mediaAsset->storagePath());
+        $member = User::factory()->create();
+        $this->actingAs($member)->postJson('/api/v1/member-proposals', $this->playlistRequest($track))->assertUnprocessable();
+        $this->assertDatabaseCount('member_proposals', 0);
+    }
 }

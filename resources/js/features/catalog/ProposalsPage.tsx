@@ -138,6 +138,7 @@ export function ProposalForm({
             <label>
                 {tr("catalog.proposalKind")}
                 <select
+                    aria-label={tr("catalog.proposalKind")}
                     value={kind}
                     disabled={dirty}
                     onChange={(e) => {
@@ -177,6 +178,7 @@ export function ProposalForm({
                     <label>
                         {tr("catalog.mood")}
                         <select
+                            aria-label={tr("catalog.mood")}
                             value={mood}
                             onChange={(e) => setMood(e.target.value as Mood)}
                         >
@@ -344,6 +346,7 @@ export function ProposalList({ owner = false }: { owner?: boolean }) {
             <label>
                 {tr("catalog.status")}
                 <select
+                    aria-label={tr("catalog.status")}
                     value={status}
                     onChange={(e) => {
                         setStatus(e.target.value);

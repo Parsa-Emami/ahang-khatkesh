@@ -10,6 +10,7 @@ use App\Models\Track;
 use App\Models\User;
 use App\Services\PlaybackMedia;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class MemberProposals
 {
@@ -24,7 +25,7 @@ class MemberProposals
         $roots = Track::visibleTo($user)->canonical()->whereIn('id', $canonical)->with('mediaAsset.blob')->get();
         abort_unless($roots->count() === count($canonical), 404);
         foreach ($roots as $track) {
-            abort_unless($track->mediaAsset->duration_seconds > 0 && (! $track->mediaAsset->blob_id || $track->mediaAsset->blob?->state === 'ready'), 422, __('catalog.media_unavailable'));
+            abort_unless($track->mediaAsset->duration_seconds > 0 && Storage::disk('media')->exists($track->mediaAsset->storagePath()) && (! $track->mediaAsset->blob_id || $track->mediaAsset->blob?->state === 'ready'), 422, __('catalog.media_unavailable'));
         }
         $this->media->assertReady($roots->pluck('media_asset_id')->all());
 

@@ -29,3 +29,9 @@
 ## تاریخچه و میکس F11
 
 GET/PATCH `listening/settings`، POST `listening/plays` و `listening/events`، GET/DELETE `listening/history`، DELETE `listening/history/{eventId}`، GET `listening/export` و `listening/mix` فقط برای حساب جاری‌اند. mutationها به revision حریم خصوصی و نشست/CSRF جاری نیاز دارند. playback با listening_revision و private_mode از snapshot خصوصی جلوگیری می‌کند. grant اشتباه 422، نشست دیگر 403، context قدیمی 409 و grant منقضی 410 می‌گیرد. جزئیات آستانه، retention و وزن‌ها در [قرارداد F11](F11_LISTENING_PRIVACY.fa.md) و schema دقیق در OpenAPI است.
+
+## API گردش کار F12
+
+مسیر عادی `member-proposals` فقط درخواست‌های همان حساب را می‌خواند و با UUID تکرار درخواست، پیشنهاد ثبت می‌کند. مسیر `admin/proposals` صندوق owner و reject با revision است. پذیرش از `admin/catalog-changes/preview` با operation=proposal عبور می‌کند. `admin/catalog-changes` دفتر پیش‌نمایش‌ها و `/{changeId}/commit` و `/{changeId}/rollback` با revision و snapshot_hash هستند. `admin/catalog-health` و `admin/workflows` فقط projection مجاز می‌دهند. شکل دقیق ورودی و پاسخ در OpenAPI اجرایی ثبت شده است.
+
+همهٔ نوشتن‌ها session، CSRF و X-Session-Context می‌خواهند؛ نوشتن مدیریتی علاوه بر capability به MFA و تأیید اخیر رمز نیاز دارد. 409 تعارض، 410 پایان مهلت و 422 ورودی یا رسانهٔ نامعتبر است. پاسخ proposal، snapshot، کلید تکرار، epoch و hash payload را افشا نمی‌کند. پاسخ journal، input خام یا before/after داخلی را ندارد؛ فقط summary مجاز نمایش داده می‌شود.

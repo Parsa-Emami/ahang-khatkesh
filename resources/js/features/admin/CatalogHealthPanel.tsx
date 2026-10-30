@@ -154,7 +154,11 @@ export function CatalogHealthPanel() {
                     )}
                     description={tr("catalog.confirmIdentityHelp")}
                 >
-                    <HealthEditor row={editor.row} kind={editor.kind} />
+                    <HealthEditor
+                        key={`${editor.kind}:${editor.row.id}`}
+                        row={editor.row}
+                        kind={editor.kind}
+                    />
                 </Dialog>
             )}
         </div>
@@ -273,6 +277,7 @@ function HealthEditor({
                     <label>
                         {tr("catalog.uploadReplacement")}
                         <input
+                            aria-label={tr("catalog.uploadReplacement")}
                             type="file"
                             accept="audio/*,.flac,.wav,.mp3,.m4a,.ogg"
                             disabled={upload.isPending}
@@ -291,6 +296,7 @@ function HealthEditor({
                     <label>
                         {tr("catalog.selectReplacement")}
                         <select
+                            aria-label={tr("catalog.selectReplacement")}
                             value={asset?.id ?? ""}
                             onChange={(e) =>
                                 setAsset(

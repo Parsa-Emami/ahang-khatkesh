@@ -2,7 +2,7 @@
   "format_version": 1,
   "product": "ahang-khatkesh",
   "status": "design_target",
-  "runtime_version": "0.2 + F01-F08 batch correction pending exact CI",
+  "runtime_version": "0.2 + F01-F12 implementation; exact CI proof tracked in roadmap",
   "target_version": "0.3",
   "implementation_complete": false,
   "review": {
@@ -1743,5 +1743,28 @@
     "release_qualification": "F16 remains open",
     "evidence_file": "docs/verification/foundation-through-f11-2026-10-29.json",
     "status": "verified_within_F11_acceptance"
+  },
+  "catalog_workflows": {
+    "phase": "F12",
+    "write_role": "owner",
+    "preview_minutes": 15,
+    "rollback_days": 7,
+    "max_pending_proposals_per_user": 10,
+    "recording_identity": [
+      "isrc",
+      "manual_uuid"
+    ],
+    "duplicate_title_or_hash": "advisory_only",
+    "merge_strategy": "retain_track_rows_as_aliases",
+    "snapshot_scope": "catalog_only_excluding_personal_data",
+    "contract": "docs/F12_CATALOG_WORKFLOWS.fa.md",
+    "runtime_components": [
+      "resources/js/features/admin/WorkflowOverview.tsx",
+      "resources/js/features/admin/CatalogWorkspace.tsx",
+      "resources/js/features/admin/BulkCatalogPanel.tsx",
+      "resources/js/features/admin/CatalogHealthPanel.tsx",
+      "resources/js/features/catalog/ProposalsPage.tsx",
+      "resources/js/features/catalog/ChangeReview.tsx"
+    ]
   }
 }

@@ -56,6 +56,7 @@ class ApplyCatalogPlan
             DB::table('track_media')->insert(['track_id' => $track->id, 'media_asset_id' => $asset->id, 'purpose' => 'original', 'label' => 'original']);
             $asset->increment('ownership_revision');
             if ($output = $this->media->ready($asset)) {
+                $this->plans->assertBytes($output);
                 $this->conversions->attach($track, $output);
             }
         } elseif ($operation === 'proposal') {
@@ -79,7 +80,12 @@ class ApplyCatalogPlan
     {
         if ($operation === 'repair') {
             foreach ($before['tracks'] as $row) {
-                $this->plans->assertBytes(MediaAsset::with('blob')->findOrFail($row['media_asset_id']));
+                $asset = MediaAsset::with('blob')->findOrFail($row['media_asset_id']);
+                $this->plans->assertBytes($asset);
+                $this->media->assertReady([$asset->id]);
+                if ($output = $this->media->ready($asset)) {
+                    $this->plans->assertBytes($output);
+                }
             }
             $ids = array_column($before['tracks'], 'id');
             $detached = DB::table('track_media')->whereIn('track_id', $ids)->pluck('media_asset_id')->all();

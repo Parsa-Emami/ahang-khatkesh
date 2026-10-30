@@ -119,6 +119,11 @@ class CatalogPlan
             $root = $this->track((int) $input['canonical_id'], (int) $input['canonical_revision']);
             abort_if(in_array($root->id, array_map('intval', $input['source_ids']), true), 422, __('catalog.merge_self'));
             abort_unless(filled($root->recording_identity) && $root->recording_identity === $input['recording_identity'] && $root->recording_provenance === $input['recording_provenance'], 422, __('catalog.identity_required'));
+            $this->assertBytes($root->mediaAsset);
+            $this->media->assertReady([$root->media_asset_id]);
+            if ($playback = $this->media->ready($root->mediaAsset)) {
+                $this->assertBytes($playback);
+            }
             $public = $root->playlists()->where('status', Playlist::PUBLISHED)->exists();
             foreach ($input['source_ids'] as $id) {
                 $source = $this->track((int) $id);
@@ -154,6 +159,7 @@ class CatalogPlan
             $scope['check_conversions'] = true;
             $output = $this->media->ready($asset);
             if ($output) {
+                $this->assertBytes($output);
                 abort_if(DB::table('track_media')->where('media_asset_id', $output->id)->exists(), 422, __('catalog.asset_owned'));
                 $scope['assets'][] = $output->id;
             }

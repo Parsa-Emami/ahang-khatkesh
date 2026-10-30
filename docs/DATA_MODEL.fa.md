@@ -59,3 +59,9 @@ backup باید schema، داده، فایل‌های خصوصی و APP_KEY را
 ## دادهٔ شنیدن F11
 
 migration جدید، شش فیلد کنترل رضایت/پیشنهاد/retention/revision/private-until/consent-at را به users و جدول listening_events با UUID و ایندکس user_id/started_at/id اضافه می‌کند. FKهای user و track حذف وابسته دارند. session_pseudonym فقط HMAC است؛ IP و session ID خام ذخیره نمی‌شوند. حد ۱۰٬۰۰۰ ردیف در هر حساب و retention پیش‌فرض سی روز با حذف زمان‌بندی‌شده برقرار است. erase و افزایش revision اتمیک‌اند و مجوزهای قدیمی را باطل می‌کنند. جزئیات در [قرارداد F11](F11_LISTENING_PRIVACY.fa.md) است.
+
+## کاتالوگ و پیشنهاد F12
+
+`tracks.recording_identity` و `recording_provenance` nullable هستند و خودکار پر نمی‌شوند. `merged_into_id` کلید خارجی restrict به همان جدول است؛ ادغام، ردیف ضبط قبلی را حذف نمی‌کند. `member_proposals` کلید UUID، FK فرستنده، access_version اولیه، idempotency key یکتا در هر کاربر، hash، payload، snapshot و نتیجهٔ بررسی دارد. `catalog_change_sets` journal مقید به actor/version، scope، before/after، revision، hash و مهلت‌های پیش‌نمایش/بازگردانی است. روابط شخصی در snapshot کپی نمی‌شوند.
+
+در undo، revision افزایش می‌یابد و موقعیت قدیمی playlist/credit حفظ می‌شود. محتوای journal از API به‌صورت allowlist محدود به summary و نتیجه ارائه می‌شود. indexهای user/date/id و status/date/id برای صفحه‌بندی و inbox هستند. جدول proposal و journal جای رسانه یا backup را نمی‌گیرند. جزئیات [قرارداد F12](F12_CATALOG_WORKFLOWS.fa.md) مقدم است.

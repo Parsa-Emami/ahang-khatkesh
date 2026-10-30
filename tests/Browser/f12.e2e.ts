@@ -33,6 +33,18 @@ async function headers(page: Page) {
     };
 }
 async function capture(page: Page, info: TestInfo, state: string) {
+    const review = page.locator(".catalog-review");
+    if (await review.count())
+        await review.evaluate((node) => {
+            node.scrollTop = 0;
+        });
+    else if (state.startsWith("member-"))
+        await page
+            .locator(".proposal-list article")
+            .first()
+            .scrollIntoViewIfNeeded();
+    else if (state === "workflows")
+        await page.locator(".workflow-card").first().scrollIntoViewIfNeeded();
     await mkdir("reports/f12-catalog", { recursive: true });
     await page.screenshot({
         path: `reports/f12-catalog/${info.project.name}-${state}.png`,
@@ -161,9 +173,7 @@ test("MemberProposalTest real CSRF member submission owner preview draft accepta
         await closeReview(owner);
         await page.reload();
         await page
-            .locator(".catalog-workflow")
-            .last()
-            .getByLabel("وضعیت", { exact: true })
+            .getByRole("combobox", { name: "وضعیت", exact: true })
             .selectOption("rejected");
         await expect(page.locator(".proposal-list")).toContainText(
             "پذیرش این پیشنهاد بازگردانی شده است.",
@@ -198,9 +208,7 @@ test("MemberProposalTest real CSRF member submission owner preview draft accepta
         await expect(owner.getByRole("dialog")).toHaveCount(0);
         await page.reload();
         await page
-            .locator(".catalog-workflow")
-            .last()
-            .getByLabel("وضعیت", { exact: true })
+            .getByRole("combobox", { name: "وضعیت", exact: true })
             .selectOption("rejected");
         await expect(page.locator(".proposal-list")).toContainText(
             "لطفاً مرجع معتبر عنوان را ارسال کنید.",
@@ -332,6 +340,9 @@ test("CatalogBulkChangeTest browser bulk draft conflict merge retained ids and m
     await healthMissing
         .getByRole("button", { name: "بررسی ترمیم", exact: true })
         .click();
+    await expect(
+        page.getByRole("dialog", { name: "ترمیم منبع صوتی", exact: true }),
+    ).toBeVisible();
     const wave = Buffer.alloc(44 + 16000 * 4 * 2);
     wave.write("RIFF", 0);
     wave.writeUInt32LE(wave.length - 8, 4);
@@ -407,4 +418,23 @@ test("CatalogBulkChangeTest browser bulk draft conflict merge retained ids and m
                     .evaluate((el) => el.scrollWidth <= el.clientWidth + 1),
             ).toBe(true);
         }
+});
+
+test.afterEach(async ({ page }, info) => {
+    if (info.status !== info.expectedStatus) {
+        console.log(
+            "F12_FAILURE_PAGE=" +
+                JSON.stringify({
+                    url: page.url(),
+                    text: (await page.locator("body").innerText()).slice(
+                        0,
+                        10000,
+                    ),
+                }),
+        );
+        await mkdir("reports/f12-failures", { recursive: true });
+        await page.screenshot({
+            path: `reports/f12-failures/${info.project.name}-${info.line}.png`,
+        });
+    }
 });

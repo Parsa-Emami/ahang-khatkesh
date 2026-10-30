@@ -110,7 +110,7 @@
 .catalog-status {
     font-weight: 700;
 }
-.catalog-review {
+.dialog-content.catalog-review {
     width: min(860px, calc(100vw - 32px));
 }
 .change-row {
