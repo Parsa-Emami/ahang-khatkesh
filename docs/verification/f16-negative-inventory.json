@@ -1,0 +1,26 @@
+{
+  "asvs_version": "5.0.0",
+  "purpose": "Existing negative security tests reused by F16 ReleaseSecurityReview; do not re-implement these scenarios.",
+  "tests": [
+    "AccountAccessTest::test_guests_cannot_read_catalog_and_registration_is_closed",
+    "AccountAccessTest::test_member_cannot_create_accounts_or_import_media",
+    "AccountAccessTest::test_theme_update_does_not_accept_privilege_escalation",
+    "AccountAccessTest::test_password_change_requires_current_password",
+    "MfaFlowTest",
+    "CredentialEpochTest",
+    "SecurityRegressionTest::test_administrator_cannot_reset_an_owners_password",
+    "AdministrationTest::test_revoked_session_version_is_rejected_even_if_a_session_row_survives",
+    "ApiResponseSchemaTest::test_wrong_or_missing_actor_context_cannot_change_a_playlist",
+    "MusicLibraryTest::test_stream_does_not_follow_path_outside_private_media_root",
+    "MusicLibraryTest::test_unpublished_playlist_and_audio_are_hidden_from_member",
+    "MediaBlobQuotaTest",
+    "ListeningPrivacyTest",
+    "PlaylistImportTest::test_audio_upload_is_deduplicated_and_never_exposes_disk_path",
+    "SuperAdministratorTest::test_non_owners_cannot_mutate_any_catalog_entry_point",
+    "LyricsTimelineTest::test_member_cannot_write_lyrics_and_unpublished_tracks_stay_hidden",
+    "PlaybackDeviceLeaseTest",
+    "OfflineRevocationTest",
+    "CatalogBulkChangeTest",
+    "MemberProposalTest"
+  ]
+}

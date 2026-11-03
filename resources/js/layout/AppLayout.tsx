@@ -18,6 +18,7 @@ import {
     Sun,
     Upload,
     X,
+    Inbox,
 } from "lucide-react";
 import {
     NavLink,
@@ -190,6 +191,10 @@ export function AppLayout() {
                     <NavLink to="/mix">
                         <Sparkles size={20} />
                         {tr("listening.mix")}
+                    </NavLink>
+                    <NavLink to="/proposals">
+                        <Inbox size={20} />
+                        {tr("proposals.nav")}
                     </NavLink>
                 </nav>
                 <div className="sidebar-divider" />

@@ -2,6 +2,8 @@
 
 use App\Exceptions\ImportPlanChanged;
 use App\Exceptions\MediaNotReady;
+use App\Exceptions\OfflineDisabled;
+use App\Exceptions\PlaybackDeviceFenced;
 use App\Http\Middleware\EnsureAccountActive;
 use App\Http\Middleware\RequireGuestSession;
 use App\Http\Middleware\RequireMfa;
@@ -27,6 +29,8 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->render(fn (MediaNotReady $error) => response()->json(['message' => $error->getMessage(), 'code' => 'media_not_ready'], 409));
         $exceptions->render(fn (ImportPlanChanged $error) => response()->json(['message' => $error->getMessage(), 'code' => 'import_plan_changed'], 409));
+        $exceptions->render(fn (PlaybackDeviceFenced $error) => response()->json(['message' => $error->getMessage(), 'code' => 'playback_device_fenced'], 409));
+        $exceptions->render(fn (OfflineDisabled $error) => response()->json(['message' => $error->getMessage(), 'code' => 'offline_disabled'], 422));
         $exceptions->shouldRenderJsonWhen(fn (Request $request) => $request->is('api/*') || $request->expectsJson());
         $exceptions->respond(function (Response $response): Response {
             if ($response instanceof JsonResponse) {

@@ -3,6 +3,7 @@
 namespace App\Actions\Listening;
 
 use App\Actions\LockCurrentAccount;
+use App\Actions\Playback\ManagePlaybackLease;
 use App\Models\PlaybackState;
 use App\Models\Track;
 use App\Models\User;
@@ -12,16 +13,23 @@ use Illuminate\Validation\ValidationException;
 
 class SavePlayback
 {
-    public function __construct(private LockCurrentAccount $accounts) {}
+    public function __construct(
+        private LockCurrentAccount $accounts,
+        private ManagePlaybackLease $leases,
+    ) {}
 
     public function handle(User $snapshot, array $data): array
     {
         return DB::transaction(function () use ($snapshot, $data): array {
             $user = $this->accounts->handle($snapshot);
+            $deviceId = $data['device_id'] ?? null;
+            $leaseToken = $data['lease_token'] ?? null;
+            unset($data['device_id'], $data['lease_token']);
             if ($user->privateListening() || ($data['private_mode'] ?? false) || ($data['listening_revision'] ?? 0) !== $user->listening_revision) {
                 return ['revision' => (int) (PlaybackState::where('user_id', $user->id)->value('revision') ?? 0), 'suppressed' => true];
             }
             unset($data['listening_revision'], $data['private_mode']);
+            $this->leases->assertWriter($user, $deviceId, $leaseToken);
             $tracks = Track::visibleTo($user)->with(['mediaAsset.blob', PlaybackMedia::EAGER])->whereIn('id', $data['queue'])->get()->keyBy('id');
             if ($tracks->count() !== count($data['queue']) || ($data['track_id'] !== null && ! in_array($data['track_id'], $data['queue'], true))) {
                 throw ValidationException::withMessages(['queue' => __('صف پخش شامل آهنگ نامعتبر یا منتشرنشده است.')]);

@@ -25,6 +25,13 @@ export type User = Partial<Preferences> & {
     mfa_enabled: boolean;
     is_active: boolean;
     theme: Theme;
+    crossfade_enabled?: boolean;
+    crossfade_seconds?: number;
+    crossfade_acknowledged?: boolean;
+    loudness_normalization?: boolean;
+    offline_opt_in?: boolean;
+    offline_revocation_acknowledged?: boolean;
+    offline_quota_bytes?: number;
 };
 export type AudioQuality = "auto" | "original" | "mp3-320";
 export type AudioConversion = {
@@ -73,6 +80,7 @@ export type Track = {
     artists?: { id: number; name: string; role: string }[];
     releases?: { id: number; title: string }[];
     duration_seconds: number;
+    loudness_lufs?: number | null;
     audio_qualities?: {
         id: "original" | "mp3-320";
         label: string;

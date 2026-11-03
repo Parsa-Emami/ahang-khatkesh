@@ -273,3 +273,54 @@ test("F11 cannot be verified with the earlier process suite alone", () => {
         /F11 requires real privacy erase and ingest process evidence/,
     );
 });
+
+test("F16 cannot be verified with CI suites alone without signed release evidence", () => {
+    const result = run((input) => {
+        const phase = input.data.phases[15];
+        phase.status = "verified";
+        phase.depends_on = [];
+        phase.required_tests = [
+            "ReleaseSecurityReview",
+            "UniversalReleaseMatrix",
+        ];
+        phase.evidence = "docs/verification/test.json";
+        input.text = input.text.replace("- [ ] F16", "- [x] F16");
+        const suite = { tests: 1, passed: 1, failed: 0, skipped: 0 };
+        writeFileSync(
+            join(input.root, "docs/verification/test.json"),
+            JSON.stringify({
+                source_fingerprint: createHash("sha256")
+                    .update("[]")
+                    .digest("hex"),
+                commit: "a".repeat(40),
+                ci: {
+                    head_sha: "a".repeat(40),
+                    run_id: 1,
+                    conclusion: "success",
+                },
+                phases: ["F16"],
+                php: { sqlite: suite, mysql: suite },
+                frontend: suite,
+                browser: suite,
+                checks: {
+                    build: "passed",
+                    format: "passed",
+                    pint: "passed",
+                    composer_validate: "passed",
+                    composer_audit: "passed",
+                    architecture: "passed",
+                    npm_advisory_scan: "passed",
+                },
+                test_inventory: [
+                    "ReleaseSecurityReviewTest",
+                    "UniversalReleaseMatrixTest",
+                ],
+            }),
+        );
+    });
+    assert.notEqual(result.status, 0);
+    assert.match(
+        result.stderr,
+        /F16 requires signed independent release evidence/,
+    );
+});

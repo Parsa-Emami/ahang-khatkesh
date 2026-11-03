@@ -4473,6 +4473,61 @@
                         "checked_at": {
                           "type": "string",
                           "format": "date-time"
+                        },
+                        "disk_available_bytes": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "disk_low": {
+                          "type": "boolean"
+                        },
+                        "oldest_job_seconds": {
+                          "type": [
+                            "integer",
+                            "null"
+                          ],
+                          "minimum": 0
+                        },
+                        "dead_queue": {
+                          "type": "boolean"
+                        },
+                        "expired_import_leases": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "expired_conversion_leases": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "expired_reservations": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "alerts": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "required": [
+                              "code",
+                              "severity",
+                              "message"
+                            ],
+                            "properties": {
+                              "code": {
+                                "type": "string"
+                              },
+                              "severity": {
+                                "type": "string"
+                              },
+                              "message": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "stream_accel_enabled": {
+                          "type": "boolean"
                         }
                       }
                     }
@@ -9401,6 +9456,1989 @@
           }
         ]
       }
+    },
+    "/proposals": {
+      "get": {
+        "operationId": "get_own_proposals",
+        "summary": "List own catalog proposals",
+        "tags": [
+          "Library"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data",
+                    "meta"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/MemberProposal"
+                      }
+                    },
+                    "meta": {
+                      "type": "object"
+                    },
+                    "links": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "422": {
+            "$ref": "#/components/responses/Validation"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "419": {
+            "$ref": "#/components/responses/CsrfExpired"
+          }
+        }
+      },
+      "post": {
+        "operationId": "post_own_proposal",
+        "summary": "Submit a catalog proposal without writing the catalog",
+        "tags": [
+          "Library"
+        ],
+        "security": [
+          {
+            "sessionCookie": [],
+            "csrfToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-Session-Context",
+            "in": "header",
+            "required": true,
+            "description": "Non-secret actor id:access_version from session. Required for authenticated writes. This header never authorizes a request.",
+            "schema": {
+              "type": "string",
+              "pattern": "^[1-9][0-9]*:[0-9]+$"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/MemberProposal"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/MemberProposal"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "422": {
+            "$ref": "#/components/responses/Validation"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "419": {
+            "$ref": "#/components/responses/CsrfExpired"
+          }
+        }
+      }
+    },
+    "/proposals/{proposal}": {
+      "delete": {
+        "operationId": "delete_own_proposal",
+        "summary": "Withdraw own pending proposal",
+        "tags": [
+          "Library"
+        ],
+        "security": [
+          {
+            "sessionCookie": [],
+            "csrfToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "proposal",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "X-Session-Context",
+            "in": "header",
+            "required": true,
+            "description": "Non-secret actor id:access_version from session. Required for authenticated writes. This header never authorizes a request.",
+            "schema": {
+              "type": "string",
+              "pattern": "^[1-9][0-9]*:[0-9]+$"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "revision"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "revision": {
+                    "type": "integer",
+                    "minimum": 0
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/MemberProposal"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "422": {
+            "$ref": "#/components/responses/Validation"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "419": {
+            "$ref": "#/components/responses/CsrfExpired"
+          }
+        }
+      }
+    },
+    "/admin/catalog-duplicates": {
+      "get": {
+        "operationId": "get_admin_catalog_duplicates",
+        "summary": "Detect recording-identity and provenance candidates without merging namesakes",
+        "tags": [
+          "Administration"
+        ],
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "maxLength": 120
+            }
+          },
+          {
+            "name": "X-Session-Context",
+            "in": "header",
+            "required": false,
+            "description": "Non-secret actor id:access_version from session. Required for authenticated writes. This header never authorizes a request.",
+            "schema": {
+              "type": "string",
+              "pattern": "^[1-9][0-9]*:[0-9]+$"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "additionalProperties": false,
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "required": [
+                        "findings"
+                      ],
+                      "additionalProperties": false,
+                      "properties": {
+                        "findings": {
+                          "type": "array"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "422": {
+            "$ref": "#/components/responses/Validation"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "419": {
+            "$ref": "#/components/responses/CsrfExpired"
+          },
+          "423": {
+            "$ref": "#/components/responses/ConfirmationRequired"
+          },
+          "428": {
+            "$ref": "#/components/responses/MfaEnrollmentRequired"
+          }
+        }
+      }
+    },
+    "/admin/catalog-health": {
+      "get": {
+        "operationId": "get_admin_catalog_health",
+        "summary": "List missing files and broken catalog links",
+        "tags": [
+          "Administration"
+        ],
+        "parameters": [
+          {
+            "name": "X-Session-Context",
+            "in": "header",
+            "required": false,
+            "description": "Non-secret actor id:access_version from session. Required for authenticated writes. This header never authorizes a request.",
+            "schema": {
+              "type": "string",
+              "pattern": "^[1-9][0-9]*:[0-9]+$"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "additionalProperties": false,
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "required": [
+                        "issues"
+                      ],
+                      "additionalProperties": false,
+                      "properties": {
+                        "issues": {
+                          "type": "array"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "422": {
+            "$ref": "#/components/responses/Validation"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "419": {
+            "$ref": "#/components/responses/CsrfExpired"
+          },
+          "423": {
+            "$ref": "#/components/responses/ConfirmationRequired"
+          },
+          "428": {
+            "$ref": "#/components/responses/MfaEnrollmentRequired"
+          }
+        }
+      }
+    },
+    "/admin/workflows": {
+      "get": {
+        "operationId": "get_admin_workflows",
+        "summary": "Workflow counts and next actions for catalog operations",
+        "tags": [
+          "Administration"
+        ],
+        "parameters": [
+          {
+            "name": "X-Session-Context",
+            "in": "header",
+            "required": false,
+            "description": "Non-secret actor id:access_version from session. Required for authenticated writes. This header never authorizes a request.",
+            "schema": {
+              "type": "string",
+              "pattern": "^[1-9][0-9]*:[0-9]+$"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "422": {
+            "$ref": "#/components/responses/Validation"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "419": {
+            "$ref": "#/components/responses/CsrfExpired"
+          },
+          "423": {
+            "$ref": "#/components/responses/ConfirmationRequired"
+          },
+          "428": {
+            "$ref": "#/components/responses/MfaEnrollmentRequired"
+          }
+        }
+      }
+    },
+    "/admin/catalog-batches": {
+      "post": {
+        "operationId": "post_admin_catalog_batch_preview",
+        "summary": "Dry-run a bounded catalog change batch",
+        "tags": [
+          "Administration"
+        ],
+        "security": [
+          {
+            "sessionCookie": [],
+            "csrfToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-Session-Context",
+            "in": "header",
+            "required": true,
+            "description": "Non-secret actor id:access_version from session. Required for authenticated writes. This header never authorizes a request.",
+            "schema": {
+              "type": "string",
+              "pattern": "^[1-9][0-9]*:[0-9]+$"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/CatalogChangeBatch"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/CatalogChangeBatch"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "422": {
+            "$ref": "#/components/responses/Validation"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "419": {
+            "$ref": "#/components/responses/CsrfExpired"
+          },
+          "423": {
+            "$ref": "#/components/responses/ConfirmationRequired"
+          },
+          "428": {
+            "$ref": "#/components/responses/MfaEnrollmentRequired"
+          }
+        }
+      }
+    },
+    "/admin/catalog-batches/{batch}": {
+      "get": {
+        "operationId": "get_admin_catalog_batch",
+        "summary": "Show a catalog change batch",
+        "tags": [
+          "Administration"
+        ],
+        "parameters": [
+          {
+            "name": "batch",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "X-Session-Context",
+            "in": "header",
+            "required": false,
+            "description": "Non-secret actor id:access_version from session. Required for authenticated writes. This header never authorizes a request.",
+            "schema": {
+              "type": "string",
+              "pattern": "^[1-9][0-9]*:[0-9]+$"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/CatalogChangeBatch"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "422": {
+            "$ref": "#/components/responses/Validation"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "419": {
+            "$ref": "#/components/responses/CsrfExpired"
+          },
+          "423": {
+            "$ref": "#/components/responses/ConfirmationRequired"
+          },
+          "428": {
+            "$ref": "#/components/responses/MfaEnrollmentRequired"
+          }
+        }
+      }
+    },
+    "/admin/catalog-batches/{batch}/commit": {
+      "post": {
+        "operationId": "post_admin_catalog_batch_commit",
+        "summary": "Commit a previewed catalog change batch",
+        "tags": [
+          "Administration"
+        ],
+        "security": [
+          {
+            "sessionCookie": [],
+            "csrfToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "batch",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "X-Session-Context",
+            "in": "header",
+            "required": true,
+            "description": "Non-secret actor id:access_version from session. Required for authenticated writes. This header never authorizes a request.",
+            "schema": {
+              "type": "string",
+              "pattern": "^[1-9][0-9]*:[0-9]+$"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "plan_hash"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "plan_hash": {
+                    "type": "string",
+                    "minLength": 64,
+                    "maxLength": 64
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/CatalogChangeBatch"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "422": {
+            "$ref": "#/components/responses/Validation"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "419": {
+            "$ref": "#/components/responses/CsrfExpired"
+          },
+          "423": {
+            "$ref": "#/components/responses/ConfirmationRequired"
+          },
+          "428": {
+            "$ref": "#/components/responses/MfaEnrollmentRequired"
+          }
+        }
+      }
+    },
+    "/admin/catalog-batches/{batch}/rollback": {
+      "post": {
+        "operationId": "post_admin_catalog_batch_rollback",
+        "summary": "Roll back a committed catalog change batch from its snapshot",
+        "tags": [
+          "Administration"
+        ],
+        "security": [
+          {
+            "sessionCookie": [],
+            "csrfToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "batch",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "X-Session-Context",
+            "in": "header",
+            "required": true,
+            "description": "Non-secret actor id:access_version from session. Required for authenticated writes. This header never authorizes a request.",
+            "schema": {
+              "type": "string",
+              "pattern": "^[1-9][0-9]*:[0-9]+$"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/CatalogChangeBatch"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "422": {
+            "$ref": "#/components/responses/Validation"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "419": {
+            "$ref": "#/components/responses/CsrfExpired"
+          },
+          "423": {
+            "$ref": "#/components/responses/ConfirmationRequired"
+          },
+          "428": {
+            "$ref": "#/components/responses/MfaEnrollmentRequired"
+          }
+        }
+      }
+    },
+    "/admin/proposals": {
+      "get": {
+        "operationId": "get_admin_proposals",
+        "summary": "List member catalog proposals",
+        "tags": [
+          "Administration"
+        ],
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "enum": [
+                "pending",
+                "accepted",
+                "rejected",
+                "withdrawn"
+              ]
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          {
+            "name": "X-Session-Context",
+            "in": "header",
+            "required": false,
+            "description": "Non-secret actor id:access_version from session. Required for authenticated writes. This header never authorizes a request.",
+            "schema": {
+              "type": "string",
+              "pattern": "^[1-9][0-9]*:[0-9]+$"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data",
+                    "meta"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/MemberProposal"
+                      }
+                    },
+                    "meta": {
+                      "type": "object"
+                    },
+                    "links": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "422": {
+            "$ref": "#/components/responses/Validation"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "419": {
+            "$ref": "#/components/responses/CsrfExpired"
+          },
+          "423": {
+            "$ref": "#/components/responses/ConfirmationRequired"
+          },
+          "428": {
+            "$ref": "#/components/responses/MfaEnrollmentRequired"
+          }
+        }
+      }
+    },
+    "/admin/proposals/{proposal}/accept": {
+      "post": {
+        "operationId": "post_admin_proposal_accept",
+        "summary": "Accept a member proposal and apply catalog changes",
+        "tags": [
+          "Administration"
+        ],
+        "security": [
+          {
+            "sessionCookie": [],
+            "csrfToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "proposal",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "X-Session-Context",
+            "in": "header",
+            "required": true,
+            "description": "Non-secret actor id:access_version from session. Required for authenticated writes. This header never authorizes a request.",
+            "schema": {
+              "type": "string",
+              "pattern": "^[1-9][0-9]*:[0-9]+$"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "revision"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "revision": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "review_note": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "maxLength": 2000
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/MemberProposal"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "422": {
+            "$ref": "#/components/responses/Validation"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "419": {
+            "$ref": "#/components/responses/CsrfExpired"
+          },
+          "423": {
+            "$ref": "#/components/responses/ConfirmationRequired"
+          },
+          "428": {
+            "$ref": "#/components/responses/MfaEnrollmentRequired"
+          }
+        }
+      }
+    },
+    "/admin/proposals/{proposal}/reject": {
+      "post": {
+        "operationId": "post_admin_proposal_reject",
+        "summary": "Reject a member proposal without writing the catalog",
+        "tags": [
+          "Administration"
+        ],
+        "security": [
+          {
+            "sessionCookie": [],
+            "csrfToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "proposal",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "X-Session-Context",
+            "in": "header",
+            "required": true,
+            "description": "Non-secret actor id:access_version from session. Required for authenticated writes. This header never authorizes a request.",
+            "schema": {
+              "type": "string",
+              "pattern": "^[1-9][0-9]*:[0-9]+$"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "revision"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "revision": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "review_note": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "maxLength": 2000
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/MemberProposal"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "422": {
+            "$ref": "#/components/responses/Validation"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "419": {
+            "$ref": "#/components/responses/CsrfExpired"
+          },
+          "423": {
+            "$ref": "#/components/responses/ConfirmationRequired"
+          },
+          "428": {
+            "$ref": "#/components/responses/MfaEnrollmentRequired"
+          }
+        }
+      }
+    },
+    "/tracks/{track}/lyrics": {
+      "get": {
+        "operationId": "get_track_lyrics",
+        "summary": "Visible track lyrics",
+        "tags": [
+          "Library"
+        ],
+        "parameters": [
+          {
+            "name": "track",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "oneOf": [
+                        {
+                          "$ref": "#/components/schemas/TrackLyric"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "422": {
+            "$ref": "#/components/responses/Validation"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "419": {
+            "$ref": "#/components/responses/CsrfExpired"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/admin/tracks/{track}/lyrics": {
+      "get": {
+        "operationId": "get_admin_track_lyrics",
+        "summary": "Admin lyrics",
+        "tags": [
+          "Administration"
+        ],
+        "parameters": [
+          {
+            "name": "track",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "X-Session-Context",
+            "in": "header",
+            "required": false,
+            "description": "Non-secret actor id:access_version from session.",
+            "schema": {
+              "type": "string",
+              "pattern": "^[1-9][0-9]*:[0-9]+$"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "oneOf": [
+                        {
+                          "$ref": "#/components/schemas/TrackLyric"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "422": {
+            "$ref": "#/components/responses/Validation"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "419": {
+            "$ref": "#/components/responses/CsrfExpired"
+          },
+          "423": {
+            "$ref": "#/components/responses/ConfirmationRequired"
+          },
+          "428": {
+            "$ref": "#/components/responses/MfaEnrollmentRequired"
+          }
+        }
+      },
+      "put": {
+        "operationId": "put_admin_track_lyrics",
+        "summary": "Save lyrics",
+        "tags": [
+          "Administration"
+        ],
+        "security": [
+          {
+            "sessionCookie": [],
+            "csrfToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "track",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "X-Session-Context",
+            "in": "header",
+            "required": true,
+            "description": "Non-secret actor id:access_version from session.",
+            "schema": {
+              "type": "string",
+              "pattern": "^[1-9][0-9]*:[0-9]+$"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/TrackLyric"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/TrackLyric"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "422": {
+            "$ref": "#/components/responses/Validation"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "419": {
+            "$ref": "#/components/responses/CsrfExpired"
+          },
+          "423": {
+            "$ref": "#/components/responses/ConfirmationRequired"
+          },
+          "428": {
+            "$ref": "#/components/responses/MfaEnrollmentRequired"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "delete_admin_track_lyrics",
+        "summary": "Delete lyrics",
+        "tags": [
+          "Administration"
+        ],
+        "security": [
+          {
+            "sessionCookie": [],
+            "csrfToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "track",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "X-Session-Context",
+            "in": "header",
+            "required": true,
+            "description": "Non-secret actor id:access_version from session.",
+            "schema": {
+              "type": "string",
+              "pattern": "^[1-9][0-9]*:[0-9]+$"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "revision"
+                ],
+                "properties": {
+                  "revision": {
+                    "type": "integer",
+                    "minimum": 0
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "422": {
+            "$ref": "#/components/responses/Validation"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "419": {
+            "$ref": "#/components/responses/CsrfExpired"
+          },
+          "423": {
+            "$ref": "#/components/responses/ConfirmationRequired"
+          },
+          "428": {
+            "$ref": "#/components/responses/MfaEnrollmentRequired"
+          }
+        }
+      }
+    },
+    "/admin/media/{asset}/loudness": {
+      "put": {
+        "operationId": "put_admin_media_loudness",
+        "summary": "Store loudness metadata without rewriting master",
+        "tags": [
+          "Administration"
+        ],
+        "security": [
+          {
+            "sessionCookie": [],
+            "csrfToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "asset",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "X-Session-Context",
+            "in": "header",
+            "required": true,
+            "description": "Non-secret actor id:access_version from session.",
+            "schema": {
+              "type": "string",
+              "pattern": "^[1-9][0-9]*:[0-9]+$"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "loudness_lufs"
+                ],
+                "properties": {
+                  "loudness_lufs": {
+                    "type": "number"
+                  },
+                  "loudness_peak": {
+                    "type": [
+                      "number",
+                      "null"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/LoudnessMetadata"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "422": {
+            "$ref": "#/components/responses/Validation"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "419": {
+            "$ref": "#/components/responses/CsrfExpired"
+          },
+          "423": {
+            "$ref": "#/components/responses/ConfirmationRequired"
+          },
+          "428": {
+            "$ref": "#/components/responses/MfaEnrollmentRequired"
+          }
+        }
+      }
+    },
+    "/playback/devices": {
+      "get": {
+        "operationId": "list_playback_devices",
+        "summary": "List playback devices and lease",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "201": {
+            "description": "Created"
+          },
+          "401": {
+            "description": "Unauthenticated"
+          },
+          "404": {
+            "description": "Not found"
+          },
+          "409": {
+            "description": "Conflict"
+          },
+          "422": {
+            "description": "Validation error"
+          }
+        }
+      },
+      "post": {
+        "operationId": "register_playback_device",
+        "summary": "Register session-bound playback device",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "201": {
+            "description": "Created"
+          },
+          "401": {
+            "description": "Unauthenticated"
+          },
+          "404": {
+            "description": "Not found"
+          },
+          "409": {
+            "description": "Conflict"
+          },
+          "422": {
+            "description": "Validation error"
+          }
+        }
+      }
+    },
+    "/playback/devices/{device}": {
+      "delete": {
+        "operationId": "revoke_playback_device",
+        "summary": "Revoke a playback device",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "201": {
+            "description": "Created"
+          },
+          "401": {
+            "description": "Unauthenticated"
+          },
+          "404": {
+            "description": "Not found"
+          },
+          "409": {
+            "description": "Conflict"
+          },
+          "422": {
+            "description": "Validation error"
+          }
+        }
+      }
+    },
+    "/playback/devices/{device}/claim": {
+      "post": {
+        "operationId": "claim_playback_lease",
+        "summary": "Claim active playback lease",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "201": {
+            "description": "Created"
+          },
+          "401": {
+            "description": "Unauthenticated"
+          },
+          "404": {
+            "description": "Not found"
+          },
+          "409": {
+            "description": "Conflict"
+          },
+          "422": {
+            "description": "Validation error"
+          }
+        }
+      }
+    },
+    "/playback/devices/{device}/heartbeat": {
+      "post": {
+        "operationId": "heartbeat_playback_lease",
+        "summary": "Renew active playback lease",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "201": {
+            "description": "Created"
+          },
+          "401": {
+            "description": "Unauthenticated"
+          },
+          "404": {
+            "description": "Not found"
+          },
+          "409": {
+            "description": "Conflict"
+          },
+          "422": {
+            "description": "Validation error"
+          }
+        }
+      }
+    },
+    "/playback/devices/{device}/transfer": {
+      "post": {
+        "operationId": "offer_playback_transfer",
+        "summary": "Offer playback transfer to another device",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "201": {
+            "description": "Created"
+          },
+          "401": {
+            "description": "Unauthenticated"
+          },
+          "404": {
+            "description": "Not found"
+          },
+          "409": {
+            "description": "Conflict"
+          },
+          "422": {
+            "description": "Validation error"
+          }
+        }
+      }
+    },
+    "/playback/devices/{device}/transfer/accept": {
+      "post": {
+        "operationId": "accept_playback_transfer",
+        "summary": "Accept playback transfer",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "201": {
+            "description": "Created"
+          },
+          "401": {
+            "description": "Unauthenticated"
+          },
+          "404": {
+            "description": "Not found"
+          },
+          "409": {
+            "description": "Conflict"
+          },
+          "422": {
+            "description": "Validation error"
+          }
+        }
+      }
+    },
+    "/playback/devices/{device}/transfer/reject": {
+      "post": {
+        "operationId": "reject_playback_transfer",
+        "summary": "Reject playback transfer",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "201": {
+            "description": "Created"
+          },
+          "401": {
+            "description": "Unauthenticated"
+          },
+          "404": {
+            "description": "Not found"
+          },
+          "409": {
+            "description": "Conflict"
+          },
+          "422": {
+            "description": "Validation error"
+          }
+        }
+      }
+    },
+    "/playback/devices/{device}/commands": {
+      "get": {
+        "operationId": "poll_playback_device_commands",
+        "summary": "Poll and consume device commands",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "201": {
+            "description": "Created"
+          },
+          "401": {
+            "description": "Unauthenticated"
+          },
+          "404": {
+            "description": "Not found"
+          },
+          "409": {
+            "description": "Conflict"
+          },
+          "422": {
+            "description": "Validation error"
+          }
+        }
+      }
+    },
+    "/offline/downloads": {
+      "get": {
+        "operationId": "list_offline_downloads",
+        "summary": "List offline entitlements and quota",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "201": {
+            "description": "Created"
+          },
+          "401": {
+            "description": "Unauthenticated"
+          },
+          "404": {
+            "description": "Not found"
+          },
+          "409": {
+            "description": "Conflict"
+          },
+          "422": {
+            "description": "Validation error"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "wipe_offline_downloads",
+        "summary": "Wipe offline entitlements",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "201": {
+            "description": "Created"
+          },
+          "401": {
+            "description": "Unauthenticated"
+          },
+          "404": {
+            "description": "Not found"
+          },
+          "409": {
+            "description": "Conflict"
+          },
+          "422": {
+            "description": "Validation error"
+          }
+        }
+      }
+    },
+    "/offline/downloads/{track}": {
+      "post": {
+        "operationId": "grant_offline_download",
+        "summary": "Grant offline entitlement for a track",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "201": {
+            "description": "Created"
+          },
+          "401": {
+            "description": "Unauthenticated"
+          },
+          "404": {
+            "description": "Not found"
+          },
+          "409": {
+            "description": "Conflict"
+          },
+          "422": {
+            "description": "Validation error"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "revoke_offline_download",
+        "summary": "Revoke offline entitlement for a track",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "201": {
+            "description": "Created"
+          },
+          "401": {
+            "description": "Unauthenticated"
+          },
+          "404": {
+            "description": "Not found"
+          },
+          "409": {
+            "description": "Conflict"
+          },
+          "422": {
+            "description": "Validation error"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -9434,7 +11472,14 @@
           "locale",
           "direction",
           "motion",
-          "time_zone"
+          "time_zone",
+          "crossfade_enabled",
+          "crossfade_seconds",
+          "crossfade_acknowledged",
+          "loudness_normalization",
+          "offline_opt_in",
+          "offline_revocation_acknowledged",
+          "offline_quota_bytes"
         ],
         "properties": {
           "id": {
@@ -9522,6 +11567,30 @@
           "time_zone": {
             "type": "string",
             "maxLength": 64
+          },
+          "crossfade_enabled": {
+            "type": "boolean"
+          },
+          "crossfade_seconds": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 12
+          },
+          "crossfade_acknowledged": {
+            "type": "boolean"
+          },
+          "loudness_normalization": {
+            "type": "boolean"
+          },
+          "offline_opt_in": {
+            "type": "boolean"
+          },
+          "offline_revocation_acknowledged": {
+            "type": "boolean"
+          },
+          "offline_quota_bytes": {
+            "type": "integer",
+            "minimum": 0
           }
         },
         "additionalProperties": false
@@ -9657,6 +11726,12 @@
                 }
               }
             }
+          },
+          "loudness_lufs": {
+            "type": [
+              "number",
+              "null"
+            ]
           }
         },
         "additionalProperties": false
@@ -10084,6 +12159,20 @@
           },
           "private_mode": {
             "type": "boolean"
+          },
+          "device_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          },
+          "lease_token": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 64
           }
         }
       },
@@ -10905,6 +12994,471 @@
           "revision"
         ],
         "additionalProperties": false
+      },
+      "CatalogChangeBatch": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "kind",
+          "status",
+          "plan_hash",
+          "plan",
+          "result",
+          "expires_at",
+          "committed_at",
+          "rolled_back_at",
+          "created_at"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "kind": {
+            "enum": [
+              "track_metadata",
+              "artist_rename",
+              "track_move",
+              "merge_recordings",
+              "repair"
+            ]
+          },
+          "status": {
+            "enum": [
+              "previewed",
+              "committed",
+              "rolled_back",
+              "expired"
+            ]
+          },
+          "plan_hash": {
+            "type": "string",
+            "minLength": 64,
+            "maxLength": 64
+          },
+          "plan": {
+            "type": "array"
+          },
+          "result": {
+            "type": [
+              "object",
+              "null"
+            ]
+          },
+          "expires_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "committed_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "rolled_back_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "created_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          }
+        }
+      },
+      "MemberProposal": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "kind",
+          "status",
+          "summary",
+          "note",
+          "payload",
+          "revision",
+          "review_note",
+          "accepted_batch_id",
+          "reviewed_at",
+          "created_at"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "kind": {
+            "enum": [
+              "track_metadata",
+              "artist_rename",
+              "playlist_create",
+              "duplicate_report",
+              "repair_report"
+            ]
+          },
+          "status": {
+            "enum": [
+              "pending",
+              "accepted",
+              "rejected",
+              "withdrawn"
+            ]
+          },
+          "summary": {
+            "type": "string",
+            "maxLength": 240
+          },
+          "note": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "payload": {
+            "type": "object"
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "proposed_by": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "name"
+            ],
+            "properties": {
+              "id": {
+                "type": "integer"
+              },
+              "name": {
+                "type": "string"
+              }
+            }
+          },
+          "review_note": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "accepted_batch_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          },
+          "reviewed_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "created_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          }
+        }
+      },
+      "TrackLyric": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "track_id",
+          "format",
+          "source",
+          "license_note",
+          "revision",
+          "body",
+          "lines",
+          "tags",
+          "updated_at"
+        ],
+        "properties": {
+          "track_id": {
+            "type": "integer"
+          },
+          "format": {
+            "enum": [
+              "plain",
+              "lrc"
+            ]
+          },
+          "source": {
+            "enum": [
+              "manual",
+              "licensed"
+            ]
+          },
+          "license_note": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "body": {
+            "type": "string"
+          },
+          "lines": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "object"
+            }
+          },
+          "tags": {
+            "type": [
+              "object",
+              "null"
+            ]
+          },
+          "updated_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          }
+        }
+      },
+      "LoudnessMetadata": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "loudness_lufs",
+          "loudness_peak",
+          "loudness_analyzed_at",
+          "master_rewritten"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "loudness_lufs": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "loudness_peak": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "loudness_analyzed_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "master_rewritten": {
+            "type": "boolean"
+          }
+        }
+      },
+      "PlaybackDevice": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "device_key",
+          "name",
+          "revision",
+          "is_active"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "device_key": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "user_agent": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "revision": {
+            "type": "integer"
+          },
+          "last_seen_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "revoked_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "is_active": {
+            "type": "boolean"
+          }
+        }
+      },
+      "PlaybackLease": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "generation",
+          "state",
+          "revision"
+        ],
+        "properties": {
+          "device_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          },
+          "generation": {
+            "type": "integer"
+          },
+          "lease_token": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "idle",
+              "active",
+              "transferring"
+            ]
+          },
+          "revision": {
+            "type": "integer"
+          },
+          "transfer_target_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          },
+          "transfer_expires_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "heartbeat_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "lease_expires_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "device": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/PlaybackDevice"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "transfer_target": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/PlaybackDevice"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      },
+      "OfflineDownload": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "track_id",
+          "asset_sha256",
+          "bytes",
+          "status"
+        ],
+        "properties": {
+          "track_id": {
+            "type": "integer"
+          },
+          "asset_sha256": {
+            "type": "string"
+          },
+          "bytes": {
+            "type": "integer"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "ready",
+              "revoked"
+            ]
+          },
+          "granted_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "revoked_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          }
+        }
       }
     },
     "responses": {

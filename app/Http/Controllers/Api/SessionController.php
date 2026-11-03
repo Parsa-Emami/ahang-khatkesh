@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Actions\ChangeOwnPassword;
+use App\Actions\Playback\ManageOfflineDownloads;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\UserResource;
 use App\Models\AuditEvent;
@@ -27,14 +28,16 @@ class SessionController extends Controller
         return response()->json(['data' => ['csrf_token' => csrf_token(), 'user' => $user?->is_active ? new UserResource($user) : null]]);
     }
 
-    public function destroy(Request $request): JsonResponse
+    public function destroy(Request $request, ManageOfflineDownloads $offline): JsonResponse
     {
-        AuditEvent::create(['user_id' => $request->user()->id, 'action' => 'auth.logout', 'subject_type' => 'user', 'subject_id' => (string) $request->user()->id]);
+        $user = $request->user();
+        $offline->wipe($user);
+        AuditEvent::create(['user_id' => $user->id, 'action' => 'auth.logout', 'subject_type' => 'user', 'subject_id' => (string) $user->id]);
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return response()->json(['data' => ['csrf_token' => csrf_token()]]);
+        return response()->json(['data' => ['csrf_token' => csrf_token(), 'offline_wiped' => true]]);
     }
 
     public function update(Request $request): UserResource
@@ -45,10 +48,45 @@ class SessionController extends Controller
             'direction' => ['sometimes', 'required', Rule::in(['auto', 'rtl', 'ltr'])],
             'motion' => ['sometimes', 'required', Rule::in(['system', 'full', 'reduced'])],
             'time_zone' => ['sometimes', 'required', 'string', 'max:64', 'timezone:all'],
+            'crossfade_enabled' => ['sometimes', 'boolean'],
+            'crossfade_seconds' => ['sometimes', 'integer', 'between:1,12'],
+            'crossfade_acknowledged' => ['sometimes', 'boolean'],
+            'loudness_normalization' => ['sometimes', 'boolean'],
+            'offline_opt_in' => ['sometimes', 'boolean'],
+            'offline_revocation_acknowledged' => ['sometimes', 'boolean'],
         ]);
-        $request->user()->update($data);
+        $user = $request->user();
+        if (array_key_exists('crossfade_enabled', $data) && $data['crossfade_enabled'] === true) {
+            abort_unless($user->crossfade_acknowledged_at !== null || ($data['crossfade_acknowledged'] ?? false) === true, 422, __('ابتدا محدودیت دستگاه‌ها برای crossfade را تأیید کنید.'));
+            if ($user->crossfade_acknowledged_at === null) {
+                $data['crossfade_acknowledged_at'] = now();
+            }
+        }
+        if (array_key_exists('crossfade_acknowledged', $data)) {
+            if ($data['crossfade_acknowledged']) {
+                $data['crossfade_acknowledged_at'] = $user->crossfade_acknowledged_at ?? now();
+            }
+            unset($data['crossfade_acknowledged']);
+        }
+        if (array_key_exists('offline_opt_in', $data) && $data['offline_opt_in'] === true) {
+            abort_unless(
+                $user->offline_revocation_acknowledged_at !== null || ($data['offline_revocation_acknowledged'] ?? false) === true,
+                422,
+                __('ابتدا محدودیت ابطال روی دستگاه کاملاً آفلاین را تأیید کنید.'),
+            );
+            if ($user->offline_revocation_acknowledged_at === null) {
+                $data['offline_revocation_acknowledged_at'] = now();
+            }
+        }
+        if (array_key_exists('offline_revocation_acknowledged', $data)) {
+            if ($data['offline_revocation_acknowledged']) {
+                $data['offline_revocation_acknowledged_at'] = $user->offline_revocation_acknowledged_at ?? now();
+            }
+            unset($data['offline_revocation_acknowledged']);
+        }
+        $user->update($data);
 
-        return new UserResource($request->user());
+        return new UserResource($user->fresh());
     }
 
     public function password(Request $request, ChangeOwnPassword $change): JsonResponse

@@ -6,6 +6,7 @@ import {
     createContext,
     useContext,
     useEffect,
+    useMemo,
     useRef,
     useState,
     type PropsWithChildren,
@@ -25,6 +26,14 @@ import {
     type SleepTimer,
 } from "../lib/sleep-timer";
 import { playbackUrl } from "../lib/playback-quality";
+import { createCrossfadeEngine } from "../lib/crossfade-engine";
+import { applyOutputVolume } from "../lib/loudness";
+import {
+    deviceDisplayName,
+    deviceKey,
+    type PlaybackLease,
+} from "../lib/playback-device";
+import { useSession } from "./AppContext";
 import type { AudioQuality } from "../types";
 import { adjacent, makeOrder } from "../lib/queue";
 import type { PlaybackSnapshot, RepeatMode, Track } from "../types";
@@ -43,6 +52,9 @@ type State = {
     syncError: string | null;
     sleepTimer: SleepTimer;
     quality: AudioQuality;
+    deviceId: string | null;
+    leaseToken: string | null;
+    leaseState: PlaybackLease["state"] | "unknown";
 };
 type Player = State & {
     current: Track | null;
@@ -63,6 +75,7 @@ type Player = State & {
     clearQueue: () => void;
     setQuality: (quality: AudioQuality) => void;
     setSleep: (value: number | "end_of_track" | null) => void;
+    applyLease: (lease: PlaybackLease) => void;
 };
 const Context = createContext<Player | null>(null);
 const initial: State = {
@@ -79,16 +92,33 @@ const initial: State = {
     syncError: null,
     sleepTimer: null,
     quality: "auto",
+    deviceId: null,
+    leaseToken: null,
+    leaseState: "unknown",
 };
 
 export function PlayerProvider({ children }: PropsWithChildren) {
     const { locale } = useLocale();
+    const session = useSession();
     const [state, setState] = useState<State>(initial);
-    const [audio] = useState(() => {
-        const element = new Audio();
-        element.preload = "metadata";
-        return element;
-    });
+    const [audioEpoch, setAudioEpoch] = useState(0);
+    const engine = useMemo(
+        () =>
+            createCrossfadeEngine(() => {
+                const element = new Audio();
+                element.preload = "metadata";
+                return element;
+            }),
+        [],
+    );
+    const sleepChannel = useMemo(
+        () =>
+            typeof BroadcastChannel === "undefined"
+                ? null
+                : new BroadcastChannel("ak-sleep-v1"),
+        [],
+    );
+    const audio = engine.active();
     const latest = useRef(state);
     latest.current = state;
     const hydrated = useRef(false),
@@ -98,10 +128,22 @@ export function PlayerProvider({ children }: PropsWithChildren) {
         savedSequence = useRef(0),
         conflicted = useRef(false),
         interacted = useRef(false),
-        pendingSeek = useRef(0);
+        pendingSeek = useRef(0),
+        skipSourceReload = useRef(false),
+        deviceIdRef = useRef<string | null>(null),
+        leaseTokenRef = useRef<string | null>(null);
     const current = state.queue[state.index] || null;
     const streamUrl = playbackUrl(current, state.quality);
+    const crossfadeEnabled = !!(
+        session.user?.crossfade_enabled && session.user?.crossfade_acknowledged
+    );
+    const crossfadeSeconds = Math.max(
+        1,
+        Math.min(12, session.user?.crossfade_seconds ?? 3),
+    );
+    const normalizeLoudness = session.user?.loudness_normalization !== false;
     useListeningEvents(audio, current?.id);
+    void audioEpoch;
     const changed = () => {
         interacted.current = true;
         sequence.current++;
@@ -136,7 +178,8 @@ export function PlayerProvider({ children }: PropsWithChildren) {
     }
     function stopForSleep() {
         changed();
-        audio.pause();
+        engine.cancelFade();
+        engine.pause();
         latest.current = {
             ...latest.current,
             playing: false,
@@ -148,8 +191,9 @@ export function PlayerProvider({ children }: PropsWithChildren) {
     function jump(index: number) {
         if (!latest.current.queue[index]) return;
         changed();
+        engine.cancelFade();
         pendingSeek.current = 0;
-        if (index === latest.current.index) audio.currentTime = 0;
+        if (index === latest.current.index) engine.seek(0);
         setState((s) => ({
             ...s,
             index,
@@ -176,15 +220,15 @@ export function PlayerProvider({ children }: PropsWithChildren) {
             return;
         }
         if (index === s.index) {
-            audio.currentTime = 0;
-            void audio.play().catch(() => {});
+            engine.seek(0);
+            void engine.play().catch(() => {});
             changed();
             return;
         }
         jump(index);
     }
     function previous() {
-        if (audio.currentTime > 3) {
+        if (engine.currentTime() > 3) {
             seek(0);
             return;
         }
@@ -196,7 +240,8 @@ export function PlayerProvider({ children }: PropsWithChildren) {
     function toggle() {
         if (!latest.current.queue.length) return;
         changed();
-        if (latest.current.error) audio.load();
+        engine.cancelFade();
+        if (latest.current.error) engine.active().load();
         setState((s) => ({ ...s, playing: !s.playing, error: null }));
     }
     function seek(value: number) {
@@ -204,9 +249,43 @@ export function PlayerProvider({ children }: PropsWithChildren) {
         if (!track) return;
         const position = Math.min(track.duration_seconds, Math.max(0, value));
         changed();
+        engine.cancelFade();
         pendingSeek.current = position;
-        if (audio.readyState >= 1) audio.currentTime = position;
+        if (engine.active().readyState >= 1) engine.seek(position);
         setState((s) => ({ ...s, position }));
+    }
+    function outputVolumeFor(track: Track | null, volume: number) {
+        return applyOutputVolume(
+            volume,
+            track?.loudness_lufs ?? null,
+            normalizeLoudness,
+        );
+    }
+    function applyLease(lease: PlaybackLease) {
+        const mine =
+            !!deviceIdRef.current && lease.device_id === deviceIdRef.current;
+        if (mine) leaseTokenRef.current = lease.lease_token;
+        else if (lease.state === "active") leaseTokenRef.current = null;
+        setState((s) => ({
+            ...s,
+            deviceId: deviceIdRef.current ?? lease.device_id,
+            leaseToken: mine ? lease.lease_token : null,
+            leaseState: lease.state,
+            syncError: mine && lease.state === "active" ? null : s.syncError,
+        }));
+        if (mine && lease.state === "active") conflicted.current = false;
+    }
+    function fenceLocal(message: string) {
+        conflicted.current = true;
+        leaseTokenRef.current = null;
+        engine.pause();
+        setState((s) => ({
+            ...s,
+            playing: false,
+            leaseToken: null,
+            leaseState: "idle",
+            syncError: message,
+        }));
     }
     async function persist() {
         if (
@@ -226,6 +305,8 @@ export function PlayerProvider({ children }: PropsWithChildren) {
                     method: "PUT",
                     body: json({
                         ...playbackPrivacy(),
+                        device_id: deviceIdRef.current,
+                        lease_token: leaseTokenRef.current,
                         track_id: snapshot.queue[snapshot.index]?.id || null,
                         queue: snapshot.order.map((i) => snapshot.queue[i].id),
                         position_seconds: snapshot.position,
@@ -241,8 +322,12 @@ export function PlayerProvider({ children }: PropsWithChildren) {
             setState((s) => ({ ...s, syncError: null }));
         } catch (error) {
             if (error instanceof ApiError && error.status === 409) {
-                conflicted.current = true;
-                setState((s) => ({ ...s, syncError: error.message }));
+                if (error.code === "playback_device_fenced")
+                    fenceLocal(error.message);
+                else {
+                    conflicted.current = true;
+                    setState((s) => ({ ...s, syncError: error.message }));
+                }
             } else
                 setState((s) => ({
                     ...s,
@@ -255,8 +340,30 @@ export function PlayerProvider({ children }: PropsWithChildren) {
 
     useEffect(() => {
         let cancelled = false;
-        api<{ data: PlaybackSnapshot }>("/playback")
-            .then(({ data }) => {
+        async function boot() {
+            try {
+                if (session.user) {
+                    const registered = await api<{
+                        data: { id: string };
+                    }>("/playback/devices", {
+                        method: "POST",
+                        body: json({
+                            device_key: deviceKey(),
+                            name: deviceDisplayName(),
+                        }),
+                    });
+                    if (cancelled) return;
+                    deviceIdRef.current = registered.data.id;
+                    const claimed = await api<{ data: PlaybackLease }>(
+                        `/playback/devices/${registered.data.id}/claim`,
+                        { method: "POST" },
+                    );
+                    if (cancelled) return;
+                    applyLease(claimed.data);
+                }
+                const { data } = await api<{ data: PlaybackSnapshot }>(
+                    "/playback",
+                );
                 if (cancelled) return;
                 revision.current = data.revision;
                 hydrated.current = true;
@@ -266,7 +373,7 @@ export function PlayerProvider({ children }: PropsWithChildren) {
                         data.queue.findIndex((t) => t.id === data.track_id),
                     );
                     pendingSeek.current = data.position_seconds;
-                    setState({
+                    setState((s) => ({
                         ...initial,
                         queue: data.queue,
                         index,
@@ -275,35 +382,119 @@ export function PlayerProvider({ children }: PropsWithChildren) {
                         volume: data.volume,
                         shuffle: data.shuffle,
                         repeat: data.repeat_mode,
-                    });
+                        deviceId: s.deviceId,
+                        leaseToken: s.leaseToken,
+                        leaseState: s.leaseState,
+                    }));
                 }
-            })
-            .catch(() => {
+            } catch {
                 if (!cancelled)
                     setState((s) => ({
                         ...s,
                         syncError: tr("m6e4360d42d"),
                     }));
-            });
+            }
+        }
+        void boot();
         const timer = window.setInterval(() => void persist(), 15000);
         return () => {
             cancelled = true;
             window.clearInterval(timer);
-            audio.pause();
-            audio.removeAttribute("src");
-            audio.load();
+            engine.dispose();
         };
-    }, [audio]);
+    }, [engine, session.user?.id]);
+    useEffect(() => {
+        if (!state.deviceId || !state.leaseToken) return;
+        const deviceId = state.deviceId;
+        const token = state.leaseToken;
+        const beat = window.setInterval(() => {
+            void api<{ data: PlaybackLease }>(
+                `/playback/devices/${deviceId}/heartbeat`,
+                {
+                    method: "POST",
+                    body: json({ lease_token: token }),
+                },
+            )
+                .then((result) => applyLease(result.data))
+                .catch((error) => {
+                    if (
+                        error instanceof ApiError &&
+                        error.code === "playback_device_fenced"
+                    )
+                        fenceLocal(error.message);
+                });
+        }, 30000);
+        const poll = window.setInterval(() => {
+            void api<{
+                data: Array<{ type: string; payload: Record<string, unknown> }>;
+            }>(`/playback/devices/${deviceId}/commands`)
+                .then(({ data }) => {
+                    for (const command of data) {
+                        if (
+                            command.type === "fence" ||
+                            command.type === "revoke" ||
+                            command.type === "transfer_accept"
+                        ) {
+                            fenceLocal(tr("devices.fenced"));
+                            engine.pause();
+                        }
+                        if (command.type === "pause") {
+                            engine.pause();
+                            setState((s) => ({ ...s, playing: false }));
+                        }
+                        if (
+                            command.type === "seek" &&
+                            typeof command.payload.position_seconds === "number"
+                        )
+                            engine.seek(
+                                command.payload.position_seconds as number,
+                            );
+                        if (command.type === "transfer_offer")
+                            setState((s) => ({
+                                ...s,
+                                leaseState: "transferring",
+                            }));
+                        if (command.type === "transfer_fallback")
+                            setState((s) => ({
+                                ...s,
+                                leaseState: "active",
+                                syncError: null,
+                            }));
+                    }
+                })
+                .catch(() => {});
+        }, 4000);
+        const onVisible = () => {
+            if (document.visibilityState === "visible")
+                void api<{ data: PlaybackLease }>(
+                    `/playback/devices/${deviceId}/heartbeat`,
+                    {
+                        method: "POST",
+                        body: json({ lease_token: token }),
+                    },
+                )
+                    .then((result) => applyLease(result.data))
+                    .catch(() => {});
+        };
+        document.addEventListener("visibilitychange", onVisible);
+        return () => {
+            window.clearInterval(beat);
+            window.clearInterval(poll);
+            document.removeEventListener("visibilitychange", onVisible);
+        };
+    }, [state.deviceId, state.leaseToken, engine]);
 
     useEffect(() => {
-        if (!current) {
-            audio.pause();
-            audio.removeAttribute("src");
+        if (skipSourceReload.current) {
+            skipSourceReload.current = false;
             return;
         }
-        audio.src = streamUrl;
-        audio.load();
-    }, [current?.id, streamUrl, audio]);
+        if (!current) {
+            engine.setSource(null);
+            return;
+        }
+        engine.setSource(streamUrl);
+    }, [current?.id, streamUrl, engine]);
 
     useEffect(() => {
         if (!current) {
@@ -323,8 +514,9 @@ export function PlayerProvider({ children }: PropsWithChildren) {
 
     useEffect(() => {
         if (!current) return;
+        engine.setOutputVolume(outputVolumeFor(current, state.volume));
         if (state.playing)
-            void audio.play().catch((error) => {
+            void engine.play().catch((error) => {
                 if (error.name !== "AbortError")
                     setState((s) => ({
                         ...s,
@@ -333,42 +525,94 @@ export function PlayerProvider({ children }: PropsWithChildren) {
                     }));
             });
         else {
-            audio.pause();
+            engine.pause();
             void persist();
         }
         if ("mediaSession" in navigator)
             navigator.mediaSession.playbackState = state.playing
                 ? "playing"
                 : "paused";
-    }, [state.playing, current?.id, streamUrl, audio]);
+    }, [
+        state.playing,
+        current?.id,
+        streamUrl,
+        state.volume,
+        normalizeLoudness,
+        audioEpoch,
+    ]);
     useEffect(() => {
-        audio.volume = state.volume;
-    }, [state.volume, audio]);
+        engine.setOutputVolume(outputVolumeFor(current, state.volume));
+    }, [
+        state.volume,
+        current?.loudness_lufs,
+        normalizeLoudness,
+        engine,
+        audioEpoch,
+    ]);
     useEffect(() => {
+        const active = () => engine.active();
         const time = () => {
             if (sleepExpired(latest.current.sleepTimer)) {
                 stopForSleep();
                 return;
             }
             if (latest.current.playing) sequence.current++;
-            setState((s) => ({ ...s, position: audio.currentTime }));
+            const position = engine.currentTime();
+            setState((s) => ({ ...s, position }));
+            const s = latest.current;
+            if (
+                !crossfadeEnabled ||
+                s.repeat === "one" ||
+                !s.playing ||
+                engine.fading()
+            )
+                return;
+            const duration =
+                engine.duration() || s.queue[s.index]?.duration_seconds || 0;
+            if (!duration) return;
+            const remaining = duration - position;
+            let order = s.order;
+            const nextIndex = adjacent(order, s.index, 1, s.repeat === "all");
+            if (nextIndex === null || nextIndex === s.index) return;
+            const nextTrack = s.queue[nextIndex];
+            const nextUrl = playbackUrl(nextTrack, s.quality);
+            if (!nextUrl) return;
+            engine.maybeCrossfade({
+                nextUrl,
+                seconds: crossfadeSeconds,
+                remaining,
+                onSwap: () => {
+                    skipSourceReload.current = true;
+                    changed();
+                    setState((value) => ({
+                        ...value,
+                        index: nextIndex,
+                        position: 0,
+                        playing: true,
+                        error: null,
+                    }));
+                    setAudioEpoch((value) => value + 1);
+                },
+            });
         };
         const metadata = () => {
-            if (pendingSeek.current > 0 && Number.isFinite(audio.duration))
-                audio.currentTime = Math.min(
+            const element = active();
+            if (pendingSeek.current > 0 && Number.isFinite(element.duration))
+                element.currentTime = Math.min(
                     pendingSeek.current,
-                    audio.duration,
+                    element.duration,
                 );
             pendingSeek.current = 0;
         };
         const ended = () => {
+            if (engine.fading()) return;
             if (sleepExpired(latest.current.sleepTimer, Date.now(), true)) {
                 stopForSleep();
                 return;
             }
             if (latest.current.repeat === "one") {
-                audio.currentTime = 0;
-                void audio.play().catch(() => {});
+                engine.seek(0);
+                void engine.play().catch(() => {});
                 return;
             }
             next();
@@ -382,13 +626,14 @@ export function PlayerProvider({ children }: PropsWithChildren) {
                 loading: false,
                 error: tr("m548a910dd8"),
             }));
-        audio.addEventListener("timeupdate", time);
-        audio.addEventListener("loadedmetadata", metadata);
-        audio.addEventListener("ended", ended);
-        audio.addEventListener("waiting", waiting);
-        audio.addEventListener("playing", ready);
-        audio.addEventListener("canplay", ready);
-        audio.addEventListener("error", failed);
+        const element = active();
+        element.addEventListener("timeupdate", time);
+        element.addEventListener("loadedmetadata", metadata);
+        element.addEventListener("ended", ended);
+        element.addEventListener("waiting", waiting);
+        element.addEventListener("playing", ready);
+        element.addEventListener("canplay", ready);
+        element.addEventListener("error", failed);
         const keyboard = (event: KeyboardEvent) => {
             const target = event.target as HTMLElement;
             if (
@@ -406,11 +651,11 @@ export function PlayerProvider({ children }: PropsWithChildren) {
             }
             if (event.key === "ArrowRight") {
                 event.preventDefault();
-                seek(audio.currentTime + 5);
+                seek(engine.currentTime() + 5);
             }
             if (event.key === "ArrowLeft") {
                 event.preventDefault();
-                seek(audio.currentTime - 5);
+                seek(engine.currentTime() - 5);
             }
         };
         window.addEventListener("keydown", keyboard);
@@ -436,12 +681,12 @@ export function PlayerProvider({ children }: PropsWithChildren) {
                 [
                     "seekforward",
                     (details) =>
-                        seek(audio.currentTime + (details.seekOffset || 10)),
+                        seek(engine.currentTime() + (details.seekOffset || 10)),
                 ],
                 [
                     "seekbackward",
                     (details) =>
-                        seek(audio.currentTime - (details.seekOffset || 10)),
+                        seek(engine.currentTime() - (details.seekOffset || 10)),
                 ],
             ];
             for (const [action, handler] of actions) {
@@ -451,13 +696,13 @@ export function PlayerProvider({ children }: PropsWithChildren) {
             }
         }
         return () => {
-            audio.removeEventListener("timeupdate", time);
-            audio.removeEventListener("loadedmetadata", metadata);
-            audio.removeEventListener("ended", ended);
-            audio.removeEventListener("waiting", waiting);
-            audio.removeEventListener("playing", ready);
-            audio.removeEventListener("canplay", ready);
-            audio.removeEventListener("error", failed);
+            element.removeEventListener("timeupdate", time);
+            element.removeEventListener("loadedmetadata", metadata);
+            element.removeEventListener("ended", ended);
+            element.removeEventListener("waiting", waiting);
+            element.removeEventListener("playing", ready);
+            element.removeEventListener("canplay", ready);
+            element.removeEventListener("error", failed);
             window.removeEventListener("keydown", keyboard);
             if ("mediaSession" in navigator)
                 for (const action of [
@@ -473,7 +718,7 @@ export function PlayerProvider({ children }: PropsWithChildren) {
                         navigator.mediaSession.setActionHandler(action, null);
                     } catch {}
         };
-    }, [audio]);
+    }, [audio, audioEpoch, crossfadeEnabled, crossfadeSeconds]);
     useEffect(() => {
         const flush = () => {
             if (
@@ -496,6 +741,8 @@ export function PlayerProvider({ children }: PropsWithChildren) {
                 },
                 body: json({
                     ...playbackPrivacy(),
+                    device_id: deviceIdRef.current,
+                    lease_token: leaseTokenRef.current,
                     track_id: s.queue[s.index]?.id || null,
                     queue: s.order.map((i) => s.queue[i].id),
                     position_seconds: s.position,
@@ -510,6 +757,24 @@ export function PlayerProvider({ children }: PropsWithChildren) {
         return () => window.removeEventListener("pagehide", flush);
     }, []);
 
+    useEffect(() => {
+        if (!sleepChannel) return;
+        const onMessage = (event: MessageEvent) => {
+            const data = event.data;
+            const valid =
+                data === null ||
+                data?.kind === "end_of_track" ||
+                (data?.kind === "deadline" &&
+                    typeof data.deadline === "number");
+            if (!valid) return;
+            setState((s) => ({ ...s, sleepTimer: data }));
+        };
+        sleepChannel.addEventListener("message", onMessage);
+        return () => {
+            sleepChannel.removeEventListener("message", onMessage);
+            sleepChannel.close();
+        };
+    }, [sleepChannel]);
     useEffect(() => {
         const timer = state.sleepTimer;
         if (timer?.kind !== "deadline") return;
@@ -540,7 +805,7 @@ export function PlayerProvider({ children }: PropsWithChildren) {
                 unique[start].id ===
                 latest.current.queue[latest.current.index]?.id
             )
-                audio.currentTime = 0;
+                engine.seek(0);
             setState((s) => ({
                 ...s,
                 queue: unique,
@@ -607,11 +872,15 @@ export function PlayerProvider({ children }: PropsWithChildren) {
         clearQueue: () =>
             editQueue(() => ({ queue: [], index: 0, playing: false })),
         setQuality(quality) {
-            pendingSeek.current = audio.currentTime || latest.current.position;
+            engine.cancelFade();
+            pendingSeek.current =
+                engine.currentTime() || latest.current.position;
             setState((s) => ({ ...s, quality, error: null }));
         },
         setSleep(value) {
-            setState((s) => ({ ...s, sleepTimer: createSleepTimer(value) }));
+            const timer = createSleepTimer(value);
+            setState((s) => ({ ...s, sleepTimer: timer }));
+            sleepChannel?.postMessage(timer);
         },
         setLiked(id, is_liked) {
             setState((s) => ({
@@ -621,6 +890,7 @@ export function PlayerProvider({ children }: PropsWithChildren) {
                 ),
             }));
         },
+        applyLease,
     };
     return <Context.Provider value={value}>{children}</Context.Provider>;
 }

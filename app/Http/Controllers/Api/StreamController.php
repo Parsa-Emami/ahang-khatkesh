@@ -7,20 +7,41 @@ use App\Models\Track;
 use App\Services\PlaybackMedia;
 use App\Services\PrivateMedia;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class StreamController extends Controller
 {
-    public function __invoke(Request $request, Track $track, PrivateMedia $media, PlaybackMedia $playback): BinaryFileResponse
+    public function __invoke(Request $request, Track $track, PrivateMedia $media, PlaybackMedia $playback): BinaryFileResponse|Response
     {
         Gate::authorize('view', $track);
         $data = $request->validate(['quality' => ['sometimes', Rule::in(['auto', 'original', 'mp3-320'])]]);
         $track->load(['mediaAsset.blob', PlaybackMedia::EAGER]);
         $asset = $playback->select($track, $data['quality'] ?? 'auto');
+        $absolute = $media->path($asset->storagePath());
 
-        $response = response()->file($media->path($asset->storagePath()), ['Content-Type' => $asset->mime_type, 'Accept-Ranges' => 'bytes', 'Content-Disposition' => 'inline'])->setEtag($asset->sha256);
+        if (config('music.stream_accel_enabled')) {
+            $internal = rtrim((string) config('music.stream_internal_prefix'), '/').'/'.ltrim(str_replace('\\', '/', $asset->storagePath()), '/');
+            $response = response('', 200, [
+                (string) config('music.stream_accel_header') => $internal,
+                'Content-Type' => $asset->mime_type,
+                'Accept-Ranges' => 'bytes',
+                'Content-Disposition' => 'inline',
+                'Cache-Control' => 'private, no-store',
+            ]);
+            $response->setEtag($asset->sha256);
+            $response->isNotModified($request);
+
+            return $response;
+        }
+
+        $response = response()->file($absolute, [
+            'Content-Type' => $asset->mime_type,
+            'Accept-Ranges' => 'bytes',
+            'Content-Disposition' => 'inline',
+        ])->setEtag($asset->sha256);
         $response->isNotModified($request);
         $ifRange = $request->headers->get('If-Range');
         $rangeApplies = $ifRange === null || $ifRange === $response->getEtag() || $ifRange === $response->getLastModified()?->format(DATE_RFC7231);

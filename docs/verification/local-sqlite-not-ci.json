@@ -1,0 +1,19 @@
+{
+  "kind": "local_sqlite_suite",
+  "ci_run_id": null,
+  "production_approved": false,
+  "verified_phases": 0,
+  "phpunit": {
+    "database": "sqlite",
+    "tests": 188,
+    "passed": 187,
+    "failed": 0,
+    "skipped": 1,
+    "skipped_reason": "MySqlUpgradeRestoreTest::test_mysql_legacy_fixture_upgrades_and_restore_hashes requires AHANG_F15_MYSQL=1"
+  },
+  "vitest": { "tests": 62, "failed": 0 },
+  "typecheck": "passed",
+  "roadmap": "pass",
+  "architecture": "structure_only",
+  "note": "This file is not phase evidence. GitHub Actions, MySQL concurrency, browser CSRF journeys, and signed F16 release fields were not executed here."
+}

@@ -6,7 +6,7 @@
     {
       "id": "F01",
       "title": "مرز سوپرادمین و سطل بازیافت",
-      "status": "verified",
+      "status": "implemented",
       "depends_on": [],
       "implemented_paths": [
         "app/Actions/AuthorizeLibraryWrite.php",
@@ -21,13 +21,13 @@
         "حذف و بازیابی revision دارند؛ فایل، شناسه، لایک و عضویت حفظ می‌شوند.",
         "API، Action و مرورگر مستقل از پنهان‌کردن دکمه بررسی می‌شوند."
       ],
-      "evidence": "docs/verification/foundation-through-f11-2026-10-29.json",
+      "evidence": null,
       "previous_evidence": "docs/verification/foundation-through-f10-2026-10-29.json"
     },
     {
       "id": "F02",
       "title": "پیش‌نمایش مؤثر و انتشار اتمیک ایمپورت",
-      "status": "verified",
+      "status": "implemented",
       "depends_on": [
         "F01"
       ],
@@ -45,13 +45,13 @@
         "تغییر مالکیت، revision یا دسترسی سازنده، انتشار جزئی ایجاد نمی‌کند.",
         "اجرای job و failed قدیمی نمی‌توانند نسل تازه را تغییر دهند."
       ],
-      "evidence": "docs/verification/foundation-through-f11-2026-10-29.json",
+      "evidence": null,
       "previous_evidence": "docs/verification/foundation-through-f10-2026-10-29.json"
     },
     {
       "id": "F03",
       "title": "نسخهٔ امنیتی جاری و کنترل credential",
-      "status": "verified",
+      "status": "implemented",
       "depends_on": [
         "F01"
       ],
@@ -70,13 +70,13 @@
         "epoch از مقدار تازه DB افزایش می‌یابد؛ hash پرهزینه بیرون قفل است.",
         "MFA، recovery، تغییر نقش و reset از کنترل حساب جاری استفاده می‌کنند."
       ],
-      "evidence": "docs/verification/foundation-through-f11-2026-10-29.json",
+      "evidence": null,
       "previous_evidence": "docs/verification/foundation-through-f10-2026-10-29.json"
     },
     {
       "id": "F04",
       "title": "پاک‌سازی بادوام فایل‌های بدون ارجاع",
-      "status": "verified",
+      "status": "implemented",
       "depends_on": [
         "F01",
         "F03"
@@ -93,13 +93,13 @@
         "شکست حذف قبلی، فایل جدید را حذف نمی‌کند.",
         "cleanup تکرارپذیر است و ارجاع سطل بازیافت را حفظ می‌کند."
       ],
-      "evidence": "docs/verification/foundation-through-f11-2026-10-29.json",
+      "evidence": null,
       "previous_evidence": "docs/verification/foundation-through-f10-2026-10-29.json"
     },
     {
       "id": "F05",
       "title": "صف شخصی و تایمر خواب",
-      "status": "verified",
+      "status": "implemented",
       "depends_on": [
         "F01",
         "F03"
@@ -118,13 +118,13 @@
         "ترتیب واقعی صف ذخیره و بازیابی می‌شود؛ shuffle مجاورت هنرمند را متعادل می‌کند.",
         "تایمر زمان‌دار و پایان آهنگ قبل از repeat اعمال می‌شوند."
       ],
-      "evidence": "docs/verification/foundation-through-f11-2026-10-29.json",
+      "evidence": null,
       "previous_evidence": "docs/verification/foundation-through-f10-2026-10-29.json"
     },
     {
       "id": "F06",
       "title": "حفظ draft، نشست چندتب و قرارداد پاسخ",
-      "status": "verified",
+      "status": "implemented",
       "depends_on": [
         "F02",
         "F03",
@@ -148,13 +148,13 @@
         "همه mutationهای authenticated زمینهٔ نشست دارند؛ لغو و پاسخ دیررس حفظ می‌شوند.",
         "reconnect ترتیب محلی را پاک نمی‌کند؛ کنارگذاشتن صریح و schema validation اجرا می‌شوند."
       ],
-      "evidence": "docs/verification/foundation-through-f11-2026-10-29.json",
+      "evidence": null,
       "previous_evidence": "docs/verification/foundation-through-f10-2026-10-29.json"
     },
     {
       "id": "F07",
       "title": "چرخهٔ کامل job، blob، quota و reconciliation",
-      "status": "verified",
+      "status": "implemented",
       "depends_on": [
         "F02",
         "F03",
@@ -183,13 +183,13 @@
         "blob فیزیکی از asset معنایی جدا شود؛ quota پیش از آپلود رزرو شود.",
         "orphan GC با retention، dry-run و recheck مرجع اجرا شود."
       ],
-      "evidence": "docs/verification/foundation-through-f11-2026-10-29.json",
+      "evidence": null,
       "previous_evidence": "docs/verification/foundation-through-f10-2026-10-29.json"
     },
     {
       "id": "F08",
       "title": "FLAC به MP3 320k و انتخاب کیفیت",
-      "status": "verified",
+      "status": "implemented",
       "depends_on": [
         "F07"
       ],
@@ -218,13 +218,13 @@
         "خطای codec، disk full، timeout، kill و تکرار job فایل نیمه‌آماده منتشر نکنند.",
         "پنل پیشرفت، retry مجاز، اندازهٔ واقعی و پروفایل خروجی داشته باشد."
       ],
-      "evidence": "docs/verification/foundation-through-f11-2026-10-29.json",
+      "evidence": null,
       "previous_evidence": "docs/verification/foundation-through-f10-2026-10-29.json"
     },
     {
       "id": "F09",
       "title": "زبان و جهت سراسری و دسترس‌پذیری پایه",
-      "status": "verified",
+      "status": "implemented",
       "depends_on": [
         "F06"
       ],
@@ -248,13 +248,13 @@
         "تغییر locale/theme پلیر را remount نکند؛ متن ترکیبی و logical CSS بررسی شوند.",
         "صفحه‌خوان، کیبورد، خروج امن از فرم و خطاهای ترجمه آزمون شوند."
       ],
-      "evidence": "docs/verification/foundation-through-f11-2026-10-29.json",
+      "evidence": null,
       "previous_evidence": "docs/verification/foundation-through-f10-2026-10-29.json"
     },
     {
       "id": "F10",
       "title": "هویت بصری و shader محلی 21st.dev",
-      "status": "verified",
+      "status": "implemented",
       "depends_on": [
         "F09"
       ],
@@ -276,13 +276,13 @@
         "رنگ، contrast، focus، density و حالت‌های empty/error/loading یکپارچه شوند.",
         "shader تزئینی با context loss، reduced motion، hidden tab و بودجه GPU افت امن داشته باشد."
       ],
-      "evidence": "docs/verification/foundation-through-f11-2026-10-29.json",
+      "evidence": null,
       "previous_evidence": "docs/verification/foundation-through-f10-2026-10-29.json"
     },
     {
       "id": "F11",
       "title": "تاریخچه، حالت خصوصی و پیشنهاد قابل توضیح",
-      "status": "verified",
+      "status": "implemented",
       "depends_on": [
         "F05",
         "F08",
@@ -312,19 +312,37 @@
         "پیشنهاد فقط از کاتالوگ مجاز و با توضیح علت، diversity و کنترل کاربر ساخته شود.",
         "پیشنهاد یا mix به پلی‌لیست عمومی تبدیل نشود مگر با تأیید سوپرادمین."
       ],
-      "evidence": "docs/verification/foundation-through-f11-2026-10-29.json"
+      "evidence": null
     },
     {
       "id": "F12",
       "title": "پنل کامل مدیریت کاتالوگ و درخواست اعضا",
-      "status": "planned",
+      "status": "implemented",
       "depends_on": [
         "F07",
         "F08",
         "F09",
         "F10"
       ],
-      "implemented_paths": [],
+      "implemented_paths": [
+        "database/migrations/2026_11_02_120000_create_catalog_governance.php",
+        "app/Actions/Catalog/PreviewCatalogBatch.php",
+        "app/Actions/Catalog/CommitCatalogBatch.php",
+        "app/Actions/Catalog/RollbackCatalogBatch.php",
+        "app/Actions/Catalog/SubmitMemberProposal.php",
+        "app/Actions/Catalog/ReviewMemberProposal.php",
+        "app/Services/Catalog/DuplicateDetector.php",
+        "app/Services/Catalog/CatalogHealth.php",
+        "app/Http/Controllers/Api/Admin/CatalogBatchController.php",
+        "app/Http/Controllers/Api/Admin/CatalogGovernanceController.php",
+        "app/Http/Controllers/Api/Admin/MemberProposalAdminController.php",
+        "app/Http/Controllers/Api/MemberProposalController.php",
+        "resources/js/features/admin/CatalogGovernancePanel.tsx",
+        "resources/js/features/proposals/ProposalsPage.tsx",
+        "tests/Feature/CatalogBulkChangeTest.php",
+        "tests/Feature/MemberProposalTest.php",
+        "docs/F12_CATALOG_GOVERNANCE.fa.md"
+      ],
       "required_tests": [
         "CatalogBulkChangeTest",
         "MemberProposalTest"
@@ -339,13 +357,27 @@
     {
       "id": "F13",
       "title": "متن همگام، crossfade و جزئیات صوت",
-      "status": "planned",
+      "status": "implemented",
       "depends_on": [
         "F08",
         "F09",
         "F11"
       ],
-      "implemented_paths": [],
+      "implemented_paths": [
+        "database/migrations/2026_11_02_140000_create_playback_enrichment.php",
+        "app/Support/Lyrics/LrcParser.php",
+        "app/Actions/Catalog/SaveTrackLyrics.php",
+        "app/Actions/Media/SaveLoudnessMetadata.php",
+        "app/Http/Controllers/Api/LyricsController.php",
+        "app/Http/Controllers/Api/Admin/LyricsAdminController.php",
+        "resources/js/lib/lrc.ts",
+        "resources/js/lib/crossfade-engine.ts",
+        "resources/js/features/lyrics/LyricsPanel.tsx",
+        "resources/js/context/PlayerContext.tsx",
+        "tests/Feature/LyricsTimelineTest.php",
+        "resources/js/lib/crossfade-engine.test.ts",
+        "docs/F13_PLAYBACK_ENRICHMENT.fa.md"
+      ],
       "required_tests": [
         "LyricsTimelineTest",
         "CrossfadeDeviceMatrix"
@@ -360,14 +392,28 @@
     {
       "id": "F14",
       "title": "کنترل چند دستگاه و آفلاین اختیاری",
-      "status": "planned",
+      "status": "implemented",
       "depends_on": [
         "F06",
         "F08",
         "F09",
         "F11"
       ],
-      "implemented_paths": [],
+      "implemented_paths": [
+        "database/migrations/2026_11_02_160000_create_playback_devices.php",
+        "app/Actions/Playback/ManagePlaybackLease.php",
+        "app/Actions/Playback/ManageOfflineDownloads.php",
+        "app/Http/Controllers/Api/PlaybackDeviceController.php",
+        "app/Http/Controllers/Api/OfflineDownloadController.php",
+        "resources/js/lib/playback-device.ts",
+        "resources/js/lib/shell-sw.ts",
+        "resources/js/lib/offline-store.ts",
+        "resources/js/features/playback/DevicePicker.tsx",
+        "resources/js/context/PlayerContext.tsx",
+        "tests/Feature/PlaybackDeviceLeaseTest.php",
+        "tests/Feature/OfflineRevocationTest.php",
+        "docs/F14_MULTI_DEVICE.fa.md"
+      ],
       "required_tests": [
         "PlaybackDeviceLeaseTest",
         "OfflineRevocationTest"
@@ -382,13 +428,27 @@
     {
       "id": "F15",
       "title": "عملیات، ارتقای MySQL و ظرفیت واقعی",
-      "status": "planned",
+      "status": "implemented",
       "depends_on": [
         "F07",
         "F08",
         "F12"
       ],
-      "implemented_paths": [],
+      "implemented_paths": [
+        "config/ops.php",
+        "app/Actions/Ops/CollectOperationsAlerts.php",
+        "app/Actions/Ops/BuildBackupManifest.php",
+        "app/Actions/Ops/VerifyBackupRestore.php",
+        "app/Actions/Ops/VerifyUpgrade.php",
+        "app/Console/Commands/VerifyUpgrade.php",
+        "app/Console/Commands/BackupManifest.php",
+        "app/Console/Commands/RestoreVerify.php",
+        "app/Http/Controllers/Api/StreamController.php",
+        "deploy/nginx.conf",
+        "tests/Feature/MySqlUpgradeRestoreTest.php",
+        "tests/Feature/TenConcurrentStreamsTest.php",
+        "docs/F15_OPERATIONS_CAPACITY.fa.md"
+      ],
       "required_tests": [
         "MySqlUpgradeRestoreTest",
         "TenConcurrentStreams"
@@ -403,7 +463,7 @@
     {
       "id": "F16",
       "title": "شواهد انتشار و بازبینی مستقل امنیت",
-      "status": "planned",
+      "status": "implemented",
       "depends_on": [
         "F10",
         "F11",
@@ -412,7 +472,23 @@
         "F14",
         "F15"
       ],
-      "implemented_paths": [],
+      "implemented_paths": [
+        "docs/F16_RELEASE_SECURITY.fa.md",
+        "docs/F16_THREAT_MODEL.fa.md",
+        "docs/F16_ASVS_MAPPING.fa.md",
+        "docs/AFTER_F16.fa.md",
+        "docs/verification/f16-negative-inventory.json",
+        "docs/verification/f16-release-evidence.template.json",
+        "docs/verification/f16-device-matrix.json",
+        "tests/Feature/ReleaseSecurityReviewTest.php",
+        "tests/Feature/UniversalReleaseMatrixTest.php",
+        "tests/Browser/f16.e2e.ts",
+        "scripts/check-roadmap.mjs",
+        "app/Actions/Ops/AssessReleaseReadiness.php",
+        "app/Console/Commands/ReleaseReadiness.php",
+        "app/Providers/AppServiceProvider.php",
+        "docs/verification/local-sqlite-not-ci.json"
+      ],
       "required_tests": [
         "ReleaseSecurityReview",
         "UniversalReleaseMatrix"

@@ -16,6 +16,7 @@ import {
     ArrowLeft,
     Trash2,
     AudioLines,
+    GitBranchPlus,
 } from "lucide-react";
 import { can, type Permission } from "../../types";
 import { useSession } from "../../context/AppContext";
@@ -26,6 +27,7 @@ import { ManageLibraryPanel } from "./ManageLibraryPanel";
 import { OverviewPanel, OperationsPanel, AuditPanel } from "./ReadPanels";
 import { TrashPanel } from "./TrashPanel";
 import { CatalogPanel } from "./CatalogPanel";
+import { CatalogGovernancePanel } from "./CatalogGovernancePanel";
 import { MfaPanel } from "../security/MfaPanel";
 const sections: {
     id: string;
@@ -99,6 +101,17 @@ const sections: {
         },
         permission: "catalog.manage",
         icon: Trash2,
+    },
+    {
+        id: "governance",
+        get label() {
+            return tr("catalog.section");
+        },
+        get description() {
+            return tr("catalog.sectionHelp");
+        },
+        permission: "catalog.manage",
+        icon: GitBranchPlus,
     },
     {
         id: "users",
@@ -240,6 +253,8 @@ export default function AdminPage() {
                             <CatalogPanel />
                         ) : active.id === "trash" ? (
                             <TrashPanel />
+                        ) : active.id === "governance" ? (
+                            <CatalogGovernancePanel />
                         ) : active.id === "users" ? (
                             <MembersPanel />
                         ) : active.id === "audit" ? (

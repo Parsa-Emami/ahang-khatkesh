@@ -14,15 +14,15 @@ class User extends Authenticatable
 {
     use HasFactory, Notifiable, TwoFactorAuthenticatable;
 
-    protected $attributes = ['is_active' => true, 'is_admin' => false, 'role' => 'listener', 'theme' => 'system', 'access_version' => 0, 'listening_history_enabled' => false, 'listening_recommendations_enabled' => true, 'listening_retention_days' => 30, 'listening_revision' => 0];
+    protected $attributes = ['is_active' => true, 'is_admin' => false, 'role' => 'listener', 'theme' => 'system', 'access_version' => 0, 'listening_history_enabled' => false, 'listening_recommendations_enabled' => true, 'listening_retention_days' => 30, 'listening_revision' => 0, 'crossfade_enabled' => false, 'crossfade_seconds' => 3, 'loudness_normalization' => true, 'offline_opt_in' => false, 'offline_quota_bytes' => 524288000];
 
-    protected $fillable = ['name', 'email', 'password', 'role', 'is_active', 'theme', 'locale', 'direction', 'motion', 'time_zone'];
+    protected $fillable = ['name', 'email', 'password', 'role', 'is_active', 'theme', 'locale', 'direction', 'motion', 'time_zone', 'crossfade_enabled', 'crossfade_seconds', 'crossfade_acknowledged_at', 'loudness_normalization', 'offline_opt_in', 'offline_revocation_acknowledged_at', 'offline_quota_bytes'];
 
     protected $hidden = ['password', 'remember_token', 'two_factor_secret', 'two_factor_recovery_codes', 'listening_history_enabled', 'listening_recommendations_enabled', 'listening_retention_days', 'listening_revision', 'listening_private_until', 'listening_consent_at'];
 
     protected function casts(): array
     {
-        return ['password' => 'hashed', 'role' => UserRole::class, 'is_admin' => 'boolean', 'is_active' => 'boolean', 'email_verified_at' => 'datetime', 'two_factor_confirmed_at' => 'datetime', 'access_version' => 'integer', 'listening_history_enabled' => 'boolean', 'listening_recommendations_enabled' => 'boolean', 'listening_retention_days' => 'integer', 'listening_revision' => 'integer', 'listening_private_until' => 'immutable_datetime', 'listening_consent_at' => 'immutable_datetime'];
+        return ['password' => 'hashed', 'role' => UserRole::class, 'is_admin' => 'boolean', 'is_active' => 'boolean', 'email_verified_at' => 'datetime', 'two_factor_confirmed_at' => 'datetime', 'access_version' => 'integer', 'listening_history_enabled' => 'boolean', 'listening_recommendations_enabled' => 'boolean', 'listening_retention_days' => 'integer', 'listening_revision' => 'integer', 'listening_private_until' => 'immutable_datetime', 'listening_consent_at' => 'immutable_datetime', 'crossfade_enabled' => 'boolean', 'crossfade_seconds' => 'integer', 'crossfade_acknowledged_at' => 'immutable_datetime', 'loudness_normalization' => 'boolean', 'offline_opt_in' => 'boolean', 'offline_revocation_acknowledged_at' => 'immutable_datetime', 'offline_quota_bytes' => 'integer'];
     }
 
     protected static function booted(): void

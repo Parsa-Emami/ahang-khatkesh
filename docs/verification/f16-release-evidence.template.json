@@ -1,0 +1,53 @@
+{
+  "asvs_version": "5.0.0",
+  "findings_closed_candidates": ["N13", "N15"],
+  "sast": {
+    "tool": "composer-audit+osv-npm+phpunit-negatives",
+    "status": "automated_partial",
+    "signed": false
+  },
+  "dast": {
+    "status": "placeholder",
+    "staging_only": true,
+    "synthetic_data": true,
+    "signed": false,
+    "false_positives": []
+  },
+  "dependency_audits": {
+    "composer_audit": "required_in_ci",
+    "npm_advisory_scan": "required_in_ci"
+  },
+  "pentest": {
+    "authorized": true,
+    "signed": false
+  },
+  "keyboard_sr": {
+    "chromium_automated": true,
+    "nvda_voiceover": false,
+    "signed": false
+  },
+  "device_matrix": {
+    "ref": "docs/verification/f16-device-matrix.json",
+    "signed": false
+  },
+  "deploy_guide": "docs/AFTER_F16.fa.md",
+  "restore_drill": { "signed": false },
+  "rollback": { "signed": false },
+  "acceptance_owner": { "name": null, "signed": false },
+  "independent_reviewer": {
+    "name": null,
+    "signed_at": null,
+    "distinct_from_author": null,
+    "signed": false
+  },
+  "production_approved_requires": [
+    "independent_reviewer.signed",
+    "device_matrix.signed",
+    "keyboard_sr.signed",
+    "dast.signed",
+    "pentest.signed",
+    "restore_drill.signed",
+    "rollback.signed",
+    "acceptance_owner.signed"
+  ]
+}

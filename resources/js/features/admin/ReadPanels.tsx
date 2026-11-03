@@ -156,6 +156,15 @@ export function OperationsPanel() {
                 <CheckCircle2 size={20} />
                 <p>{tr("m0c1e8a1db7")}</p>
             </div>
+            {d.alerts?.length ? (
+                <div className="admin-notice" role="status">
+                    <p>
+                        {d.alerts
+                            .map((alert) => `${alert.code}: ${alert.message}`)
+                            .join(" · ")}
+                    </p>
+                </div>
+            ) : null}
             <dl className="operations-grid">
                 {[
                     ["PHP", d.php_version],
@@ -164,6 +173,29 @@ export function OperationsPanel() {
                     [tr("m4fe3d3125e"), d.queue_driver],
                     [tr("mc03c413f05"), digits(d.queued_jobs)],
                     [tr("mc541970bf1"), digits(d.failed_jobs)],
+                    [tr("ops.diskAvailable"), digits(d.disk_available_bytes)],
+                    [
+                        tr("ops.diskLow"),
+                        d.disk_low ? tr("m30572438bf") : tr("m8ef9e291f9"),
+                    ],
+                    [
+                        tr("ops.deadQueue"),
+                        d.dead_queue ? tr("m30572438bf") : tr("m8ef9e291f9"),
+                    ],
+                    [
+                        tr("ops.expiredLeases"),
+                        digits(
+                            d.expired_import_leases +
+                                d.expired_conversion_leases +
+                                d.expired_reservations,
+                        ),
+                    ],
+                    [
+                        tr("ops.streamAccel"),
+                        d.stream_accel_enabled
+                            ? tr("m30572438bf")
+                            : tr("m8ef9e291f9"),
+                    ],
                     [
                         tr("mf3704f9f9b"),
                         d.ffprobe_available

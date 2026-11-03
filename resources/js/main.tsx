@@ -60,3 +60,11 @@ createRoot(document.getElementById("root")!).render(
         </ErrorBoundary>
     </LocaleProvider>,
 );
+void import("./lib/shell-sw").then(({ registerShellWorker }) =>
+    registerShellWorker(
+        typeof import.meta.env.VITE_BUILD_ID === "string" &&
+            import.meta.env.VITE_BUILD_ID
+            ? import.meta.env.VITE_BUILD_ID
+            : "dev",
+    ).catch(() => {}),
+);

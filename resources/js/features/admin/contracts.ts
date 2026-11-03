@@ -16,6 +16,15 @@ export type Operations = {
     queued_jobs: number;
     failed_jobs: number;
     ffprobe_available: boolean;
+    disk_available_bytes: number;
+    disk_low: boolean;
+    oldest_job_seconds: number | null;
+    dead_queue: boolean;
+    expired_import_leases: number;
+    expired_conversion_leases: number;
+    expired_reservations: number;
+    alerts: { code: string; severity: string; message: string }[];
+    stream_accel_enabled: boolean;
     checked_at: string;
 };
 export type AuditEvent = {

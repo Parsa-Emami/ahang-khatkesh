@@ -1,5 +1,6 @@
 import { ListeningProvider } from "./features/listening/ListeningProvider";
 import { HistoryPage, MixPage } from "./features/listening/ListeningPages";
+import { ProposalsPage } from "./features/proposals/ProposalsPage";
 import { tr } from "./i18n/runtime";
 import { useLocale } from "./i18n/LocaleProvider";
 import { Navigate, Route, Routes } from "react-router-dom";
@@ -47,6 +48,10 @@ export function App() {
                             <Route path="liked" element={<LikedPage />} />
                             <Route path="history" element={<HistoryPage />} />
                             <Route path="mix" element={<MixPage />} />
+                            <Route
+                                path="proposals"
+                                element={<ProposalsPage />}
+                            />
                             <Route path="search" element={<SearchPage />} />
                             <Route
                                 path="playlists/:id"

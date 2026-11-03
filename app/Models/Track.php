@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Track extends Model
@@ -63,6 +64,11 @@ class Track extends Model
     public function likedBy(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'liked_tracks')->withTimestamps();
+    }
+
+    public function lyric(): HasOne
+    {
+        return $this->hasOne(TrackLyric::class);
     }
 
     #[Scope]

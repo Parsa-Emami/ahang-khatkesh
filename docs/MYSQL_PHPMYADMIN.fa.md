@@ -27,7 +27,7 @@ MySQL روی 127.0.0.1:3306 و phpMyAdmin روی 127.0.0.1:8081 است. اگر �
 
 مشاهدهٔ schema و FK، EXPLAIN خواندنی، کنترل حجم، export/backup و بررسی دادهٔ غیرمحرمانه برای اپراتور مناسب است. فایل موسیقی را از phpMyAdmin وارد نکنید؛ از پنل برنامه و FFprobe استفاده کنید. role، MFA، revision، search_text، pivot position و ردیف قفل را با SQL دستی تغییر ندهید؛ این کار Actionها، audit و invariantها را دور می‌زند. نام فارسی و نام مشابه مجازند؛ برای تشخیص هویت از ID و روابط استفاده کنید.
 
-phpMyAdmin را در production روی شبکهٔ عمومی رها نکنید؛ فقط مسیر مدیریتی محدود/VPN و HTTPS. رمز app، APP_KEY، secretهای MFA و recovery دادهٔ پشتیبان حساس‌اند. دسترسی اپراتور schema از دسترسی ادمین داخل برنامه جداست.
+phpMyAdmin را در production روی شبکهٔ عمومی رها نکنید؛ فقط مسیر مدیریتی محدود/VPN و HTTPS (در `compose.dev.yml` فقط `127.0.0.1`). رمز app، APP_KEY، secretهای MFA و recovery دادهٔ پشتیبان حساس‌اند. دسترسی اپراتور schema از دسترسی ادمین داخل برنامه جداست. حساب PMA جدا از `ahang_app` runtime و بدون root باشد. دادهٔ محصول را از phpMyAdmin تغییر ندهید؛ Actions برنامه مرجع mutation هستند. برای F15 از `ops:backup-manifest` و `ops:restore-verify` استفاده کنید.
 
 ## پشتیبان و بازیابی
 

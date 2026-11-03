@@ -51,15 +51,15 @@
 | N05 / R11 | بسته در دامنهٔ F09 | کاتالوگ fa/en و جهت مستقل، ترجیحات حساب و ماتریس مرورگر اضافه شده‌اند | F09 |
 | N06 / R11 | بسته در دامنهٔ F10 | منبع محلی MIT، lifecycle محدود و ماتریس تصویری/contrast با CI همان source تأیید شدند؛ qualification دستگاه واقعی در F16 باقی است | F10 |
 | N07 | بسته در دامنهٔ F11 | تاریخچه با رضایت/retention/erase، حالت خصوصی و میکس توضیح‌پذیر با آزمون دو حساب و race واقعی MySQL تأیید شدند؛ qualification انتشار F16 باقی است | evidence F11 |
-| N08 | P2 | bulk operations، repair/merge و پیشنهاد اعضا workflow کامل ندارند | F12 |
-| N09 | P2 | متن همگام، crossfade، gapless و loudness analysis نیستند | F13 |
-| N10 | P2 | کنترل دستگاه فعال و آفلاین اختیاری وجود ندارند؛ تعارض playback فقط revision دارد | F14 |
-| N11 / R08 | P1 | ارتقای نمونهٔ واقعی نسخهٔ قبلی در MySQL و restore هماهنگ DB و رسانه اثبات نشده | F15 |
-| N12 / R09 | P1 | X-Accel مجاز و ده stream هم‌زمان با import/conversion بارسنجی نشده‌اند | F15 |
-| N13 / R10 | P1 | schema response برای مسیرهای منتخب است؛ تمام APIها و type generation کامل نشده‌اند | F16 |
+| N08 | پیاده‌سازی محلی | bulk، duplicate/health و پیشنهاد عضو در F12؛ verified پس از CI | evidence CI |
+| N09 | پیاده‌سازی محلی | lyrics/LRC، crossfade اختیاری و loudness metadata در F13؛ gapless ادعا نمی‌شود | evidence CI |
+| N10 | پیاده‌سازی محلی | lease دستگاه و آفلاین opt-in در F14 | evidence CI |
+| N11 / R08 | پیاده‌سازی محلی | manifest/restore و verify ادامه‌پذیر در F15؛ MySQL 8.4 واقعی هنوز skip بدون AHANG_F15_MYSQL | MySQL CI |
+| N12 / R09 | پیاده‌سازی محلی | X-Accel پس از Policy و ده Range در F15؛ SLO ثبت نشده | observation |
+| N13 / R10 | باز تا امضا | ASVS/inventory هست؛ schema کامل و type generation هنوز evidence امضاشده می‌خواهد | F16 human |
 | N14 | بسته در دامنهٔ F09 | محافظ مشترک route/back/unload و بستن dialog به فرم‌های ویرایش متصل شده است | F09 |
-| N15 | P1 | ASVS mapping کامل، pentest مستقل، Safari/Firefox، دستگاه فیزیکی و صفحه‌خوان آزمون نشده‌اند | F16 |
-| N16 | P2 | تایمر خواب فقط در تب فعلی است؛ زمان دقیق در suspend سیستم تضمین ندارد | F14، F16 |
+| N15 | باز تا امضا | دروازهٔ readiness هست؛ pentest/DAST/دستگاه فیزیکی/NVDA-VoiceOver امضا نشده‌اند | F16 human |
+| N16 | بخشی محلی | deadline با visibility و BroadcastChannel بین تب‌ها؛ بیداری دقیق هنگام suspend سیستم هنوز انسانی است | F16 human |
 
 P1 یعنی پیش از production یا فعال‌کردن قابلیت وابسته حل شود؛ به معنی وقوع قطعی حمله نیست. این فهرست، نقص‌های شناخته‌شده و شواهدِ موجود را پوشش می‌دهد و تضمین کشف تمام نقص‌های ممکن نیست.
 

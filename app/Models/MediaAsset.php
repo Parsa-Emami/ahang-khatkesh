@@ -12,7 +12,7 @@ class MediaAsset extends Model
 {
     use HasFactory, HasUuids;
 
-    protected $fillable = ['blob_id', 'sha256', 'path', 'original_name', 'mime_type', 'size_bytes', 'duration_seconds', 'uploaded_by', 'source_asset_id', 'ownership_revision', 'codec', 'sample_rate', 'channels'];
+    protected $fillable = ['blob_id', 'sha256', 'path', 'original_name', 'mime_type', 'size_bytes', 'duration_seconds', 'uploaded_by', 'source_asset_id', 'ownership_revision', 'codec', 'sample_rate', 'channels', 'loudness_lufs', 'loudness_peak', 'loudness_analyzed_at'];
 
     protected $attributes = ['ownership_revision' => 1];
 
@@ -40,6 +40,6 @@ class MediaAsset extends Model
 
     protected function casts(): array
     {
-        return ['duration_seconds' => 'float', 'size_bytes' => 'integer', 'ownership_revision' => 'integer', 'channels' => 'integer', 'sample_rate' => 'integer'];
+        return ['duration_seconds' => 'float', 'size_bytes' => 'integer', 'ownership_revision' => 'integer', 'channels' => 'integer', 'sample_rate' => 'integer', 'loudness_lufs' => 'float', 'loudness_peak' => 'float', 'loudness_analyzed_at' => 'immutable_datetime'];
     }
 }

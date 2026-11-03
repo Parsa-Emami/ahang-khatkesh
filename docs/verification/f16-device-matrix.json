@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "signed": false,
+  "note": "Physical device and engine matrix remains human evidence. CI must not treat unsigned matrix as release proof.",
+  "browsers": [
+    { "engine": "Chromium", "automated": true, "qualified": false },
+    { "engine": "Firefox", "automated": false, "qualified": false },
+    { "engine": "Safari", "automated": false, "qualified": false }
+  ],
+  "devices": [
+    { "platform": "iOS", "qualified": false },
+    { "platform": "Android", "qualified": false },
+    { "platform": "desktop", "qualified": false }
+  ],
+  "assistive": [
+    { "tool": "keyboard", "automated": true, "qualified": false },
+    { "tool": "NVDA", "automated": false, "qualified": false },
+    { "tool": "VoiceOver", "automated": false, "qualified": false }
+  ]
+}

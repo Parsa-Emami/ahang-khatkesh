@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { execFileSync } from "node:child_process";
 import { sourceFingerprint } from "./source-fingerprint.mjs";
 const roadmap = JSON.parse(readFileSync("docs/roadmap/phases.json", "utf8"));
@@ -141,6 +142,30 @@ for (const phase of roadmap.phases) {
             "F11 requires synthetic history and opt-out screenshots",
         );
     }
+    if (phase.id === "F16") {
+        assert(
+            record.release &&
+                record.release.asvs_version === "5.0.0" &&
+                record.release.independent_reviewer?.signed === true &&
+                record.release.device_matrix?.signed === true &&
+                record.release.keyboard_sr?.signed === true &&
+                record.release.dast?.signed === true &&
+                record.release.pentest?.signed === true &&
+                record.release.restore_drill?.signed === true &&
+                record.release.rollback?.signed === true &&
+                record.release.acceptance_owner?.signed === true,
+            "F16 requires signed independent release evidence; CI alone is not enough",
+        );
+        assert(
+            record.test_inventory.some((name) =>
+                name.includes("ReleaseSecurityReview"),
+            ) &&
+                record.test_inventory.some((name) =>
+                    name.includes("UniversalReleaseMatrix"),
+                ),
+            "F16 requires ReleaseSecurityReview and UniversalReleaseMatrix evidence",
+        );
+    }
     for (const gate of [
         "build",
         "format",
@@ -203,8 +228,30 @@ if (process.env.GITHUB_ACTIONS === "true" && records.size) {
     }
     remoteEvidenceChecked = true;
 }
-if (roadmap.production_approved)
+if (roadmap.production_approved) {
     assert.equal(verified, 16, "Production approval requires all phases");
+    const releasePath = resolve("docs/verification/f16-release-evidence.json");
+    assert(
+        existsSync(releasePath),
+        "production_approved requires signed docs/verification/f16-release-evidence.json",
+    );
+    const release = JSON.parse(readFileSync(releasePath, "utf8"));
+    for (const required of release.production_approved_requires ?? []) {
+        const parts = required.split(".");
+        let cursor = release;
+        for (const part of parts) cursor = cursor?.[part];
+        assert.equal(
+            cursor,
+            true,
+            `production_approved requires ${required}=true`,
+        );
+    }
+    assert.equal(
+        release.independent_reviewer?.distinct_from_author,
+        true,
+        "Independent reviewer must be distinct from the author",
+    );
+}
 console.log(
     JSON.stringify({
         result: "pass",

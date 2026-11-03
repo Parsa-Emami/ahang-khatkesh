@@ -37,6 +37,14 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        if ($this->app->isProduction()) {
+            if (config('app.debug') === true) {
+                throw new \RuntimeException('APP_DEBUG must be false in production.');
+            }
+            if (config('session.secure') !== true || config('session.http_only') !== true) {
+                throw new \RuntimeException('Production sessions require SESSION_SECURE_COOKIE=true and SESSION_HTTP_ONLY=true.');
+            }
+        }
         Model::preventLazyLoading(! app()->isProduction());
         Event::listen([Failed::class, TwoFactorAuthenticationFailed::class], function (object $event): void {
             AuditEvent::create(['user_id' => $event->user?->id, 'action' => $event instanceof Failed ? 'auth.login_failed' : 'auth.mfa_failed', 'subject_type' => 'user', 'subject_id' => $event->user ? (string) $event->user->id : null]);

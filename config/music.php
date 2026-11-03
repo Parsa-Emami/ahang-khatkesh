@@ -29,4 +29,7 @@ return [
     'import_lease_seconds' => 240,
     'import_queue_stall_seconds' => 600,
     'import_max_recoveries' => 3,
+    'stream_accel_enabled' => (bool) env('MUSIC_STREAM_ACCEL_ENABLED', false),
+    'stream_accel_header' => env('MUSIC_STREAM_ACCEL_HEADER', 'X-Accel-Redirect'),
+    'stream_internal_prefix' => env('MUSIC_STREAM_INTERNAL_PREFIX', '/internal-media'),
 ];

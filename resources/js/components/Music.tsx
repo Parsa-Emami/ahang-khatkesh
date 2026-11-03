@@ -41,6 +41,7 @@ import {
 } from "../types";
 import { Artwork, Dialog, IconButton } from "./UI";
 import { ShaderBackdrop } from "./effects/ShaderBackdrop";
+import { LyricsPanel } from "../features/lyrics/LyricsPanel";
 
 export function LikeButton({ track }: { track: Track }) {
     useLocale();
@@ -722,6 +723,7 @@ export function PlayerBar() {
                             </div>
                         </div>
                     </div>
+                    {current ? <LyricsPanel trackId={current.id} /> : null}
                 </div>
             </Dialog>
             {(player.error || player.syncError) && (
