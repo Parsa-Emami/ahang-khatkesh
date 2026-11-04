@@ -34,3 +34,6 @@ Thumbs.db
 /reports/
 /test-results/
 /playwright-report/
+
+/dist-demo/
+

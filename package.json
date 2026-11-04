@@ -13,7 +13,9 @@
     "format:check": "prettier --check resources/js resources/css vite.config.ts vitest.config.ts index.html playwright.config.ts tests/Browser/*.ts scripts/*.mjs",
     "test:browser": "npm run build && node scripts/run-browser-tests.mjs",
     "test:architecture": "node --test scripts/roadmap.test.mjs",
-    "audit:offline": "bash scripts/audit-npm.sh"
+    "audit:offline": "bash scripts/audit-npm.sh",
+    "build:demo": "tsc --noEmit -p demo/tsconfig.json && vite build --config demo/vite.config.ts && node demo/generate-audio.mjs",
+    "test:demo": "vitest run --config demo/vitest.config.ts"
   },
   "dependencies": {
     "@fontsource-variable/manrope": "^5.2.0",

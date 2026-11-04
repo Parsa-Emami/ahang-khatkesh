@@ -1,0 +1,59 @@
+:root {
+  --demo-notice-height: 56px;
+}
+.demo-notice {
+  min-height: var(--demo-notice-height);
+  height: var(--demo-notice-height);
+  background: #23392f;
+  color: #f0f9ef;
+  border-bottom: 1px solid #4b6657;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 8px 24px;
+  font-size: 12px;
+  line-height: 1.6;
+}
+.demo-notice strong {
+  display: block;
+  font-size: 12px;
+}
+.demo-notice a,
+.demo-notice button {
+  min-height: 36px;
+  padding: 5px 10px;
+  color: inherit;
+  border: 1px solid #81998a;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+.demo-notice-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.app-shell {
+  height: calc(100dvh - var(--demo-notice-height));
+}
+@media (max-width: 600px) {
+  :root {
+    --demo-notice-height: 80px;
+  }
+  .demo-notice {
+    padding: 8px 12px;
+    font-size: 10px;
+    gap: 8px;
+  }
+  .demo-notice strong {
+    font-size: 11px;
+  }
+  .demo-notice-actions a {
+    display: none;
+  }
+}
+@media (max-width: 760px) {
+  .sidebar {
+    inset-block-start: var(--demo-notice-height);
+  }
+}

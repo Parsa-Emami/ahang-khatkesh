@@ -1,0 +1,10 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": { "types": ["vite/client", "node"] },
+  "include": ["./**/*.ts", "./**/*.tsx", "../resources/js"],
+  "exclude": [
+    "../resources/js/**/*.test.ts",
+    "../resources/js/**/*.test.tsx",
+    "./**/*.test.ts"
+  ]
+}
