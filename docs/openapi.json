@@ -11188,9 +11188,26 @@
       "post": {
         "operationId": "claim_playback_lease",
         "summary": "Claim active playback lease",
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "only_if_available": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Preserve an unexpired lease held by another device and any pending transfer."
+                  }
+                }
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "Lease granted, or data is null if an automatic claim cannot proceed."
           },
           "201": {
             "description": "Created"

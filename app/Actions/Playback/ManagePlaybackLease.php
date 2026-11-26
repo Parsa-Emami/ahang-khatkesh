@@ -18,13 +18,19 @@ class ManagePlaybackLease
         private EnqueueDeviceCommand $commands,
     ) {}
 
-    public function claim(User $snapshot, PlaybackDevice $device): PlaybackLease
+    public function claim(User $snapshot, PlaybackDevice $device, bool $onlyIfAvailable = false): ?PlaybackLease
     {
-        return DB::transaction(function () use ($snapshot, $device): PlaybackLease {
+        return DB::transaction(function () use ($snapshot, $device, $onlyIfAvailable): ?PlaybackLease {
             $user = $this->accounts->handle($snapshot);
             $this->assertOwnActive($user, $device);
             $lease = $this->lockLease($user->id);
             $previous = $lease->device_id;
+            if ($onlyIfAvailable && ! $lease->isExpired()
+                && ($lease->state === PlaybackLease::TRANSFERRING
+                    || ($lease->state === PlaybackLease::ACTIVE && $previous !== $device->id))) {
+                return null;
+            }
+
             $token = Str::random(48);
             $lease->forceFill([
                 'device_id' => $device->id,

@@ -15,6 +15,27 @@ class PlaybackDeviceLeaseTest extends TestCase
 {
     use LazilyRefreshDatabase;
 
+    public function test_automatic_claim_leaves_current_playback_and_transfer_intact(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+        $a = $this->registerDevice('device-private-primary', 'Primary tab');
+        $b = $this->registerDevice('device-private-sibling', 'Sibling tab');
+        $automatic = ['only_if_available' => true];
+
+        $lease = $this->postJson('/api/v1/playback/devices/'.$a.'/claim', $automatic)->assertOk()->json('data');
+        $this->postJson('/api/v1/playback/devices/'.$b.'/claim', $automatic)->assertOk()->assertExactJson(['data' => null]);
+        $this->assertSame($lease['generation'], PlaybackLease::where('user_id', $user->id)->value('generation'));
+        $this->assertFalse(PlaybackDeviceCommand::where('target_device_id', $a)->exists());
+
+        $this->postJson('/api/v1/playback/devices/'.$a.'/transfer', [
+            'lease_token' => $lease['lease_token'],
+            'target_device_id' => $b,
+        ])->assertOk();
+        $this->postJson('/api/v1/playback/devices/'.$a.'/claim', $automatic)->assertOk()->assertExactJson(['data' => null]);
+        $this->postJson('/api/v1/playback/devices/'.$b.'/transfer/accept')->assertOk()->assertJsonPath('data.device_id', $b);
+    }
+
     public function test_active_device_fences_other_writers_and_invalidates_commands_on_revoke(): void
     {
         [$user, $track] = $this->memberWithTrack();

@@ -65,25 +65,26 @@ class AudioProcessRunner
             if ($samples <= 0 || $inputRate !== $c['sample_rate']) {
                 throw new ConversionFailure('invalid_source');
             }
-            $decoded = (float) $this->execute([$c['ffmpeg'], '-hide_banner', '-v', 'error', '-nostdin', '-xerror', '-err_detect', 'explode', '-protocol_whitelist', 'file,pipe', '-f', 'flac', '-i', $source, '-map', '0:a:0', '-threads', '1', '-c:a', 'pcm_s32le', '-f', 'framemd5', '-'], $c['validation_timeout'], 'source', $output);
+            $decoded = (float) $this->execute([$c['ffmpeg'], '-hide_banner', '-v', 'error', '-nostdin', '-xerror', '-err_detect', 'explode', '-filter_threads', '1', '-protocol_whitelist', 'file,pipe', '-threads', '1', '-f', 'flac', '-i', $source, '-map', '0:a:0', '-threads', '1', '-c:a', 'pcm_s32le', '-f', 'framemd5', '-'], $c['validation_timeout'], 'source', $output);
             if ((int) $decoded !== $samples) {
                 throw new ConversionFailure('truncated_source');
             }
-            $this->execute([$c['ffmpeg'], '-hide_banner', '-loglevel', 'error', '-nostdin', '-xerror', '-err_detect', 'explode', '-n', '-progress', 'pipe:1', '-stats_period', '0.5', '-nostats', '-protocol_whitelist', 'file,pipe', '-f', 'flac', '-i', $source, '-map', '0:a:0', '-map_metadata', '-1', '-map_chapters', '-1', '-vn', '-sn', '-dn', '-c:a', 'libmp3lame', '-b:a', '320k', '-abr', '0', '-ar', (string) $rate, '-ac', (string) $c['channels'], '-threads', '1', '-id3v2_version', '3', '-write_xing', '1', '-f', 'mp3', $output], $c['encoder_timeout'], 'encode', $output);
+            $this->execute([$c['ffmpeg'], '-hide_banner', '-loglevel', 'error', '-nostdin', '-xerror', '-err_detect', 'explode', '-n', '-progress', 'pipe:1', '-stats_period', '0.5', '-nostats', '-filter_threads', '1', '-protocol_whitelist', 'file,pipe', '-threads', '1', '-f', 'flac', '-i', $source, '-map', '0:a:0', '-map_metadata', '-1', '-map_chapters', '-1', '-vn', '-sn', '-dn', '-c:a', 'libmp3lame', '-b:a', '320k', '-abr', '0', '-ar', (string) $rate, '-ac', (string) $c['channels'], '-threads', '1', '-id3v2_version', '3', '-write_xing', '1', '-f', 'mp3', $output], $c['encoder_timeout'], 'encode', $output);
             $this->emit(['event' => 'validating']);
             clearstatcache(true, $output);
             $size = is_file($output) ? filesize($output) : 0;
             if (! $size || $size > $c['max_bytes']) {
                 throw new ConversionFailure('invalid_output');
             }
-            $probe = json_decode($this->execute([$c['ffprobe'], '-v', 'error', '-protocol_whitelist', 'file,pipe', '-show_entries', 'format=duration:stream=codec_type,codec_name,sample_rate,channels,bit_rate', '-of', 'json', $output], $c['validation_timeout'], 'probe', $output), true);
+            $probe = json_decode($this->execute([$c['ffprobe'], '-v', 'error', '-protocol_whitelist', 'file,pipe', '-f', 'mp3', '-show_entries', 'format=duration:stream=codec_type,codec_name,sample_rate,channels', '-of', 'json', $output], $c['validation_timeout'], 'probe', $output), true);
             $streams = $probe['streams'] ?? [];
             $audio = $streams[0] ?? [];
-            if (count($streams) !== 1 || ($audio['codec_name'] ?? null) !== 'mp3' || (int) ($audio['bit_rate'] ?? 0) !== 320000 || (int) ($audio['sample_rate'] ?? 0) !== $rate || (int) ($audio['channels'] ?? 0) !== $c['channels'] || abs((float) ($probe['format']['duration'] ?? 0) - $c['duration']) > 0.25) {
+            $duration = filter_var($probe['format']['duration'] ?? null, FILTER_VALIDATE_FLOAT);
+            if (count($streams) !== 1 || ($audio['codec_type'] ?? null) !== 'audio' || ($audio['codec_name'] ?? null) !== 'mp3' || (int) ($audio['sample_rate'] ?? 0) !== $rate || (int) ($audio['channels'] ?? 0) !== $c['channels'] || $duration === false || ! is_finite($duration) || $duration <= 0 || abs($duration - $c['duration']) > 0.25) {
                 throw new ConversionFailure('invalid_output');
             }
             $frames = $this->validateFrames($output, $rate);
-            $this->execute([$c['ffmpeg'], '-hide_banner', '-v', 'error', '-nostdin', '-xerror', '-err_detect', 'explode', '-protocol_whitelist', 'file,pipe', '-f', 'mp3', '-i', $output, '-map', '0:a:0', '-threads', '1', '-f', 'null', '-'], $c['validation_timeout'], 'decode', $output);
+            $this->execute([$c['ffmpeg'], '-hide_banner', '-v', 'error', '-nostdin', '-xerror', '-err_detect', 'explode', '-filter_threads', '1', '-protocol_whitelist', 'file,pipe', '-threads', '1', '-f', 'mp3', '-i', $output, '-map', '0:a:0', '-threads', '1', '-f', 'null', '-'], $c['validation_timeout'], 'decode', $output);
             $handle = fopen($output, 'r+b');
             if (! $handle || ! fflush($handle) || ! fsync($handle)) {
                 throw new ConversionFailure('storage_unavailable', true);
@@ -91,7 +92,7 @@ class AudioProcessRunner
             fclose($handle);
             $this->parent();
 
-            return ['duration_seconds' => (float) $probe['format']['duration'], 'codec' => 'mp3', 'sample_rate' => $rate, 'channels' => $c['channels'], 'size_bytes' => $size, 'sha256' => hash_file('sha256', $output), 'bitrate_bps' => 320000, 'validated_frames' => $frames, 'validated_source_samples' => $samples, 'full_source_decode' => true, 'full_decode' => true];
+            return ['duration_seconds' => $duration, 'codec' => 'mp3', 'sample_rate' => $rate, 'channels' => $c['channels'], 'size_bytes' => $size, 'sha256' => hash_file('sha256', $output), 'bitrate_bps' => 320000, 'validated_frames' => $frames, 'validated_source_samples' => $samples, 'full_source_decode' => true, 'full_decode' => true];
         } finally {
             flock($global, LOCK_UN);
             flock($lock, LOCK_UN);
