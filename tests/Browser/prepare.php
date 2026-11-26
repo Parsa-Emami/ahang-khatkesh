@@ -41,6 +41,7 @@ foreach (['desktop', 'mobile'] as $device) {
     User::create(['name' => 'Browser listener', 'email' => 'listener-'.$device.'@example.test', 'password' => getenv('AHANG_E2E_PASSWORD'), 'role' => UserRole::Listener]);
     User::create(['name' => 'Visual listener', 'email' => 'visual-'.$device.'@example.test', 'password' => getenv('AHANG_E2E_PASSWORD'), 'role' => UserRole::Listener]);
     User::create(['name' => 'History listener', 'email' => 'history-'.$device.'@example.test', 'password' => getenv('AHANG_E2E_PASSWORD'), 'role' => UserRole::Listener]);
+    User::create(['name' => 'Mix listener', 'email' => 'mix-'.$device.'@example.test', 'password' => getenv('AHANG_E2E_PASSWORD'), 'role' => UserRole::Listener]);
 }
 if (Artisan::call('app:demo') !== 0 || Playlist::count() !== 6) {
     throw new RuntimeException('Synthetic browser library could not be prepared.');

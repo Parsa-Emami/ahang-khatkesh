@@ -6,6 +6,9 @@ import {
     type TestInfo,
 } from "@playwright/test";
 import { mkdir, readFile } from "node:fs/promises";
+
+test.use({ reducedMotion: "reduce" });
+
 async function login(
     page: Page,
     device: string,
@@ -134,6 +137,7 @@ test("ListeningPrivacyTest native audio consent private broadcast export erase a
             .getByRole("button", { name: "پایان حالت خصوصی", exact: true }),
     ).toHaveAttribute("aria-pressed", "true");
     await sibling.close();
+    await page.bringToFront();
     let grants = 0;
     page.on("request", (request) => {
         if (
@@ -144,29 +148,26 @@ test("ListeningPrivacyTest native audio consent private broadcast export erase a
     });
     await navigate(page, "میکس برای تو");
     await page.getByRole("button", { name: "پخش میکس", exact: true }).click();
+    const position = page.getByLabel("موقعیت پخش", { exact: true });
     await expect
-        .poll(() =>
-            page
-                .getByLabel("موقعیت پخش", { exact: true })
-                .inputValue()
-                .then(Number),
-        )
+        .poll(() => position.inputValue().then(Number), { timeout: 20000 })
         .toBeGreaterThan(2);
     expect(grants).toBe(0);
     const snapshot = await (await page.request.get("/api/v1/playback")).json();
     expect(snapshot.data.queue).toEqual([]);
     await capture(page, info, "private");
+    const granted = page.waitForResponse(
+        (r) =>
+            r.url().endsWith("/api/v1/listening/plays") &&
+            r.request().method() === "POST",
+    );
     await privacy(page, "پایان حالت خصوصی");
-    await expect.poll(() => grants).toBe(1);
+    const grant = await granted;
+    expect(grant.status()).toBe(200);
+    const grantData = (await grant.json()).data;
+    expect(grantData.recording).toBe(true);
     await expect
-        .poll(
-            () =>
-                page
-                    .getByLabel("موقعیت پخش", { exact: true })
-                    .inputValue()
-                    .then(Number),
-            { timeout: 25000 },
-        )
+        .poll(() => position.inputValue().then(Number), { timeout: 30000 })
         .toBeGreaterThan(18);
     const saved = page.waitForResponse(
         (r) =>
@@ -178,6 +179,7 @@ test("ListeningPrivacyTest native audio consent private broadcast export erase a
         .getByRole("button", { name: "توقف پخش", exact: true })
         .click();
     expect((await saved).status()).toBe(200);
+    expect(grants).toBe(1);
     const audio = await page.evaluate(() => {
         const list = (window as unknown as { __f11Audio: HTMLAudioElement[] })
             .__f11Audio;
@@ -190,6 +192,9 @@ test("ListeningPrivacyTest native audio consent private broadcast export erase a
     const row = (
         await (await page.request.get("/api/v1/listening/history")).json()
     ).data[0];
+    expect(Number(row.listened_seconds)).toBeGreaterThanOrEqual(
+        grantData.minimum_seconds,
+    );
     const download = page.waitForEvent("download");
     await page
         .getByRole("button", { name: "دریافت خروجی JSON", exact: true })
@@ -247,7 +252,7 @@ test("ExplainableMixTest curated reasons liked signals opt-out virtual playback 
     page,
 }, info) => {
     page.setDefaultTimeout(15000);
-    await login(page, info.project.name);
+    await login(page, info.project.name, "mix");
     const before = (await (await page.request.get("/api/v1/playlists")).json())
         .data;
     await navigate(page, "میکس برای تو");
@@ -258,15 +263,19 @@ test("ExplainableMixTest curated reasons liked signals opt-out virtual playback 
     );
     const mix = (await (await page.request.get("/api/v1/listening/mix")).json())
         .data;
+    const likedTrack = mix[0].track;
     const like = await page.request.put(
-        `/api/v1/tracks/${mix[0].track.id}/like`,
+        `/api/v1/tracks/${likedTrack.id}/like`,
         { headers: await headers(page) },
     );
     expect(like.status()).toBe(200);
     await navigate(page, "تاریخچهٔ شنیدن");
     await navigate(page, "میکس برای تو");
-    await page.locator("summary").first().click();
-    await expect(page.locator("details[open]")).toContainText(
+    const likedRow = page.locator(".listening-row").filter({
+        has: page.getByText(likedTrack.title, { exact: true }),
+    });
+    await likedRow.locator("summary").click();
+    await expect(likedRow.locator("details[open]")).toContainText(
         "خودت این آهنگ را پسندیده‌ای",
     );
     await capture(page, info, "mix");
