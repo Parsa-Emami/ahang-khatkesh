@@ -48,6 +48,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           fetch-depth: 0
+          persist-credentials: false
       - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962
         with:
           php-version: '8.5'
@@ -77,11 +78,11 @@ jobs:
           command -v setsid
           command -v prlimit
           ffmpeg -version | head -1
+      - run: composer validate --strict --no-plugins
+      - run: composer audit --locked --no-plugins
       - run: composer install --prefer-dist --no-interaction
       - run: cp .env.example .env
       - run: php artisan key:generate
-      - run: composer validate --strict
-      - run: composer audit
       - run: npm ci
       - name: Offline npm advisory scan
         run: bash scripts/audit-npm.sh
@@ -116,7 +117,7 @@ jobs:
         env:
           AHANG_DATABASE: ${{ matrix.database }}
       - name: Retain synthetic F10 visual matrix
-        if: always() && matrix.database == 'sqlite'
+        if: matrix.database == 'sqlite' && (success() || (failure() && hashFiles('reports/f10-visual/**') != ''))
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: f10-visual-matrix
@@ -124,7 +125,7 @@ jobs:
           if-no-files-found: error
           retention-days: 14
       - name: Retain synthetic F11 privacy screens
-        if: always() && matrix.database == 'sqlite'
+        if: matrix.database == 'sqlite' && (success() || (failure() && hashFiles('reports/f11-privacy/**') != ''))
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: f11-privacy
