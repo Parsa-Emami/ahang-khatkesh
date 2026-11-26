@@ -117,7 +117,7 @@ jobs:
           AHANG_DATABASE: ${{ matrix.database }}
       - name: Retain synthetic F10 visual matrix
         if: always() && matrix.database == 'sqlite'
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         with:
           name: f10-visual-matrix
           path: reports/f10-visual/
@@ -125,7 +125,7 @@ jobs:
           retention-days: 14
       - name: Retain synthetic F11 privacy screens
         if: always() && matrix.database == 'sqlite'
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         with:
           name: f11-privacy
           path: reports/f11-privacy/
