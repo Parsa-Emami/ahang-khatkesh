@@ -1,0 +1,42 @@
+name: P01-C isolated Composer remediation
+"on":
+  push:
+    branches: ['security/p01-c-composer-remediation']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: p01-c-composer-remediation
+  cancel-in-progress: false
+jobs:
+  resolve:
+    if: github.ref == 'refs/heads/security/p01-c-composer-remediation'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962
+        with:
+          php-version: '8.5'
+          extensions: mbstring, dom, xml, xmlwriter, sqlite3, pdo_sqlite, pdo_mysql, intl, zip, bcmath, gd
+          coverage: none
+          tools: composer:v2
+      - name: Resolve vulnerable packages without executing dependency scripts
+        run: |
+          set -euo pipefail
+          composer update laravel/framework symfony/http-foundation symfony/http-kernel symfony/routing symfony/serializer symfony/yaml web-auth/webauthn-lib --with-all-dependencies --no-scripts --no-plugins --no-install --prefer-dist --no-interaction
+          composer validate --strict --no-plugins
+          composer audit --locked --no-plugins --format=json
+          git diff --exit-code -- composer.json
+          mkdir -p "$RUNNER_TEMP/p01-c-lock"
+          cp composer.lock "$RUNNER_TEMP/p01-c-lock/"
+          git rev-parse HEAD > "$RUNNER_TEMP/p01-c-lock/source-commit.txt"
+          sha256sum composer.lock | cut -d ' ' -f 1 > "$RUNNER_TEMP/p01-c-lock/composer-lock.sha256"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: p01-c-resolved-composer-lock
+          path: ${{ runner.temp }}/p01-c-lock/
+          retention-days: 2
+          if-no-files-found: error
