@@ -7,8 +7,6 @@ import {
 } from "@playwright/test";
 import { mkdir, readFile } from "node:fs/promises";
 
-test.use({ reducedMotion: "reduce" });
-
 async function login(
     page: Page,
     device: string,
@@ -110,7 +108,8 @@ test("ListeningPrivacyTest native audio consent private broadcast export erase a
         const created: HTMLAudioElement[] = [];
         Object.assign(window, { __f11Audio: created });
         window.Audio = function (src?: string) {
-            const audio = new Original(src);
+            const audio =
+                src === undefined ? new Original() : new Original(src);
             created.push(audio);
             return audio;
         } as unknown as typeof Audio;
@@ -128,9 +127,26 @@ test("ListeningPrivacyTest native audio consent private broadcast export erase a
     });
     expect(missingCsrf.status()).toBe(419);
     await checkbox(page, consent, true);
+    const leaseHolder = async () => {
+        const response = await page.request.get("/api/v1/playback/devices");
+        expect(response.status()).toBe(200);
+        return (await response.json()).data.lease?.device_id;
+    };
+    await expect.poll(leaseHolder).toBeTruthy();
+    const primaryDevice = await leaseHolder();
     const sibling = await page.context().newPage();
+    const siblingClaim = sibling.waitForResponse(
+        (r) =>
+            r.url().includes("/api/v1/playback/devices/") &&
+            r.url().endsWith("/claim") &&
+            r.request().method() === "POST",
+    );
     await sibling.goto("/history");
     await privacy(sibling, "شروع حالت خصوصی");
+    const passive = await siblingClaim;
+    expect(passive.status()).toBe(200);
+    expect((await passive.json()).data).toBeNull();
+    expect(await leaseHolder()).toBe(primaryDevice);
     await expect(
         page
             .locator(".app-header")
@@ -148,6 +164,23 @@ test("ListeningPrivacyTest native audio consent private broadcast export erase a
     });
     await navigate(page, "میکس برای تو");
     await page.getByRole("button", { name: "پخش میکس", exact: true }).click();
+    const activeAudio = () =>
+        page.evaluate(() => {
+            const elements = (
+                window as unknown as { __f11Audio: HTMLAudioElement[] }
+            ).__f11Audio;
+            return elements.flatMap((element, index) =>
+                element.hasAttribute("src")
+                    ? [
+                          {
+                              index,
+                              source: element.src,
+                              time: element.currentTime,
+                          },
+                      ]
+                    : [],
+            );
+        });
     const position = page.getByLabel("موقعیت پخش", { exact: true });
     await expect
         .poll(() => position.inputValue().then(Number), { timeout: 20000 })
@@ -155,6 +188,9 @@ test("ListeningPrivacyTest native audio consent private broadcast export erase a
     expect(grants).toBe(0);
     const snapshot = await (await page.request.get("/api/v1/playback")).json();
     expect(snapshot.data.queue).toEqual([]);
+    const [privateAudio, ...otherAudio] = await activeAudio();
+    expect(privateAudio?.time).toBeGreaterThan(2);
+    expect(otherAudio).toHaveLength(0);
     await capture(page, info, "private");
     const granted = page.waitForResponse(
         (r) =>
@@ -178,15 +214,17 @@ test("ListeningPrivacyTest native audio consent private broadcast export erase a
         .locator(".player-bar")
         .getByRole("button", { name: "توقف پخش", exact: true })
         .click();
-    expect((await saved).status()).toBe(200);
+    const recorded = await saved;
+    expect(recorded.status()).toBe(200);
+    expect((await recorded.json()).data.recorded).toBe(true);
     expect(grants).toBe(1);
-    const audio = await page.evaluate(() => {
-        const list = (window as unknown as { __f11Audio: HTMLAudioElement[] })
-            .__f11Audio;
-        return { count: list.length, time: list[0].currentTime };
-    });
-    expect(audio.count).toBe(1);
-    expect(audio.time).toBeGreaterThan(18);
+    expect(await activeAudio()).toEqual([
+        expect.objectContaining({
+            index: privateAudio.index,
+            source: privateAudio.source,
+            time: expect.any(Number),
+        }),
+    ]);
     await navigate(page, "تاریخچهٔ شنیدن");
     await expect(page.locator(".listening-row")).toHaveCount(1);
     const row = (

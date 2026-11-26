@@ -91,7 +91,14 @@ jobs:
       - run: npm run build
       - run: mkdir -p reports
       - run: npm test -- --reporter=default --reporter=json --outputFile=reports/vitest.json
-      - run: php vendor/bin/phpunit --log-junit=reports/phpunit.xml
+      - name: SQLite PHPUnit
+        if: matrix.database == 'sqlite'
+        run: php vendor/bin/phpunit --exclude-group mysql --log-junit=reports/phpunit.xml
+      - name: MySQL PHPUnit including legacy upgrade and restore
+        if: matrix.database == 'mysql'
+        run: php vendor/bin/phpunit --log-junit=reports/phpunit.xml
+        env:
+          AHANG_F15_MYSQL: '1'
       - name: MySQL process isolation and recovery
         if: matrix.database == 'mysql'
         run: |

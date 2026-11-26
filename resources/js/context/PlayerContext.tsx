@@ -188,8 +188,13 @@ export function PlayerProvider({ children }: PropsWithChildren) {
         setState((s) => ({ ...s, playing: false, sleepTimer: null }));
         void persist();
     }
+    function canStartPlayback() {
+        if (!deviceIdRef.current || leaseTokenRef.current) return true;
+        setState((s) => ({ ...s, syncError: tr("devices.spectator") }));
+        return false;
+    }
     function jump(index: number) {
-        if (!latest.current.queue[index]) return;
+        if (!latest.current.queue[index] || !canStartPlayback()) return;
         changed();
         engine.cancelFade();
         pendingSeek.current = 0;
@@ -220,6 +225,7 @@ export function PlayerProvider({ children }: PropsWithChildren) {
             return;
         }
         if (index === s.index) {
+            if (!canStartPlayback()) return;
             engine.seek(0);
             void engine.play().catch(() => {});
             changed();
@@ -239,6 +245,7 @@ export function PlayerProvider({ children }: PropsWithChildren) {
     }
     function toggle() {
         if (!latest.current.queue.length) return;
+        if (!latest.current.playing && !canStartPlayback()) return;
         changed();
         engine.cancelFade();
         if (latest.current.error) engine.active().load();
@@ -354,12 +361,20 @@ export function PlayerProvider({ children }: PropsWithChildren) {
                     });
                     if (cancelled) return;
                     deviceIdRef.current = registered.data.id;
-                    const claimed = await api<{ data: PlaybackLease }>(
+                    const claimed = await api<{ data: PlaybackLease | null }>(
                         `/playback/devices/${registered.data.id}/claim`,
-                        { method: "POST" },
+                        {
+                            method: "POST",
+                            body: json({ only_if_available: true }),
+                        },
                     );
                     if (cancelled) return;
-                    applyLease(claimed.data);
+                    if (claimed.data) applyLease(claimed.data);
+                    else
+                        setState((s) => ({
+                            ...s,
+                            deviceId: registered.data.id,
+                        }));
                 }
                 const { data } = await api<{ data: PlaybackSnapshot }>(
                     "/playback",
@@ -664,6 +679,7 @@ export function PlayerProvider({ children }: PropsWithChildren) {
                 [
                     "play",
                     () => {
+                        if (!canStartPlayback()) return;
                         changed();
                         setState((s) => ({ ...s, playing: true }));
                     },
@@ -798,7 +814,7 @@ export function PlayerProvider({ children }: PropsWithChildren) {
             const unique = [
                 ...new Map(tracks.map((t) => [t.id, t])).values(),
             ].slice(0, 500);
-            if (!unique[start]) return;
+            if (!unique[start] || !canStartPlayback()) return;
             changed();
             pendingSeek.current = 0;
             if (

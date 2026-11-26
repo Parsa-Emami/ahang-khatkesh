@@ -10,6 +10,7 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Storage;
+use PHPUnit\Framework\Attributes\Group;
 use Tests\TestCase;
 
 class MySqlUpgradeRestoreTest extends TestCase
@@ -51,6 +52,7 @@ class MySqlUpgradeRestoreTest extends TestCase
         $this->assertSame(0, Artisan::call('ops:verify-upgrade', ['--limit' => 10, '--after' => '']));
     }
 
+    #[Group('mysql')]
     public function test_mysql_legacy_fixture_upgrades_and_restore_hashes(): void
     {
         if (config('database.default') !== 'mysql' || env('AHANG_F15_MYSQL') !== '1') {

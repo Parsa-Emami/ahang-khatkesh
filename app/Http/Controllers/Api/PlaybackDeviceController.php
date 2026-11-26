@@ -53,8 +53,10 @@ class PlaybackDeviceController extends Controller
     public function claim(Request $request, PlaybackDevice $device, ManagePlaybackLease $leases): JsonResponse
     {
         abort_unless((int) $device->user_id === (int) $request->user()->id, 404);
+        $data = $request->validate(['only_if_available' => ['sometimes', 'boolean']]);
+        $lease = $leases->claim($request->user(), $device, (bool) ($data['only_if_available'] ?? false));
 
-        return response()->json(['data' => new PlaybackLeaseResource($leases->claim($request->user(), $device)->load(['device', 'transferTarget']))]);
+        return response()->json(['data' => $lease ? new PlaybackLeaseResource($lease) : null]);
     }
 
     public function heartbeat(Request $request, PlaybackDevice $device, ManagePlaybackLease $leases): JsonResponse
