@@ -1,0 +1,44 @@
+name: Sensitive tracked file guard
+"on":
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  tracked-paths:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+        with:
+          persist-credentials: false
+      - name: Reject tracked environment files and runtime records
+        run: |
+          python3 - <<'PY'
+          from pathlib import PurePosixPath
+          import subprocess
+          import sys
+
+          paths = subprocess.check_output(["git", "ls-files", "-z"]).decode("utf-8").split("\0")
+          failures = 0
+          for path in filter(None, paths):
+              parts = PurePosixPath(path).parts
+              name = parts[-1].lower()
+              if name in (".gitkeep", ".gitignore") or any(p in ("node_modules", "vendor") for p in parts):
+                  continue
+              example = name.startswith(".env") and name.endswith(".example")
+              forbidden = (name == ".env" or name.startswith(".env.") and not example
+                           or name in ("auth.json", "credentials.json", "secrets.json", "id_rsa", "id_ed25519")
+                           or name.endswith("with-env.zip")
+                           or name.endswith(".tfstate") or ".tfstate." in name
+                           or any(fragment in "/" + path for fragment in (
+                               "/storage/logs/", "/storage/framework/sessions/",
+                               "/storage/framework/cache/", "/storage/framework/views/", "/bootstrap/cache/")))
+              if forbidden:
+                  failures += 1
+          print(f"Forbidden tracked path count: {failures}")
+          sys.exit(bool(failures))
+          PY
